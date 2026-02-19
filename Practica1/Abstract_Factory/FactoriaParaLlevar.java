@@ -4,10 +4,10 @@ package Practica1.Abstract_Factory;
 public class FactoriaParaLlevar implements FactoriaAbstracta {
 
     @Override
-    public Menu crearMenuSemanal(String tipoAcompanamiento) {
+    public Menu crearMenuTemporada(String tipoAcompanamiento) {
         // Le pasamos un 'true' al menú para avisarle de que es un pedido para llevar
         // Así, cuando el menú calcule su precio final, sabrá que tiene que sumar el 2%
-        MenuSemanal menu = new MenuSemanal(true);
+        MenuTemporada menu = new MenuTemporada(true);
 
         // Regla del local: El menú semanal para llevar SOLO tiene entrante y principal
         menu.asignarPlato(new Plato("Sopa de fideos", 5.00, "Entrante", "Ninguno"));
@@ -18,9 +18,9 @@ public class FactoriaParaLlevar implements FactoriaAbstracta {
     }
 
     @Override
-    public Menu crearMenuTemporada(String tipoAcompanamiento) {
+    public Menu crearMenuSemanal(String tipoAcompanamiento) {
         // Igual que antes, le decimos que es para llevar (true)
-        MenuTemporada menu = new MenuTemporada(true);
+        MenuSemanal menu = new MenuSemanal(true);
 
         // En el de temporada vamos a suponer que sí les damos el postre
         menu.asignarPlato(new Plato("Crema de calabaza", 6.00, "Entrante", "Ninguno"));
