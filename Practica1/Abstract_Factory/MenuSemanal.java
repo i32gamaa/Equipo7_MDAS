@@ -3,12 +3,18 @@ package Practica1.Abstract_Factory;
 public class MenuSemanal extends Menu {
 
     public MenuSemanal() {
-        super(); // Llama al constructor del padre para preparar la lista vacía
+        super(); //Esto quiere decir que se llama al constructor de la clase padre (Menu) para inicializar la lista de platos.  
     }
 
-    public MenuSemanal(boolean paraLlevar) {
-        super(paraLlevar);
+    @Override
+    public float calcular_precio() {
+        float total = 0;
+        for (Plato plato : this.platos) {
+            total += plato.getPrecio();
+        }
+        return total;
     }
+
     @Override
     public String toString() {
         return "--- Menú Semanal ---";

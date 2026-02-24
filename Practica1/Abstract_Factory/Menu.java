@@ -5,37 +5,20 @@ import java.util.List;
 
 public abstract class Menu {
    
-    protected List<Plato> platos; // Lista de platos en el menú Semanal o Temporada
-    protected boolean paraLlevar;
+    protected List<Plato> platos; 
 
-    public Menu() { // Constructor para inicializar la lista de platos
-        platos = new ArrayList<>();
-        this.paraLlevar = false;
-    }
-
-    public Menu(boolean paraLlevar) {
+    public Menu() { 
         this.platos = new ArrayList<>();
-        this.paraLlevar = paraLlevar;
     }
 
-    public void agregarPlato(Plato plato) { // Método para agregar un plato al menú
+    // Nombres exactos al diagrama UML
+    public void asignarPlato(Plato plato) { 
         this.platos.add(plato);
     }
 
-    public List<Plato> obtenerPlatos() { // Método para obtener la lista de platos en el menú
+    public List<Plato> obtener_platos() { 
         return this.platos;
     }
 
-    // Calcula el precio total del menú, aplicando recargo si es para llevar
-    public double calcularPrecio() {
-        double total = 0;
-        for (Plato plato : platos) {
-            total += plato.getPrecio();
-        }
-        if (paraLlevar) {
-            total *= 1.02; // Recargo del 2%
-        }
-        return total;
-    }
-
+    public abstract float calcular_precio(); 
 }

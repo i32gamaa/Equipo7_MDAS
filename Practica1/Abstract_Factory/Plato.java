@@ -2,42 +2,36 @@ package Practica1.Abstract_Factory;
 
 public class Plato {
 
-    public enum TipoPlato{
-     
+    public enum TipoPlato {
         ENTRANTE, PRINCIPAL, POSTRE, TEMPORADA
-   
     }
 
-    public enum TipoAcompanamiento{
-     
-        ARROZ, PAPAS, VEGETALES, PASTA, NINGUNO
-   
+    public enum TipoAcompanamiento {
+        ENSALADA, PATATAS, NINGUNO 
     }
 
     private String nombre;
-    private double precio;
+    private float precio; 
     private TipoPlato tipo;
     private TipoAcompanamiento acompanamiento;
 
-    public Plato(String nombre, double precio, TipoPlato tipo) {
-            this.nombre = nombre;
-            this.precio = precio;
-            this.tipo = tipo;
-            this.acompanamiento = TipoAcompanamiento.NINGUNO; // Por defecto, sin acompanamiento
+    public Plato(String nombre, float precio, TipoPlato tipo) {
+        this.nombre = nombre;
+        this.precio = precio;
+        this.tipo = tipo;
+        this.acompanamiento = TipoAcompanamiento.NINGUNO;
     }
     
     
-    public void asignarPrecio(double nuevoPrecio) { // Método para asignar o modificar el precio del plato
+    public void asignarPrecio(float nuevoPrecio) { 
         this.precio = nuevoPrecio;
     }
 
-    // Método para añadirle un acompanamiento al plato
     public void setAcompanamiento(TipoAcompanamiento acompanamiento) {
         this.acompanamiento = acompanamiento;
     }
 
-    // Getters básicos que necesitará el menú para calcular el total y mostrar el ticket
-    public double getPrecio() {
+    public float getPrecio() {
         return this.precio;
     }
 
@@ -49,7 +43,7 @@ public class Plato {
         return this.tipo;
     }
 
-    @Override //Para mostrar el plato con su nombre, precio y guarnición si la tiene
+    @Override 
     public String toString() {
         String texto = nombre + " (" + precio + "€)";
         if (acompanamiento != TipoAcompanamiento.NINGUNO) {
@@ -57,5 +51,4 @@ public class Plato {
         }
         return texto;
     }
-
 }
