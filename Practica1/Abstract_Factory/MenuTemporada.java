@@ -14,6 +14,8 @@ public class MenuTemporada extends Menu {
             total += plato.getPrecio();
         }
         return total;
+    public MenuTemporada(boolean paraLlevar) {
+        super(paraLlevar); // Llama al constructor del padre para indicar si es para llevar
     }
 
     @Override
