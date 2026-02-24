@@ -4,11 +4,11 @@ package Practica1.Abstract_Factory;
 public class FactoriaParaLlevar implements FactoriaAbstracta {
 
     @Override
-    public MenuSemanal crearMenuSemanal(TipoAcompañamiento acompañamiento) {
+    public MenuSemanal crearMenuSemanal(TipoAcompanamiento acompañamiento) {
         // Le decimos que es para llevar (true) para que se aplique el recargo.
         MenuSemanal menu = new MenuSemanal(true);
 
-        // En el menú semanal para llevar, sí incluimos postre.
+        // En el menú semanal para llevar, s    í incluimos postre.
         menu.agregarPlato(new Plato("Crema de calabaza", 6.00, Plato.TipoPlato.ENTRANTE));
 
         Plato principal = new Plato("Costillas BBQ", 14.00, Plato.TipoPlato.PRINCIPAL);
