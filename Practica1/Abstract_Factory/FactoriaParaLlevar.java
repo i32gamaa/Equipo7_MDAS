@@ -4,7 +4,7 @@ package Practica1.Abstract_Factory;
 public class FactoriaParaLlevar implements FactoriaAbstracta {
 
     @Override
-    public MenuSemanal crearMenuSemanal(TipoAcompanamiento acompañamiento) {
+    public MenuSemanal crearMenuSemanal(Plato.TipoAcompanamiento acompanamiento) {
         // Le decimos que es para llevar (true) para que se aplique el recargo.
         MenuSemanal menu = new MenuSemanal(true);
 
@@ -12,7 +12,7 @@ public class FactoriaParaLlevar implements FactoriaAbstracta {
         menu.agregarPlato(new Plato("Crema de calabaza", 6.00, Plato.TipoPlato.ENTRANTE));
 
         Plato principal = new Plato("Costillas BBQ", 14.00, Plato.TipoPlato.PRINCIPAL);
-        principal.setAcompanamiento(acompañamiento);
+        principal.setAcompanamiento(acompanamiento);
         menu.agregarPlato(principal);
 
         menu.agregarPlato(new Plato("Tarta de queso", 4.50, Plato.TipoPlato.POSTRE));
@@ -31,7 +31,7 @@ public class FactoriaParaLlevar implements FactoriaAbstracta {
 
         Plato principal = new Plato("Pollo asado", 10.00, Plato.TipoPlato.PRINCIPAL);
         // El menú de temporada para llevar no tiene acompañamiento a elegir, se sirve con patatas.
-        principal.setAcompanamiento(Plato.TipoAcompañamiento.PAPAS);
+        principal.setAcompanamiento(Plato.TipoAcompanamiento.PAPAS);
         menu.agregarPlato(principal);
 
         // ¡Ojo! No le metemos postre.
