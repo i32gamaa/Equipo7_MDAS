@@ -8,7 +8,7 @@ public class Plato {
    
     }
 
-    public enum TipoAcompañamiento{
+    public enum TipoAcompanamiento{
      
         ARROZ, PAPAS, VEGETALES, PASTA, NINGUNO
    
@@ -17,13 +17,13 @@ public class Plato {
     private String nombre;
     private double precio;
     private TipoPlato tipo;
-    private TipoAcompañamiento acompañamiento;
+    private TipoAcompanamiento acompanamiento;
 
     public Plato(String nombre, double precio, TipoPlato tipo) {
             this.nombre = nombre;
             this.precio = precio;
             this.tipo = tipo;
-            this.acompañamiento = TipoAcompañamiento.NINGUNO; // Por defecto, sin acompañamiento
+            this.acompanamiento = TipoAcompanamiento.NINGUNO; // Por defecto, sin acompanamiento
     }
     
     
@@ -31,9 +31,9 @@ public class Plato {
         this.precio = nuevoPrecio;
     }
 
-    // Método para añadirle un acompañamiento al plato
-    public void setAcompanamiento(TipoAcompañamiento acompanamiento) {
-        this.acompañamiento = acompanamiento;
+    // Método para añadirle un acompanamiento al plato
+    public void setAcompanamiento(TipoAcompanamiento acompanamiento) {
+        this.acompanamiento = acompanamiento;
     }
 
     // Getters básicos que necesitará el menú para calcular el total y mostrar el ticket
@@ -52,8 +52,8 @@ public class Plato {
     @Override //Para mostrar el plato con su nombre, precio y guarnición si la tiene
     public String toString() {
         String texto = nombre + " (" + precio + "€)";
-        if (acompañamiento != TipoAcompañamiento.NINGUNO) {
-            texto += " con " + acompañamiento.toString().toLowerCase();
+        if (acompanamiento != TipoAcompanamiento.NINGUNO) {
+            texto += " con " + acompanamiento.toString().toLowerCase();
         }
         return texto;
     }
