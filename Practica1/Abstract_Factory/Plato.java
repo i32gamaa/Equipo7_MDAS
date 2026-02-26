@@ -45,7 +45,7 @@ public class Plato {
 
     @Override 
     public String toString() {
-        String texto = nombre + " (" + precio + "€)";
+        String texto = nombre + " (" + precio + " EUR)";
         if (acompanamiento != TipoAcompanamiento.NINGUNO) {
             texto += " con " + acompanamiento.toString().toLowerCase();
         }
