@@ -8,11 +8,19 @@ public class MenuTemporada extends Menu {
 
     @Override
     public float calcular_precio() {
-        float total = 0;
-        for (Plato plato : this.platos) {
-            total += plato.getPrecio();
+        double total = 0;
+        
+        // 1. Sumamos los precios base de todos los platos
+        for (Plato p : platos) {
+            total += p.getPrecio();
         }
-        return total;
+        
+        // 2. Si es para llevar, le metemos el sablazo del 2% al total
+        if (this.paraLlevar) {
+            total = total * 1.02f; 
+        }
+        
+        return (float) total;
     }
 
     @Override

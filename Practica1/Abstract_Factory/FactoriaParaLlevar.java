@@ -5,36 +5,25 @@ public class FactoriaParaLlevar implements FactoriaAbstracta {
 
     @Override
     public MenuSemanal crearMenuSemanal(Plato.TipoAcompanamiento acompanamiento) {
-        // Le decimos que es para llevar (true) para que se aplique el recargo.
-        MenuSemanal menu = new MenuSemanal(true);
+        MenuSemanal menu = new MenuSemanal();
+        menu.setParaLlevar(true);
 
-        // En el menú semanal para llevar, s    í incluimos postre.
-        menu.agregarPlato(new Plato("Crema de calabaza", 6.00, Plato.TipoPlato.ENTRANTE));
+        menu.asignarPlato(new Plato("Crema de calabaza", 6.00f, Plato.TipoPlato.ENTRANTE));
 
-        Plato principal = new Plato("Costillas BBQ", 14.00, Plato.TipoPlato.PRINCIPAL);
+        Plato principal = new Plato("Costillas BBQ", 14.00f, Plato.TipoPlato.PRINCIPAL);
         principal.setAcompanamiento(acompanamiento);
-        menu.agregarPlato(principal);
-
-        menu.agregarPlato(new Plato("Tarta de queso", 4.50, Plato.TipoPlato.POSTRE));
+        menu.asignarPlato(principal);
 
         return menu;
     }
 
     @Override
     public MenuTemporada crearMenuTemporada() {
-        // Le pasamos un 'true' al menú para avisarle de que es un pedido para llevar
-        // Así, cuando el menú calcule su precio final, sabrá que tiene que sumar el 2%
-        MenuTemporada menu = new MenuTemporada(true);
+        MenuTemporada menu = new MenuTemporada();
+        menu.setParaLlevar(true);
 
-        // Regla del local: El menú de temporada para llevar SOLO tiene entrante y principal.
-        menu.agregarPlato(new Plato("Sopa de fideos", 5.00, Plato.TipoPlato.ENTRANTE));
+        menu.asignarPlato(new Plato("Pollo asado", 10.00f, Plato.TipoPlato.TEMPORADA));
 
-        Plato principal = new Plato("Pollo asado", 10.00, Plato.TipoPlato.PRINCIPAL);
-        // El menú de temporada para llevar no tiene acompañamiento a elegir, se sirve con patatas.
-        principal.setAcompanamiento(Plato.TipoAcompanamiento.PAPAS);
-        menu.agregarPlato(principal);
-
-        // ¡Ojo! No le metemos postre.
         return menu;
     }
 }
