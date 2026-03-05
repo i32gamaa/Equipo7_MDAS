@@ -2,67 +2,114 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Iniciando pruebas del Patrón Adapter...\n");
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("==========================================");
+        System.out.println("   SISTEMA DE MAQUETACIÓN - PATRÓN ADAPTER  ");
+        System.out.println("==========================================\n");
 
         try {
-            // --- FASE 0: CONFIGURAR LA RUTA ---
-            // Usamos File.separator para que funcione igual de bien en Windows, Mac o Linux
+            // --- FASE 0: CONFIGURACIÓN DE RUTAS Y LIMPIEZA INICIAL ---
             String rutaBase = "Practica1" + File.separator + "Adapter" + File.separator;
-            
-            // Si la carpeta no existe, le decimos a Java que la cree por nosotros
             File directorio = new File("Practica1" + File.separator + "Adapter");
+            
+            // Creación del directorio si no existe
             if (!directorio.exists()) {
                 directorio.mkdirs();
             }
 
-            // --- FASE 1: PREPARACIÓN DEL ESCENARIO ---
-            // Ahora le pegamos la rutaBase delante de cada nombre de archivo
+            // Definición de todos los archivos implicados
             File f1 = new File(rutaBase + "fichero1.txt");
             File f2 = new File(rutaBase + "fichero2.txt");
-            
-            MaquetadorBasico basico = new MaquetadorBasico();
-            if(f1.exists()) f1.delete();
-            if(f2.exists()) f2.delete();
-            
-            basico.anadirTexto(f1, "Linea 1 del Fichero 1: Hola buenos dias");
-            basico.anadirTexto(f1, "Linea 2 del Fichero 1: Estamos picando codigo");
-            basico.anadirTexto(f1, "Linea 3 del Fichero 1: A tope!!!");
-            
-            basico.anadirTexto(f2, "Linea 1 del Fichero 2: Que pasa compañero");
-            basico.anadirTexto(f2, "Linea 2 del Fichero 2: El patron adapter mola");
-            basico.anadirTexto(f2, "Linea 3 del Fichero 2: Un saludo");
-
-            // --- FASE 2: INSTANCIAR EL ADAPTADOR ---
-            MaquetadorAvanzado maquetador = new AdaptadorMaquetador();
-
-            // --- FASE 3: EJECUTAR LAS PRUEBAS ---
-            
-            // Prueba A: Unir Ficheros
             File fUnido = new File(rutaBase + "resultado_unido.txt");
-            maquetador.unirFicheros(f1, f2, fUnido);
-            System.out.println("[EXITO] Ficheros unidos en '" + fUnido.getPath() + "'");
-
-            // Prueba B: Combinar Ficheros
             File fCombinado = new File(rutaBase + "resultado_combinado.txt");
-            List<int[]> parrafosF1 = Arrays.asList(new int[]{1, 2}); 
-            List<int[]> parrafosF2 = Arrays.asList(new int[]{1, 2});
-            maquetador.combinarFicheros(f1, f2, parrafosF1, parrafosF2, fCombinado);
-            System.out.println("[EXITO] Ficheros combinados en '" + fCombinado.getPath() + "'");
+            File fParte1 = new File(rutaBase + "parte1.txt");
+            File fParte2 = new File(rutaBase + "parte2.txt");
 
-            // Prueba C: Separar Ficheros
-            File fAseparar = new File(rutaBase + "resultado_unido.txt");
-            List<Integer> puntosDeCorte = Arrays.asList(3); 
-            List<File> partes = Arrays.asList(new File(rutaBase + "parte1.txt"), new File(rutaBase + "parte2.txt"));
-            maquetador.separarFichero(fAseparar, puntosDeCorte, partes);
+            // Limpieza de archivos de ejecuciones anteriores
+            if (f1.exists()) f1.delete();
+            if (f2.exists()) f2.delete();
+            if (fUnido.exists()) fUnido.delete();
+            if (fCombinado.exists()) fCombinado.delete();
+            if (fParte1.exists()) fParte1.delete();
+            if (fParte2.exists()) fParte2.delete();
             
-            System.out.println("[EXITO] Fichero separado en '" + partes.get(0).getPath() + "' y '" + partes.get(1).getPath() + "'");
+            // Generación de los ficheros base con texto formal
+            MaquetadorBasico basico = new MaquetadorBasico();
+            basico.anadirTexto(f1, "Línea 1 del Fichero 1: Introducción al patrón Adapter.");
+            basico.anadirTexto(f1, "Línea 2 del Fichero 1: Este patrón permite la colaboración de clases.");
+            basico.anadirTexto(f1, "Línea 3 del Fichero 1: Fin de la primera sección.");
+            
+            basico.anadirTexto(f2, "Línea 1 del Fichero 2: Detalles de implementación.");
+            basico.anadirTexto(f2, "Línea 2 del Fichero 2: Se utiliza composición o herencia.");
+            basico.anadirTexto(f2, "Línea 3 del Fichero 2: Conclusión del documento.");
+
+            // --- FASE 1: INSTANCIACIÓN DEL ADAPTADOR ---
+            MaquetadorAvanzado maquetador = new AdaptadorMaquetador();
+            boolean salir = false;
+
+            // --- FASE 2: MENÚ DE USUARIO ---
+            while (!salir) {
+                System.out.println("\nSeleccione la operación a realizar:");
+                System.out.println("  1. Unir Fichero 1 y Fichero 2");
+                System.out.println("  2. Combinar e intercalar Fichero 1 y Fichero 2");
+                System.out.println("  3. Separar un fichero (requiere haber ejecutado la opción 1)");
+                System.out.println("  4. Salir del programa");
+                System.out.print("Introduzca una opción (1-4): ");
+                
+                String input = scanner.nextLine();
+                int opcion = 0;
+                
+                try {
+                    opcion = Integer.parseInt(input);
+                } catch (NumberFormatException e) {
+                    System.out.println(">> [ADVERTENCIA] Por favor, introduzca un valor numérico válido.");
+                    continue;
+                }
+
+                switch (opcion) {
+                    case 1:
+                        maquetador.unirFicheros(f1, f2, fUnido);
+                        System.out.println(">> [ÉXITO] Ficheros unidos correctamente. Archivo generado: " + fUnido.getPath());
+                        break;
+                        
+                    case 2:
+                        // Rango de extracción: líneas 1 a 2 de cada fichero
+                        List<int[]> parrafosF1 = Arrays.asList(new int[]{1, 2}); 
+                        List<int[]> parrafosF2 = Arrays.asList(new int[]{1, 2});
+                        maquetador.combinarFicheros(f1, f2, parrafosF1, parrafosF2, fCombinado);
+                        System.out.println(">> [ÉXITO] Ficheros combinados correctamente. Archivo generado: " + fCombinado.getPath());
+                        break;
+                        
+                    case 3:
+                        if (!fUnido.exists()) {
+                            System.out.println(">> [ERROR] El fichero origen no existe. Ejecute la opción 1 primero.");
+                        } else {
+                            List<Integer> puntosDeCorte = Arrays.asList(3); // El corte se realiza en la línea 3
+                            List<File> partes = Arrays.asList(fParte1, fParte2);
+                            maquetador.separarFichero(fUnido, puntosDeCorte, partes);
+                            System.out.println(">> [ÉXITO] Fichero separado correctamente en: '" + fParte1.getName() + "' y '" + fParte2.getName() + "'.");
+                        }
+                        break;
+                        
+                    case 4:
+                        System.out.println(">> Finalizando la ejecución del programa. Hasta pronto.");
+                        salir = true;
+                        break;
+                        
+                    default:
+                        System.out.println(">> [ADVERTENCIA] Opción fuera de rango. Seleccione un número entre 1 y 4.");
+                }
+            }
 
         } catch (IOException e) {
-            System.err.println("Error leyendo o escribiendo archivos");
+            System.err.println(">> [ERROR CRÍTICO] Excepción de entrada/salida detectada durante la manipulación de archivos.");
             e.printStackTrace();
+        } finally {
+            scanner.close();
         }
     }
 }
