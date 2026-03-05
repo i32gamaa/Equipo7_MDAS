@@ -1,50 +1,42 @@
 import java.io.*;
-import java.nio.file.*;
+import java.nio.file.Files;
 import java.util.List;
-import java.util.ArrayList;
 
-/**
- * Clase que implementa el sistema de maquetación digital básico.
- * Representa la 'ClaseExistente' en el patrón Adapter.
- */
 public class MaquetadorBasico {
-
-    // 1) Añadir texto, recibido como String, al final de un archivo [cite: 23]
-    public void añadirTexto(String nombreFichero, String texto) throws IOException {
-        try (FileWriter fw = new FileWriter(nombreFichero, true);
+    
+    // Añadir texto al final de un archivo
+    public void anadirTexto(File archivo, String texto) throws IOException {
+        try (FileWriter fw = new FileWriter(archivo, true);
              BufferedWriter bw = new BufferedWriter(fw)) {
             bw.write(texto);
             bw.newLine();
         }
     }
 
-    // 2) Extraer un párrafo de un archivo de texto, indicando la línea de inicio y fin 
-    public List<String> extraerParrafo(String nombreFichero, int lineaInicio, int lineaFin) throws IOException {
-        List<String> lineas = Files.readAllLines(Paths.get(nombreFichero));
-        List<String> parrafo = new ArrayList<>();
-        
-        // Ajuste de índices (las líneas suelen contarse desde 1)
+    // Extraer un párrafo indicando donde empieza y acaba
+    public String extraerParrafo(File archivo, int lineaInicio, int lineaFin) throws IOException {
+        List<String> lineas = Files.readAllLines(archivo.toPath());
+        StringBuilder sb = new StringBuilder();
+        // Los índices empiezan en 1 para el usuario
         for (int i = lineaInicio - 1; i < lineaFin && i < lineas.size(); i++) {
-            parrafo.add(lineas.get(i));
+            if (i >= 0) sb.append(lineas.get(i)).append("\n");
         }
-        return parrafo;
+        return sb.toString();
     }
 
-    // 3) Dividir un fichero de texto en dos, dando un número de línea para el corte 
-    public void dividirFichero(String nombreFichero, int lineaCorte) throws IOException {
-        List<String> lineas = Files.readAllLines(Paths.get(nombreFichero));
-        
-        // Fichero parte 1
-        try (PrintWriter writer1 = new PrintWriter(new FileWriter("parte1_" + nombreFichero))) {
-            for (int i = 0; i < lineaCorte && i < lineas.size(); i++) {
-                writer1.println(lineas.get(i));
-            }
-        }
-
-        // Fichero parte 2
-        try (PrintWriter writer2 = new PrintWriter(new FileWriter("parte2_" + nombreFichero))) {
-            for (int i = lineaCorte; i < lineas.size(); i++) {
-                writer2.println(lineas.get(i));
+    // Dividir el fichero en dos
+    public void dividirFichero(File archivoOrig, int lineaCorte, File archivo1, File archivo2) throws IOException {
+        List<String> lineas = Files.readAllLines(archivoOrig.toPath());
+        try (BufferedWriter bw1 = new BufferedWriter(new FileWriter(archivo1));
+             BufferedWriter bw2 = new BufferedWriter(new FileWriter(archivo2))) {
+            for (int i = 0; i < lineas.size(); i++) {
+                if (i < lineaCorte - 1) {
+                    bw1.write(lineas.get(i));
+                    bw1.newLine();
+                } else {
+                    bw2.write(lineas.get(i));
+                    bw2.newLine();
+                }
             }
         }
     }
