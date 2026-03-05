@@ -6,25 +6,29 @@ import java.util.List;
 // ClaseComposite 
 public class ContenedorEnergia implements ContadorEnergia {
     private String nombre;
-    private List<ContadorEnergia> hijos = new ArrayList<>(); // Agregación 
+    private List<ContadorEnergia> Aparatos = new ArrayList<>(); // Agregación 
 
     public ContenedorEnergia(String nombre) {
         this.nombre = nombre;
     }
 
     public void añadir(ContadorEnergia elemento) {
-        hijos.add(elemento);
+        Aparatos.add(elemento);
+    }
+
+    public void eliminar(ContadorEnergia elemento) {
+        Aparatos.remove(elemento);
     }
 
     @Override
     public double calcularConsumo() {
         // Suma el consumo de todo lo que tiene dentro 
-        return hijos.stream().mapToDouble(ContadorEnergia::calcularConsumo).sum();
+        return Aparatos.stream().mapToDouble(ContadorEnergia::calcularConsumo).sum();
     }
 
     @Override
     public double calcularCoste(double precioKWh) {
-        return hijos.stream().mapToDouble(h -> h.calcularCoste(precioKWh)).sum();
+        return Aparatos.stream().mapToDouble(h -> h.calcularCoste(precioKWh)).sum();
     }
 
     @Override
