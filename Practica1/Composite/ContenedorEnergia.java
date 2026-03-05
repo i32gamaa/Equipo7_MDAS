@@ -1,5 +1,32 @@
 package Practica1.Composite;
 
-public class ContenedorEnergia {
-    
+import java.util.ArrayList;
+import java.util.List;
+
+// ClaseComposite [cite: 13, 15]
+public class ContenedorEnergia implements ContadorEnergia {
+    private String nombre;
+    private List<ContadorEnergia> hijos = new ArrayList<>(); // Agregación [cite: 8]
+
+    public ContenedorEnergia(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void añadir(ContadorEnergia elemento) {
+        hijos.add(elemento);
+    }
+
+    @Override
+    public double calcularConsumo() {
+        // Suma el consumo de todo lo que tiene dentro 
+        return hijos.stream().mapToDouble(ContadorEnergia::calcularConsumo).sum();
+    }
+
+    @Override
+    public double calcularCoste(double precioKWh) {
+        return hijos.stream().mapToDouble(h -> h.calcularCoste(precioKWh)).sum();
+    }
+
+    @Override
+    public String getNombre() { return nombre; }
 }
