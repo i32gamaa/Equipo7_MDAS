@@ -3,10 +3,10 @@ package Practica1.Composite;
 import java.util.ArrayList;
 import java.util.List;
 
-// ClaseComposite [cite: 13, 15]
+// ClaseComposite 
 public class ContenedorEnergia implements ContadorEnergia {
     private String nombre;
-    private List<ContadorEnergia> hijos = new ArrayList<>(); // Agregación [cite: 8]
+    private List<ContadorEnergia> hijos = new ArrayList<>(); // Agregación 
 
     public ContenedorEnergia(String nombre) {
         this.nombre = nombre;
