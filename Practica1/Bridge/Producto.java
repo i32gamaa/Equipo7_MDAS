@@ -15,7 +15,6 @@ public abstract class Producto {
     public double getPrecio() { return precio; }
     public int getStock() { return stock; }
     
-    // Método clave para cuando la Persona 2 tenga que unificar stocks de varias empresas
     public void sumarStock(int cantidad) { 
         this.stock += cantidad; 
     }
