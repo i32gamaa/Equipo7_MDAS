@@ -8,7 +8,7 @@ public class EmpresaA implements IEmpresaProveedora {
     public EmpresaA() {
         catalogoSofas = new ArrayList<>();
         catalogoSofas.add(new Sofa("Sofá Chaise Longue (Empresa A)", 450.0, 5, 3));
-        catalogoSofas.add(new Sofa("Sofá Cama (Empresa A)", 300.0, 2, 2));
+        catalogoSofas.add(new Sofa("Sofá Cama", 300.0, 2, 2));
     }
 
     @Override

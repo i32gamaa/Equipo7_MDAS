@@ -32,7 +32,7 @@ public class Main {
                 case 2 -> menuMesas(empresaA, empresaB, empresaC);
                 case 3 -> {
                     salir = true;
-                    System.out.println("Cerrando el comparador... ¡Hasta la próxima, manito!");
+                    System.out.println("Cerrando el comparador... ¡Hasta la próxima!");
                 }
                 default -> System.out.println("Opción no válida. Por favor, elige 1, 2 o 3.");
             }
