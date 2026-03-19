@@ -1,16 +1,20 @@
 package Practica1.Bridge;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
     private static Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) {
-        // 1. Instanciamos las empresas proveedoras en la "nube" de nuestro sistema
-        IEmpresaProveedora empresaA = new EmpresaA(); // Vende solo Sofás
-        IEmpresaProveedora empresaB = new EmpresaB(); // Vende solo Mesas
-        IEmpresaProveedora empresaC = new EmpresaC(); // Vende Mesas y Sofás
+        // 1. Instanciamos las empresas proveedoras 
+        IEmpresaProveedora empresaA = new EmpresaA(); 
+        IEmpresaProveedora empresaB = new EmpresaB(); 
+        IEmpresaProveedora empresaC = new EmpresaC(); 
 
         boolean salir = false;
         
@@ -20,46 +24,53 @@ public class Main {
 
         while (!salir) {
             System.out.println("\n--- MENÚ PRINCIPAL ---");
-            System.out.println("1. Buscar Sofás");
-            System.out.println("2. Buscar Mesas");
-            System.out.println("3. Salir");
+            System.out.println("1. Buscar Sofás (Une empresas B y C)");
+            System.out.println("2. Buscar Mesas (Une empresas A y B)");
+            System.out.println("3. Buscar TODO el catálogo (Une empresas A, B y C)");
+            System.out.println("4. Salir");
             System.out.print("Elige una opción: ");
             
             int opcion = leerEntero();
 
             switch (opcion) {
-                case 1 -> menuSofas(empresaA, empresaB, empresaC);
-                case 2 -> menuMesas(empresaA, empresaB, empresaC);
-                case 3 -> {
+                case 1 -> menuSofas(empresaB, empresaC); 
+                case 2 -> menuMesas(empresaA, empresaB);
+                case 3 -> menuGeneral(empresaA, empresaB, empresaC);
+                case 4 -> {
                     salir = true;
-                    System.out.println("Cerrando el comparador... ¡Hasta la próxima!");
+                    System.out.println("Cerrando el comparador... ¡Mucha suerte con el 10, manito!");
                 }
-                default -> System.out.println("Opción no válida. Por favor, elige 1, 2 o 3.");
+                default -> System.out.println("❌ Opción no válida. Por favor, elige 1, 2, 3 o 4.");
             }
         }
     }
 
-    // MENÚ SOFÁS 
-    private static void menuSofas(IEmpresaProveedora empA, IEmpresaProveedora empB, IEmpresaProveedora empC) {
+    private static void menuSofas(IEmpresaProveedora empB, IEmpresaProveedora empC) {
         System.out.print("\n¿De cuántas plazas buscas el sofá? (ej. 2, 3, 4): ");
         int plazas = leerEntero();
 
         BuscadorSofas buscador = new BuscadorSofas(plazas);
-        // Conectamos las empresas al buscador (El Puente)
-        buscador.addProveedor(empA);
         buscador.addProveedor(empB);
         buscador.addProveedor(empC);
 
         mostrarResultados(buscador);
     }
 
-    // MENÚ MESAS
-    private static void menuMesas(IEmpresaProveedora empA, IEmpresaProveedora empB, IEmpresaProveedora empC) {
+    private static void menuMesas(IEmpresaProveedora empA, IEmpresaProveedora empB) {
         System.out.print("\n¿Qué dimensión buscas para la mesa? (en metros, ej. 2.0 o 1.5): ");
         double dimension = leerDouble();
 
         BuscadorMesas buscador = new BuscadorMesas(dimension);
-        // Conectamos las empresas al buscador (El Puente)
+        buscador.addProveedor(empA);
+        buscador.addProveedor(empB);
+
+        mostrarResultados(buscador);
+    }
+
+    private static void menuGeneral(IEmpresaProveedora empA, IEmpresaProveedora empB, IEmpresaProveedora empC) {
+        System.out.println("\nBuscando todos los muebles del catálogo (Mesas y Sofás)...");
+        
+        BuscadorGeneral buscador = new BuscadorGeneral();
         buscador.addProveedor(empA);
         buscador.addProveedor(empB);
         buscador.addProveedor(empC);
@@ -67,7 +78,6 @@ public class Main {
         mostrarResultados(buscador);
     }
 
-    // LÓGICA DE ORDENACIÓN Y MUESTRA 
     private static void mostrarResultados(SistemaProveedor buscador) {
         System.out.println("\n¿Cómo quieres ordenar los resultados?");
         System.out.println("1. Por precio (Más baratos primero)");
@@ -81,21 +91,20 @@ public class Main {
         } else if (orden == 2) {
             resultados = buscador.buscarOrdenadoPorStock();
         } else {
-            System.out.println("Opción no válida, volviendo al menú principal...");
+            System.out.println("❌ Opción no válida, volviendo al menú principal...");
             return;
         }
 
         System.out.println("\n=== RESULTADOS DE LA BÚSQUEDA ===");
         if (resultados.isEmpty()) {
-            System.out.println("No se han encontrado muebles con esas características en ningún proveedor.");
+            System.out.println("No se han encontrado muebles con esas características en los proveedores conectados.");
         } else {
             for (Producto p : resultados) {
-                System.out.println(p.toString());
+                System.out.println(" ✅ " + p.toString());
             }
         }
     }
 
-    // MÉTODOS DE LECTURA SEGURA (Evitan que el programa falle si se meten letras de mas)
     private static int leerEntero() {
         try {
             return Integer.parseInt(sc.nextLine().trim());
@@ -106,11 +115,52 @@ public class Main {
 
     private static double leerDouble() {
         try {
-            // Reemplazamos coma por punto por si el usuario escribe "2,5" en vez de "2.5"
             String entrada = sc.nextLine().trim().replace(",", ".");
             return Double.parseDouble(entrada);
         } catch (Exception e) {
             return -1.0;
         }
+    }
+}
+
+// =======================================================================
+// CLASE BUSCADOR GENERAL (Oculta para no tener que crear otro archivo)
+// =======================================================================
+class BuscadorGeneral extends SistemaProveedor {
+
+    public BuscadorGeneral() {}
+
+    // Método privado adaptado para agrupar TODOS los productos mezclados
+    private List<Producto> agruparStock(List<Producto> listaBruta) {
+        Map<String, Producto> mapa = new HashMap<>();
+        for (Producto p : listaBruta) {
+            if (mapa.containsKey(p.getNombre())) {
+                mapa.get(p.getNombre()).sumarStock(p.getStock());
+            } else {
+                // Clonamos el producto para no alterar la BD de la empresa
+                if (p instanceof Mesa) {
+                    Mesa m = (Mesa) p;
+                    mapa.put(m.getNombre(), new Mesa(m.getNombre(), m.getPrecio(), m.getStock(), m.getDimension()));
+                } else if (p instanceof Sofa) {
+                    Sofa s = (Sofa) p;
+                    mapa.put(s.getNombre(), new Sofa(s.getNombre(), s.getPrecio(), s.getStock(), s.getPlazas()));
+                }
+            }
+        }
+        return new ArrayList<>(mapa.values());
+    }
+
+    @Override
+    public List<Producto> buscarOrdenadoPorPrecio() {
+        List<Producto> agrupados = agruparStock(buscarGeneral());
+        agrupados.sort(Comparator.comparingDouble(Producto::getPrecio));
+        return agrupados;
+    }
+
+    @Override
+    public List<Producto> buscarOrdenadoPorStock() {
+        List<Producto> agrupados = agruparStock(buscarGeneral());
+        agrupados.sort((p1, p2) -> Integer.compare(p2.getStock(), p1.getStock()));
+        return agrupados;
     }
 }
