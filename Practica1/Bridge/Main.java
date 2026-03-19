@@ -19,7 +19,7 @@ public class Main {
         boolean salir = false;
         
         System.out.println("==================================================");
-        System.out.println("  🛋️ BIENVENIDO AL COMPARADOR DE MUEBLES V1.0 🪑");
+        System.out.println("  BIENVENIDO AL COMPARADOR DE MUEBLES V1.0 ");
         System.out.println("==================================================");
 
         while (!salir) {
@@ -40,13 +40,13 @@ public class Main {
                     salir = true;
                     System.out.println("Cerrando el comparador... ¡Mucha suerte con el 10, manito!");
                 }
-                default -> System.out.println("❌ Opción no válida. Por favor, elige 1, 2, 3 o 4.");
+                default -> System.out.println(" Opción no válida. Por favor, elige 1, 2, 3 o 4.");
             }
         }
     }
 
     private static void menuSofas(IEmpresaProveedora empB, IEmpresaProveedora empC) {
-        System.out.print("\n¿De cuántas plazas buscas el sofá? (ej. 2, 3, 4): ");
+        System.out.print("\n¿De cuántas plazas buscas el sofá (ej. 2, 3, 4): ");
         int plazas = leerEntero();
 
         BuscadorSofas buscador = new BuscadorSofas(plazas);
@@ -57,7 +57,7 @@ public class Main {
     }
 
     private static void menuMesas(IEmpresaProveedora empA, IEmpresaProveedora empB) {
-        System.out.print("\n¿Qué dimensión buscas para la mesa? (en metros, ej. 2.0 o 1.5): ");
+        System.out.print("\n¿Qué dimensión buscas para la mesa (en metros, ej. 2.0 o 1.5): ");
         double dimension = leerDouble();
 
         BuscadorMesas buscador = new BuscadorMesas(dimension);
@@ -79,7 +79,7 @@ public class Main {
     }
 
     private static void mostrarResultados(SistemaProveedor buscador) {
-        System.out.println("\n¿Cómo quieres ordenar los resultados?");
+        System.out.println("\n¿Cómo quieres ordenar los resultados");
         System.out.println("1. Por precio (Más baratos primero)");
         System.out.println("2. Por stock (Mayor disponibilidad primero)");
         System.out.print("Elige una opción: ");
@@ -91,7 +91,7 @@ public class Main {
         } else if (orden == 2) {
             resultados = buscador.buscarOrdenadoPorStock();
         } else {
-            System.out.println("❌ Opción no válida, volviendo al menú principal...");
+            System.out.println(" Opción no válida, volviendo al menú principal...");
             return;
         }
 
@@ -100,7 +100,7 @@ public class Main {
             System.out.println("No se han encontrado muebles con esas características en los proveedores conectados.");
         } else {
             for (Producto p : resultados) {
-                System.out.println(" ✅ " + p.toString());
+                System.out.println(" OK " + p.toString());
             }
         }
     }
