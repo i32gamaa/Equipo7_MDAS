@@ -1,4 +1,4 @@
-package Practica1.Façade;
+package Practica1.Facade;
 
 public class Main {
     
