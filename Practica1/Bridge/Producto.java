@@ -21,6 +21,6 @@ public abstract class Producto {
 
     @Override
     public String toString() {
-        return nombre + " | Precio: " + precio + "€ | Stock: " + stock;
+        return nombre + " | Precio: " + precio + " | Stock: " + stock;
     }
 }

@@ -100,7 +100,7 @@ public class Main {
             System.out.println("No se han encontrado muebles con esas características en los proveedores conectados.");
         } else {
             for (Producto p : resultados) {
-                System.out.println(" OK " + p.toString());
+                System.out.println(" --> " + p.toString());
             }
         }
     }
@@ -120,47 +120,5 @@ public class Main {
         } catch (Exception e) {
             return -1.0;
         }
-    }
-}
-
-// =======================================================================
-// CLASE BUSCADOR GENERAL (Oculta para no tener que crear otro archivo)
-// =======================================================================
-class BuscadorGeneral extends SistemaProveedor {
-
-    public BuscadorGeneral() {}
-
-    // Método privado adaptado para agrupar TODOS los productos mezclados
-    private List<Producto> agruparStock(List<Producto> listaBruta) {
-        Map<String, Producto> mapa = new HashMap<>();
-        for (Producto p : listaBruta) {
-            if (mapa.containsKey(p.getNombre())) {
-                mapa.get(p.getNombre()).sumarStock(p.getStock());
-            } else {
-                // Clonamos el producto para no alterar la BD de la empresa
-                if (p instanceof Mesa) {
-                    Mesa m = (Mesa) p;
-                    mapa.put(m.getNombre(), new Mesa(m.getNombre(), m.getPrecio(), m.getStock(), m.getDimension()));
-                } else if (p instanceof Sofa) {
-                    Sofa s = (Sofa) p;
-                    mapa.put(s.getNombre(), new Sofa(s.getNombre(), s.getPrecio(), s.getStock(), s.getPlazas()));
-                }
-            }
-        }
-        return new ArrayList<>(mapa.values());
-    }
-
-    @Override
-    public List<Producto> buscarOrdenadoPorPrecio() {
-        List<Producto> agrupados = agruparStock(buscarGeneral());
-        agrupados.sort(Comparator.comparingDouble(Producto::getPrecio));
-        return agrupados;
-    }
-
-    @Override
-    public List<Producto> buscarOrdenadoPorStock() {
-        List<Producto> agrupados = agruparStock(buscarGeneral());
-        agrupados.sort((p1, p2) -> Integer.compare(p2.getStock(), p1.getStock()));
-        return agrupados;
     }
 }
