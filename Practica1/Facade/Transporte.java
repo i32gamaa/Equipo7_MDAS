@@ -15,6 +15,6 @@ public class Transporte {
 
     @Override
     public String toString() {
-        return "✈️ " + aerolinea + " | " + origen + " -> " + destino + " | Precio: " + precio + "€";
+        return "- " + aerolinea + " | " + origen + " -> " + destino + " | Precio: " + precio + " EUR";
     }
 }

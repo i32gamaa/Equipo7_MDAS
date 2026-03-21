@@ -8,7 +8,7 @@ import java.util.List;
 public class ServicioAlojamiento {
     public List<Alojamiento> buscarAlojamientoGrupal(String ciudad, String fechaIn, String fechaOut) {
         List<Alojamiento> resultados = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("alojamientos.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("Practica1/Facade/alojamientos.txt"))) {
             String linea;
             while ((linea = br.readLine()) != null) {
                 String[] datos = linea.split(";");

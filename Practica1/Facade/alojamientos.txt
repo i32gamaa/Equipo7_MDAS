@@ -1,0 +1,3 @@
+Hotel Center;Madrid;20;120.0
+Hostal Sol;Madrid;5;40.0
+Hotel Eurostars Palace;Cordoba;50;150.0

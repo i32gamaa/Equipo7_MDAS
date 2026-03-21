@@ -6,10 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OficinaTurismoMadrid {
-    // Fíjate que solo recibe la fecha por parámetro, cumpliendo el requisito del PDF
     public List<Actividad> buscarPorFecha(String fecha) {
         List<Actividad> resultados = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("actividades_madrid.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("Practica1/Facade/actividades_madrid.txt"))) {
             String linea;
             while ((linea = br.readLine()) != null) {
                 String[] datos = linea.split(";");

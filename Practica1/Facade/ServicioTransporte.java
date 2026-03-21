@@ -9,7 +9,7 @@ public class ServicioTransporte {
     public List<Transporte> buscarTransporte(String origen, String destino, String fecha) {
         List<Transporte> resultados = new ArrayList<>();
         // Abrimos el archivo que habrá generado el GestorArchivos
-        try (BufferedReader br = new BufferedReader(new FileReader("transportes.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("Practica1/Facade/transportes.txt"))) {
             String linea;
             while ((linea = br.readLine()) != null) {
                 String[] datos = linea.split(";");

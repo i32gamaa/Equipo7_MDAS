@@ -15,6 +15,6 @@ public class Alojamiento {
 
     @Override
     public String toString() {
-        return "🏨 " + nombre + " (" + ciudad + ") | Capacidad: " + capacidad + " pax | Precio/Noche: " + precio + "€";
+        return "- " + nombre + " (" + ciudad + ") | Capacidad: " + capacidad + " pax | Precio/Noche: " + precio + " EUR";
     }
 }

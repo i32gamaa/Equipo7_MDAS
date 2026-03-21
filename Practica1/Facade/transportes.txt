@@ -1,0 +1,3 @@
+Iberia;Sevilla;Madrid;45.0
+AVE;Sevilla;Madrid;30.0
+Renfe Avant;Sevilla;Cordoba;20.0
