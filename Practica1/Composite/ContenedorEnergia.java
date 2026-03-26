@@ -20,6 +20,10 @@ public class ContenedorEnergia implements ContadorEnergia {
         Aparatos.remove(elemento);
     }
 
+    public List<ContadorEnergia> getComponentes() {
+        return this.Aparatos;
+    }
+
     @Override
     public double calcularConsumo() {
         // Suma el consumo de todo lo que tiene dentro 
