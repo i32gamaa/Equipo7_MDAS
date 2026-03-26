@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -16,12 +17,10 @@ public class Main {
             String rutaBase = "Practica1" + File.separator + "Adapter" + File.separator;
             File directorio = new File("Practica1" + File.separator + "Adapter");
             
-            // Creación del directorio si no existe
             if (!directorio.exists()) {
                 directorio.mkdirs();
             }
 
-            // Definición de todos los archivos implicados
             File f1 = new File(rutaBase + "fichero1.txt");
             File f2 = new File(rutaBase + "fichero2.txt");
             File fUnido = new File(rutaBase + "resultado_unido.txt");
@@ -29,7 +28,6 @@ public class Main {
             File fParte1 = new File(rutaBase + "parte1.txt");
             File fParte2 = new File(rutaBase + "parte2.txt");
 
-            // Limpieza de archivos de ejecuciones anteriores
             if (f1.exists()) f1.delete();
             if (f2.exists()) f2.delete();
             if (fUnido.exists()) fUnido.delete();
@@ -37,7 +35,6 @@ public class Main {
             if (fParte1.exists()) fParte1.delete();
             if (fParte2.exists()) fParte2.delete();
             
-            // Generación de los ficheros base con texto formal
             MaquetadorBasico basico = new MaquetadorBasico();
             basico.anadirTexto(f1, "Línea 1 del Fichero 1: Introducción al patrón Adapter.");
             basico.anadirTexto(f1, "Línea 2 del Fichero 1: Este patrón permite la colaboración de clases.");
@@ -77,27 +74,59 @@ public class Main {
                         break;
                         
                     case 2:
-                        // Separamos cada línea como si fuera un párrafo independiente para ver el intercalado
-                        List<int[]> parrafosF1 = Arrays.asList(new int[]{1, 1}, new int[]{2, 2}, new int[]{3, 3}); 
-                        List<int[]> parrafosF2 = Arrays.asList(new int[]{1, 1}, new int[]{2, 2}, new int[]{3, 3});
-                        
-                        maquetador.combinarFicheros(f1, f2, parrafosF1, parrafosF2, fCombinado);
-                        System.out.println(">> [ÉXITO] Ficheros combinados correctamente. Archivo generado: " + fCombinado.getPath());
+                        try {
+                            System.out.print("¿Cuántas líneas quieres que tenga cada párrafo al intercalar?: ");
+                            int lineasPorParrafo = Integer.parseInt(scanner.nextLine());
+                            
+                            // 1. Contamos el total de líneas de cada fichero
+                            long totalLineasF1 = java.nio.file.Files.readAllLines(f1.toPath()).size();
+                            long totalLineasF2 = java.nio.file.Files.readAllLines(f2.toPath()).size();
+                            
+                            List<int[]> parrafosF1 = new ArrayList<>();
+                            List<int[]> parrafosF2 = new ArrayList<>();
+
+                            // 2. Generamos automáticamente los bloques para el Fichero 1
+                            for (int inicio = 1; inicio <= totalLineasF1; inicio += lineasPorParrafo) {
+                                int fin = (int) Math.min(inicio + lineasPorParrafo - 1, totalLineasF1);
+                                parrafosF1.add(new int[]{inicio, fin});
+                            }
+
+                            // 3. Generamos automáticamente los bloques para el Fichero 2
+                            for (int inicio = 1; inicio <= totalLineasF2; inicio += lineasPorParrafo) {
+                                int fin = (int) Math.min(inicio + lineasPorParrafo - 1, totalLineasF2);
+                                parrafosF2.add(new int[]{inicio, fin});
+                            }
+                            
+                            // 4. Se los pasamos al adaptador para que haga la magia
+                            maquetador.combinarFicheros(f1, f2, parrafosF1, parrafosF2, fCombinado);
+                            System.out.println(">> [ÉXITO] Ficheros combinados correctamente. Archivo generado: " + fCombinado.getPath());
+                            
+                        } catch (NumberFormatException e) {
+                            System.out.println(">> [ERROR] Entrada no válida. Debes introducir un número entero.");
+                        }
                         break;
                         
                     case 3:
                         if (!fUnido.exists()) {
                             System.out.println(">> [ERROR] El fichero origen no existe. Ejecute la opción 1 primero.");
                         } else {
-                            List<Integer> puntosDeCorte = Arrays.asList(3); // El corte se realiza en la línea 3
-                            List<File> partes = Arrays.asList(fParte1, fParte2);
-                            maquetador.separarFichero(fUnido, puntosDeCorte, partes);
-                            System.out.println(">> [ÉXITO] Fichero separado correctamente en: '" + fParte1.getName() + "' y '" + fParte2.getName() + "'.");
+                            try {
+                                System.out.print("Indica la línea de corte (un número) para dividir el fichero en dos: ");
+                                int lineaCorte = Integer.parseInt(scanner.nextLine());
+                                
+                                List<Integer> puntosDeCorte = Arrays.asList(lineaCorte);
+                                List<File> partes = Arrays.asList(fParte1, fParte2);
+                                
+                                maquetador.separarFichero(fUnido, puntosDeCorte, partes);
+                                System.out.println(">> [ÉXITO] Fichero separado correctamente en: '" + fParte1.getName() + "' y '" + fParte2.getName() + "'.");
+                            } catch (NumberFormatException e) {
+                                System.out.println(">> [ERROR] Entrada no válida. Debes introducir un número entero.");
+                            }
                         }
                         break;
                         
                     case 4:
-                        System.out.println(">> Finalizando la ejecución del programa. Hasta pronto.");
+                        System.out.println(">> Finalizando la ejecución del programa. ¡Hasta pronto!");
                         salir = true;
                         break;
                         

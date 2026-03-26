@@ -42,21 +42,22 @@ public class AdaptadorMaquetador extends MaquetadorBasico implements MaquetadorA
         int iteraciones = Math.max(parrafosF1.size(), parrafosF2.size());
         
         for (int i = 0; i < iteraciones; i++) {
-            // Extraer y añadir el trozo del Fichero 1 usando los métodos heredados
+            // Extraer y añadir el trozo del Fichero 1
             if (i < parrafosF1.size()) {
                 int[] rango = parrafosF1.get(i);
-                // this.extraerParrafo viene de MaquetadorBasico
                 String parrafo = this.extraerParrafo(f1, rango[0], rango[1]); 
                 if (parrafo != null && !parrafo.isEmpty()) {
                     this.anadirTexto(destino, parrafo.trim());
+                    this.anadirTexto(destino, ""); // <-- SALTO DE LÍNEA EXTRA 
                 }
             }
-            // Hacemos exactamente lo mismo para el Fichero 2
+            // Extraer y añadir el trozo del Fichero 2
             if (i < parrafosF2.size()) {
                 int[] rango = parrafosF2.get(i);
                 String parrafo = this.extraerParrafo(f2, rango[0], rango[1]);
                 if (parrafo != null && !parrafo.isEmpty()) {
                     this.anadirTexto(destino, parrafo.trim());
+                    this.anadirTexto(destino, ""); // <-- SALTO DE LÍNEA EXTRA 
                 }
             }
         }
