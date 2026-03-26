@@ -105,7 +105,7 @@ public class Main {
         System.out.printf(" PRECIO TOTAL: %.2f EUR\n", menu.calcular_precio());
         
         if (menu.paraLlevar) {
-            System.out.println(" *(Incluye 2%% de recargo)*");
+            System.out.println(" *(Incluye 2% de recargo)*");
         }
         
         System.out.println(" =========================================");

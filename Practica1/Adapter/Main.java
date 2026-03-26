@@ -77,9 +77,10 @@ public class Main {
                         break;
                         
                     case 2:
-                        // Rango de extracción: líneas 1 a 2 de cada fichero
-                        List<int[]> parrafosF1 = Arrays.asList(new int[]{1, 2}); 
-                        List<int[]> parrafosF2 = Arrays.asList(new int[]{1, 2});
+                        // Separamos cada línea como si fuera un párrafo independiente para ver el intercalado
+                        List<int[]> parrafosF1 = Arrays.asList(new int[]{1, 1}, new int[]{2, 2}, new int[]{3, 3}); 
+                        List<int[]> parrafosF2 = Arrays.asList(new int[]{1, 1}, new int[]{2, 2}, new int[]{3, 3});
+                        
                         maquetador.combinarFicheros(f1, f2, parrafosF1, parrafosF2, fCombinado);
                         System.out.println(">> [ÉXITO] Ficheros combinados correctamente. Archivo generado: " + fCombinado.getPath());
                         break;
