@@ -9,7 +9,6 @@ public class EmpresaC implements IEmpresaProveedora {
         catalogo = new ArrayList<>();
         catalogo.add(new Sofa("Sofá Piel (Empresa C)", 600.0, 3, 4));
         catalogo.add(new Mesa("Mesa Cristal (Empresa C)", 200.0, 5, 1.8));
-        // Metemos un sofá idéntico al de la Empresa A pero más caro para probar el filtro de precios y stock
         catalogo.add(new Sofa("Sofá Cama", 300.0, 4, 2)); 
     }
 
