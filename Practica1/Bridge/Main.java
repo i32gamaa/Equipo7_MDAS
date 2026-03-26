@@ -19,7 +19,7 @@ public class Main {
         boolean salir = false;
         
         System.out.println("==================================================");
-        System.out.println("  BIENVENIDO AL COMPARADOR DE MUEBLES V1.0 ");
+        System.out.println("  BIENVENIDO AL COMPARADOR DE MUEBLES ");
         System.out.println("==================================================");
 
         while (!salir) {
@@ -38,7 +38,7 @@ public class Main {
                 case 3 -> menuGeneral(empresaA, empresaB, empresaC);
                 case 4 -> {
                     salir = true;
-                    System.out.println("Cerrando el comparador... ¡Mucha suerte con el 10, manito!");
+                    System.out.println("Cerrando el comparador...");
                 }
                 default -> System.out.println(" Opción no válida. Por favor, elige 1, 2, 3 o 4.");
             }
