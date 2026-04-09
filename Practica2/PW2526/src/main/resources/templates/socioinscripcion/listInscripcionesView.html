@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Listado de Inscripciones</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="stylehome.css">
+    <link rel="icon" href="images/logo.png" type="image/png">
+</head>
+
+<body>
+    <main class="overlay">
+        <h1>Listado de Inscripciones</h1>
+        <p class="subtitle">Consulta todas las inscripciones registradas en el sistema.</p>
+
+        <div th:if="${error}" class="message error" th:text="${error}"></div>
+        <div th:if="${message}" class="message info" th:text="${message}"></div>
+
+        <section th:if="${inscripciones} and ${not inscripciones.empty}">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha de inscripción</th>
+                        <th>Cuota</th>
+                        <th>Usuario titular</th>
+                        <th>Adultos inscritos</th>
+                        <th>Menores inscritos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="inscripcion : ${inscripciones}">
+                        <td th:text="${inscripcion.id}"></td>
+                        <td th:text="${inscripcion.date != null ? inscripcion.date : 'Sin fecha'}"></td>
+                        <td th:text="${inscripcion.totalAmount}"></td>
+                        <td th:text="${inscripcion.userId}"></td>
+                        <td th:text="${inscripcion.registeredAdults}"></td>
+                        <td th:text="${inscripcion.registeredKids}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <div th:if="${inscripciones == null or inscripciones.isEmpty()}" class="no-data">
+            No hay inscripciones registradas en el sistema.
+        </div>
+
+        <div class="btn-group">
+            <a th:href="@{/addInscripcion}" class="btn btn-primary">Añadir Nueva Inscripción</a>
+            <a th:href="@{/addSocio}" class="btn btn-outline-light">Añadir Socio No Titular</a>
+            <a th:href="@{/}" class="btn btn-secondary">Volver al Inicio</a>
+        </div>
+    </main>
+</body>
+</html>

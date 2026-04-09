@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="stylehome.css">
+    <title>Listado de Alquileres</title>
+    <link rel="icon" href="images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div class="overlay">
+        <h1>📋 Listado de Alquileres</h1>
+        <p>Gestiona y visualiza todos los alquileres del sistema</p>
+
+        <div th:if="${alquileres != null and not alquileres.empty}">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>ID Socio</th>
+                        <th>Matrícula</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Plazas</th>
+                        <th>Importe (€)</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="a : ${alquileres}">
+                        <td th:text="${a.rentalId}"></td>
+                        <td th:text="${a.userId}"></td>
+                        <td th:text="${a.registrationNumber}"></td>
+                        <td th:text="${a.startDate}"></td>
+                        <td th:text="${a.endDate}"></td>
+                        <td th:text="${a.numSeats}"></td>
+                        <td th:text="${a.amount}"></td>
+                        <td>
+                            <span th:if="${a.endDate != null and a.endDate.isBefore(T(java.time.LocalDate).now())}" 
+                                  class="status-completed">Completado</span>
+                            <span th:unless="${a.endDate != null and a.endDate.isBefore(T(java.time.LocalDate).now())}" 
+                                  class="status-active">Activo</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        <div th:if="${alquileres == null or alquileres.empty}" class="no-data">
+            <h3>No hay alquileres registrados</h3>
+            <p>No se encontraron alquileres en el sistema.</p>
+        </div>
+
+        <div class="btn-group">
+            <a th:href="@{/addAlquiler}" class="btn btn-primary">Nuevo Alquiler</a>
+            <a th:href="@{/findAlquilerByDate}" class="btn btn-outline-light">Buscar Disponibles</a>
+            <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
+        </div>
+    </div>
+</body>
+</html>

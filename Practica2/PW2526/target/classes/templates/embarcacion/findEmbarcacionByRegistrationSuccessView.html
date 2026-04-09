@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <title>Embarcación Encontrada</title>
+    <link rel="stylesheet" href="stylesuccess.css">
+</head>
+
+<body>
+    <main class="overlay">
+        <h1>Embarcación Encontrada</h1>
+        <p class="subtitle">Embarcación localizada correctamente</p>
+
+        <section class="details">
+            <h3>Información de la Embarcación</h3>
+            <table class="styled-table">
+                <tr><th>Matrícula</th><td th:text="${embarcacion.registrationNumber}"></td></tr>
+                <tr><th>Tipo</th><td th:text="${embarcacion.type}"></td></tr>
+                <tr><th>Nombre</th><td th:text="${embarcacion.name}"></td></tr>
+                <tr><th>Plazas</th><td th:text="${embarcacion.numSeats}"></td></tr>
+                <tr><th>Longitud</th><td th:text="${embarcacion.length} + ' m'"></td></tr>
+                <tr><th>Ancho</th><td th:text="${embarcacion.width} + ' m'"></td></tr>
+                <tr><th>Altura</th><td th:text="${embarcacion.height} + ' m'"></td></tr>
+                <tr><th>Patrón Asignado</th>
+                    <td>
+                        <span th:if="${embarcacion.patronId != null}" th:text="${embarcacion.patronId}" class="badge-success">Asignado</span>
+                        <span th:unless="${embarcacion.patronId != null}" class="badge-secondary">Sin asignar</span>
+                    </td>
+                </tr>
+            </table>
+        </section>
+
+        <div class="btn-group">
+            <a th:href="@{/findEmbarcacionByRegistration}" class="btn btn-primary">Nueva Búsqueda</a>
+            <a th:href="@{/findEmbarcacionMenu}" class="btn btn-outline-light">Volver al Menú de Búsqueda</a>
+            <a th:href="@{/}" class="btn btn-outline-light">Volver al Inicio</a>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="stylehome.css">
+  <title>Gestión de Alquileres - Club Náutico</title>
+  <link rel="icon" href="images/logo.png" type="image/png">
+</head>
+
+<body>
+  <div class="overlay">
+    <h1>Gestión de Alquileres</h1>
+    <p>Registra, busca y gestiona alquileres</p>
+
+    <div class="action-grid">
+      <div class="action-card">
+        <i class="fa-solid fa-id-card"></i>
+        <h5>Alquileres</h5>
+        <a href="/addAlquiler" class="btn btn-success btn-custom">Agregar</a>
+        <a href="/findAlquilerByDate" class="btn btn-outline-light btn-custom">Buscar</a>
+        <a href="/listAlquileres" class="btn btn-outline-light btn-custom">Listar</a>
+      </div>
+    </div>
+
+    <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
+  </div>
+</body>
+
+</html>

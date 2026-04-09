@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <title>Buscar embarcación por tipo</title>
+    <link rel="stylesheet" href="stylehome.css">
+</head>
+
+<body>
+    <main class="overlay">
+        <h1>Buscar Embarcación por Tipo</h1>
+
+        <form th:action="@{/findEmbarcacionByType}" method="post">
+            <div class="form-group">
+                <label class="form-label" for="type">Tipo de embarcación:</label>
+                <select id="type" name="type" required>
+                    <option th:each="tipo : ${T(es.uco.pw.demo.model.domain.EmbarcacionType).values()}" th:value="${tipo}"
+                        th:text="${tipo}"></option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </form>
+
+        <div class="btn-group">
+            <a th:href="@{/findEmbarcacionMenu}" class="btn btn-secondary">Volver al Menú de Búsqueda</a>
+            <a th:href="@{/}" class="btn btn-secondary">Volver al Inicio</a>
+        </div>
+    </main>
+</body>
+
+</html>

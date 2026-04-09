@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="stylehome.css">
+    <title>Buscar Embarcaciones Disponibles</title>
+    <link rel="icon" href="images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div class="overlay">
+        <h1>📅 Buscar Embarcaciones Disponibles</h1>
+        <p>Encuentra embarcaciones disponibles para tus fechas</p>
+
+        <form th:action="@{/findAlquilerByDate}" method="post" class="form-container">
+            <div class="form-group">
+                <label for="startDate">Fecha de Inicio:</label>
+                <input type="date" id="startDate" name="startDate" 
+                       th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" 
+                       min="" required>
+            </div>
+
+            <div class="form-group">
+                <label for="endDate">Fecha de Fin:</label>
+                <input type="date" id="endDate" name="endDate" 
+                       th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" 
+                       min="" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">🔍 Buscar Disponibles</button>
+        </form>
+
+        <p class="note">Se mostrarán las embarcaciones que NO están alquiladas entre las fechas seleccionadas.</p>
+
+        <div class="btn-group">
+            <a th:href="@{/addAlquiler}" class="btn btn-outline-light">Nuevo Alquiler</a>
+            <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').min = today;
+            document.getElementById('endDate').min = today;
+
+            document.getElementById('startDate').addEventListener('change', function() {
+                const startDate = this.value;
+                document.getElementById('endDate').min = startDate;
+                
+                if (document.getElementById('endDate').value < startDate) {
+                    document.getElementById('endDate').value = startDate;
+                }
+            });
+
+            document.querySelector('form').addEventListener('submit', function(e) {
+                const startDate = new Date(document.getElementById('startDate').value);
+                const endDate = new Date(document.getElementById('endDate').value);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (startDate < today) {
+                    alert('❌ La fecha de inicio no puede ser anterior a hoy');
+                    e.preventDefault();
+                    return;
+                }
+
+                if (endDate < startDate) {
+                    alert('❌ La fecha de fin no puede ser anterior a la fecha de inicio');
+                    e.preventDefault();
+                    return;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
