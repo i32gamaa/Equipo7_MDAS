@@ -12,7 +12,8 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class FindEmbarcacionByTypeController {
-    EmbarcacionRepository embarcacionRepository;
+    
+    private EmbarcacionRepository embarcacionRepository;
     private ModelAndView modelAndView = new ModelAndView();
 
     public FindEmbarcacionByTypeController(EmbarcacionRepository embarcacionRepository) {
@@ -22,26 +23,26 @@ public class FindEmbarcacionByTypeController {
     }
 
     @GetMapping("/findEmbarcacionByType")
-    public ModelAndView getFindEmbarcacionForm() {
+    public ModelAndView mostrarFormularioBusquedaPorTipo() {
         modelAndView.setViewName("embarcacion/findEmbarcacionByTypeView");
-        modelAndView.addObject("types", EmbarcacionType.values()); // Añadir los tipos al modelo
+        modelAndView.addObject("types", EmbarcacionType.values()); 
         return modelAndView;
     }
 
     @PostMapping("/findEmbarcacionByType")
-    public ModelAndView findEmbarcacionByType(@RequestParam("type") EmbarcacionType type) {
-        System.out.println("[FindEmbarcacionByTypeController] Received type: " + type);
+    public ModelAndView procesarBusquedaPorTipo(@RequestParam("type") EmbarcacionType tipoSeleccionado) {
+        System.out.println("[FindEmbarcacionByTypeController] Tipo recibido: " + tipoSeleccionado);
 
-        List<Embarcacion> embarcaciones = embarcacionRepository.findByType(type);
+        List<Embarcacion> embarcacionesEncontradas = embarcacionRepository.findByType(tipoSeleccionado);
 
-        if (embarcaciones != null && !embarcaciones.isEmpty()) {
-            System.out.println("[FindEmbarcacionByTypeController] Found " + embarcaciones.size() + " embarcaciones");
+        if (embarcacionesEncontradas != null && !embarcacionesEncontradas.isEmpty()) {
+            System.out.println("[FindEmbarcacionByTypeController] Encontradas " + embarcacionesEncontradas.size() + " embarcaciones");
             modelAndView.setViewName("embarcacion/findEmbarcacionByTypeSuccessView");
-            modelAndView.addObject("embarcaciones", embarcaciones);
-            modelAndView.addObject("type", type); 
+            modelAndView.addObject("embarcaciones", embarcacionesEncontradas);
+            modelAndView.addObject("type", tipoSeleccionado); 
         } else {
             modelAndView.setViewName("embarcacion/findEmbarcacionByTypeFailView");
-            modelAndView.addObject("type", type);
+            modelAndView.addObject("type", tipoSeleccionado);
         }
 
         return modelAndView;

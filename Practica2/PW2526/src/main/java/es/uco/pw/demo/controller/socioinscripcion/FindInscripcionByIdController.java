@@ -12,7 +12,7 @@ import es.uco.pw.demo.model.repository.InscripcionRepository;
 @Controller
 public class FindInscripcionByIdController {
 
-    InscripcionRepository inscripcionRepository;
+    private InscripcionRepository inscripcionRepository;
 
     public FindInscripcionByIdController(InscripcionRepository inscripcionRepository) {
         this.inscripcionRepository = inscripcionRepository;
@@ -21,22 +21,22 @@ public class FindInscripcionByIdController {
     }
 
     @GetMapping("/findInscripcionById")
-    public ModelAndView showForm() {
+    public ModelAndView mostrarFormularioBusqueda() {
         return new ModelAndView("socioinscripcion/findInscripcionByIdView");
     }
 
     @PostMapping("/findInscripcionById")
-    public ModelAndView findInscripcionById(@RequestParam("id") int id) {
-        Inscripcion i = inscripcionRepository.findById(id);
-        ModelAndView mav;
+    public ModelAndView procesarBusquedaPorId(@RequestParam("id") int idBuscado) {
+        Inscripcion inscripcionEncontrada = inscripcionRepository.findById(idBuscado);
+        ModelAndView vistaResultados;
 
-        if (i != null) {
-            mav = new ModelAndView("socioinscripcion/findInscripcionByIdSuccessView");
-            mav.addObject("inscripcion", i);
+        if (inscripcionEncontrada != null) {
+            vistaResultados = new ModelAndView("socioinscripcion/findInscripcionByIdSuccessView");
+            vistaResultados.addObject("inscripcion", inscripcionEncontrada);
         } else {
-            mav = new ModelAndView("socioinscripcion/findInscripcionByIdFailView");
+            vistaResultados = new ModelAndView("socioinscripcion/findInscripcionByIdFailView");
         }
 
-        return mav;
+        return vistaResultados;
     }
 }

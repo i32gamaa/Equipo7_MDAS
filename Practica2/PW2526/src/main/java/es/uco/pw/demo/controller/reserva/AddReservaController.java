@@ -23,59 +23,57 @@ public class AddReservaController {
     }
 
     @GetMapping("/addReserva")
-    public ModelAndView getAddReservaForm() {
+    public ModelAndView mostrarFormularioRegistro() {
         this.modelAndView.setViewName("reserva/addReservaView");
         this.modelAndView.addObject("newReserva", new Reserva());
         return modelAndView;
     }
 
     @PostMapping("/addReserva")
-    public String addReserva(@ModelAttribute Reserva newReserva, SessionStatus sessionStatus) {
-        System.out.println("[AddReservaController] Received info: userId=" + newReserva.getUserId() +
-                " registrationNumber=" + newReserva.getRegistrationNumber() +
-                " date=" + newReserva.getDate() +
-                " numSeats=" + newReserva.getNumSeats() +
-                " purpose=" + newReserva.getPurpose() +
-                "totalAmount= " + newReserva.getTotalAmount());
+    public String procesarNuevaReserva(@ModelAttribute("newReserva") Reserva reservaSolicitada, SessionStatus estadoSesion) {
+        System.out.println("[AddReservaController] Info recibida: userId=" + reservaSolicitada.getUserId() +
+                " matricula=" + reservaSolicitada.getRegistrationNumber() +
+                " fecha=" + reservaSolicitada.getDate() +
+                " plazas=" + reservaSolicitada.getNumSeats() +
+                " proposito=" + reservaSolicitada.getPurpose() +
+                " importeTotal=" + reservaSolicitada.getTotalAmount());
 
-        // Comprueba que la embarcación tiene patrón asignado, capacidad suficiente,
-        // disponibilidad en la fecha y socio mayor de edad
-        boolean hasPatron = reservaRepository.patronAssigned(newReserva.getRegistrationNumber());
-        boolean hasCapacity = reservaRepository.hasCapacity(newReserva.getRegistrationNumber(),
-                newReserva.getNumSeats());
-        boolean isAvailable = reservaRepository.isAvailable(newReserva.getRegistrationNumber(), newReserva.getDate());
-        boolean isAvailableInAlquiler = reservaRepository.isAvailableInAlquiler(newReserva.getRegistrationNumber(),
-                newReserva.getDate());
-        boolean isAdult = reservaRepository.isAdult(newReserva.getUserId());
-        if (!hasPatron) {
+        boolean tienePatronAsignado = reservaRepository.patronAssigned(reservaSolicitada.getRegistrationNumber());
+        boolean tieneCapacidadSuficiente = reservaRepository.hasCapacity(reservaSolicitada.getRegistrationNumber(),
+                reservaSolicitada.getNumSeats());
+        boolean estaDisponibleReserva = reservaRepository.isAvailable(reservaSolicitada.getRegistrationNumber(), reservaSolicitada.getDate());
+        boolean estaDisponibleAlquiler = reservaRepository.isAvailableInAlquiler(reservaSolicitada.getRegistrationNumber(),
+                reservaSolicitada.getDate());
+        boolean esSocioMayorDeEdad = reservaRepository.isAdult(reservaSolicitada.getUserId());
+        
+        if (!tienePatronAsignado) {
             System.out.println("[AddReservaController] Error: no tiene patrón asignado la embarcación con matrícula "
-                    + newReserva.getRegistrationNumber());
+                    + reservaSolicitada.getRegistrationNumber());
             return "reserva/addReservaFailNOPATRONView";
-        } else if (!hasCapacity) {
+        } else if (!tieneCapacidadSuficiente) {
             System.out.println("[AddReservaController] Error: La embarcación no tiene suficiente capacidad para "
-                    + newReserva.getNumSeats() + " plazas.");
+                    + reservaSolicitada.getNumSeats() + " plazas.");
             return "reserva/addReservaFailNOCAPACITYView";
-        } else if (!isAvailable || !isAvailableInAlquiler) {
+        } else if (!estaDisponibleReserva || !estaDisponibleAlquiler) {
             System.out.println("[AddReservaController] Error: La embarcación no está disponible en la fecha: "
-                    + newReserva.getDate());
+                    + reservaSolicitada.getDate());
             return "reserva/addReservaFailNOAVAILABLEView";
-        } else if (!isAdult) {
-            System.out.println("[AddReservaController] Error:El socio con id: " + newReserva.getUserId()
+        } else if (!esSocioMayorDeEdad) {
+            System.out.println("[AddReservaController] Error: El socio con id: " + reservaSolicitada.getUserId()
                     + " no es mayor de edad.");
             return "reserva/addReservaFailNOADULTView";
         }
 
-        // Guardar socio
-        int success = reservaRepository.addReserva(newReserva);
-        String nextPage;
+        int filasAfectadas = reservaRepository.addReserva(reservaSolicitada);
+        String vistaDestino;
 
-        if (success != -1) {
-            nextPage = "reserva/addReservaSuccessView";
+        if (filasAfectadas != -1) {
+            vistaDestino = "reserva/addReservaSuccessView";
         } else {
-            nextPage = "reserva/addReservaFailView";
+            vistaDestino = "reserva/addReservaFailView";
         }
 
-        sessionStatus.setComplete();
-        return nextPage;
+        estadoSesion.setComplete();
+        return vistaDestino;
     }
 }

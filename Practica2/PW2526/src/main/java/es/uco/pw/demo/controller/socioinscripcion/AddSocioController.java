@@ -36,84 +36,80 @@ public class AddSocioController {
     }
 
     @GetMapping("/addSocio")
-    public ModelAndView getAddSocioForm() {
+    public ModelAndView mostrarFormularioRegistroSocio() {
         this.modelAndView.setViewName("socioinscripcion/addSocioView");
         this.modelAndView.addObject("newSocio", new Socio());
         return modelAndView;
     }
 
     @PostMapping("/addSocio")
-    public String addSocio(@ModelAttribute Socio newSocio, SessionStatus sessionStatus) {
+    public String procesarNuevoSocio(@ModelAttribute("newSocio") Socio socioSolicitado, SessionStatus estadoSesion) {
 
-        System.out.println("[AddSocioController] Recibido socio: dni=" + newSocio.getId() +
-                ", nombre=" + newSocio.getName() +
-                ", apellidos=" + newSocio.getSurname() +
-                " direccion=" + newSocio.getAddress() +
-                ", nacimiento=" + newSocio.getBirthdate() +
-                ", inscripción ID=" + newSocio.getInscriptionId());
+        System.out.println("[AddSocioController] Recibido socio: dni=" + socioSolicitado.getId() +
+                ", nombre=" + socioSolicitado.getName() +
+                ", apellidos=" + socioSolicitado.getSurname() +
+                " direccion=" + socioSolicitado.getAddress() +
+                ", nacimiento=" + socioSolicitado.getBirthdate() +
+                ", inscripción ID=" + socioSolicitado.getInscriptionId());
 
-       Socio existingSocio = socioRepository.findById(newSocio.getId());
-       if (existingSocio != null) {
-           System.out.println("[AddSocioController] Error: ya existe un socio con el ID " + newSocio.getId());
+       Socio socioExistente = socioRepository.findById(socioSolicitado.getId());
+       if (socioExistente != null) {
+           System.out.println("[AddSocioController] Error: ya existe un socio con el ID " + socioSolicitado.getId());
            return "socioinscripcion/addSocioDuplicateIdView"; 
        }
-       Patron existingPatron = patronRepository.findById(newSocio.getId());
-        if (existingPatron != null) {
-            System.out.println("[AddInscripcionController] Error: ya existe un patron con el ID " + newSocio.getId());
+       Patron patronExistente = patronRepository.findById(socioSolicitado.getId());
+        if (patronExistente != null) {
+            System.out.println("[AddSocioController] Error: ya existe un patron con el ID " + socioSolicitado.getId());
             return "socioinscripcion/addInscripcionDuplicateIdView"; 
         }
 
-        boolean esAdulto = Period.between(newSocio.getBirthdate(), LocalDate.now()).getYears() >= 18;
-        newSocio.setIsAdult(esAdulto);
-        newSocio.setInscriptionDate(LocalDate.now());
+        boolean esAdulto = Period.between(socioSolicitado.getBirthdate(), LocalDate.now()).getYears() >= 18;
+        socioSolicitado.setIsAdult(esAdulto);
+        socioSolicitado.setInscriptionDate(LocalDate.now());
 
         if (!esAdulto) {
-            newSocio.setIsBoatDriver(false);
+            socioSolicitado.setIsBoatDriver(false);
         }
 
         System.out.println("[AddSocioController] Es adulto: " + esAdulto);
 
-        Inscripcion inscripcion = inscripcionRepository.findById(newSocio.getInscriptionId());
+        Inscripcion inscripcionEncontrada = inscripcionRepository.findById(socioSolicitado.getInscriptionId());
 
-        if (inscripcion != null) {
+        if (inscripcionEncontrada != null) {
             int cuotaExtra = esAdulto ? 250 : 100;
-            inscripcion.setTotalAmount(inscripcion.getTotalAmount() + cuotaExtra);
+            inscripcionEncontrada.setTotalAmount(inscripcionEncontrada.getTotalAmount() + cuotaExtra);
             if(esAdulto){
-                inscripcion.setRegisteredAdults(inscripcion.getRegisteredAdults() + 1);
+                inscripcionEncontrada.setRegisteredAdults(inscripcionEncontrada.getRegisteredAdults() + 1);
             }else{
-                inscripcion.setRegisteredKids(inscripcion.getRegisteredKids() + 1);
+                inscripcionEncontrada.setRegisteredKids(inscripcionEncontrada.getRegisteredKids() + 1);
             }
 
-            if (inscripcion.getRegisteredAdults() > 2) {
+            if (inscripcionEncontrada.getRegisteredAdults() > 2) {
                 System.out.println("[AddSocioController] Error: ya existen dos adultos asociados a la inscripcion familiar");
                 return "socioinscripcion/addSocioFailView"; 
             }
 
-            inscripcionRepository.update(inscripcion);
+            inscripcionRepository.update(inscripcionEncontrada);
 
-            System.out.println("[AddSocioController] Actualizada inscripción " + inscripcion.getId() + " con cuota +" + cuotaExtra + "€. Total: " + inscripcion.getTotalAmount() + "adultos: " + inscripcion.getRegisteredAdults() + "niños: " + inscripcion.getRegisteredKids());
+            System.out.println("[AddSocioController] Actualizada inscripción " + inscripcionEncontrada.getId() + " con cuota +" + cuotaExtra + " Euros. Total: " + inscripcionEncontrada.getTotalAmount() + "adultos: " + inscripcionEncontrada.getRegisteredAdults() + "niños: " + inscripcionEncontrada.getRegisteredKids());
 
-            // Actualizar el inscriptionId del socio con el id de la inscripción actualizada
-            newSocio.setInscriptionId(inscripcion.getId());
-            System.out.println("[AddSocioController] InscriptionId del socio actualizado a: " + newSocio.getInscriptionId());
+            socioSolicitado.setInscriptionId(inscripcionEncontrada.getId());
+            System.out.println("[AddSocioController] InscriptionId del socio actualizado a: " + socioSolicitado.getInscriptionId());
 
         } else {
-            System.out.println("[AddSocioController] No se encontró inscripción con ID: " + newSocio.getInscriptionId());
+            System.out.println("[AddSocioController] No se encontró inscripción con ID: " + socioSolicitado.getInscriptionId());
         }
 
-        // Guardar socio
-        boolean success = socioRepository.addSocio(newSocio);
-        String nextPage;
+        boolean registroCompletado = socioRepository.addSocio(socioSolicitado);
+        String vistaDestino;
 
-        if (success) {
-            nextPage = "socioinscripcion/addSocioSuccessView";
+        if (registroCompletado) {
+            vistaDestino = "socioinscripcion/addSocioSuccessView";
         } else {
-            nextPage = "socioinscripcion/addSocioFailView";
+            vistaDestino = "socioinscripcion/addSocioFailView";
         }
 
-        sessionStatus.setComplete();
-        return nextPage;
+        estadoSesion.setComplete();
+        return vistaDestino;
     }
 }
-
-

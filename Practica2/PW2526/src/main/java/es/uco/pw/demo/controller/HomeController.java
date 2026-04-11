@@ -7,38 +7,38 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
     
     @GetMapping("/")
-    public String home() {
+    public String mostrarPaginaInicio() {
         return "home";
     }
 
     @GetMapping("/homeAlquiler")
-    public String homeAlquiler() {
-        return "alquiler/homeAlquiler"; // -> templates/alquiler/homeAlquiler.html
+    public String mostrarMenuAlquiler() {
+        return "alquiler/homeAlquiler"; 
     }
 
     @GetMapping("/homeEmbarcacion")
-    public String homeEmbarcacion() {
-        return "embarcacion/homeEmbarcacion"; // -> templates/embarcacion/homeEmbarcacion.html
+    public String mostrarMenuEmbarcacion() {
+        return "embarcacion/homeEmbarcacion"; 
     }
 
     @GetMapping("/findEmbarcacionMenu")
-    public String homeFindEmbarcacion() {
-        return "embarcacion/findEmbarcacionMenuView"; // -> templates/embarcacion/findEmbarcacionMenuView.html
+    public String mostrarMenuBusquedaEmbarcacion() {
+        return "embarcacion/findEmbarcacionMenuView"; 
     }
 
     @GetMapping("/homePatron")
-    public String homePatron() {
-        return "patron/homePatron"; // -> templates/patron/homePatron.html
+    public String mostrarMenuPatron() {
+        return "patron/homePatron"; 
     }
 
     @GetMapping("/homeReserva")
-    public String homeReserva() {
-        return "reserva/homeReserva"; // -> templates/reserva/homeReserva.html
+    public String mostrarMenuReserva() {
+        return "reserva/homeReserva"; 
     }
 
     @GetMapping("/homeSocioInscripcion")
-    public String homeSocioInscripcion() {
-        return "socioinscripcion/homeSocioInscripcion"; // -> templates/socioinscripcion/homeSocioInscripcion.html
+    public String mostrarMenuSocio() {
+        return "socioinscripcion/homeSocioInscripcion"; 
     }
 }
 

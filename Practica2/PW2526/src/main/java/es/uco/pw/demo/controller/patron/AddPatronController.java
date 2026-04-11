@@ -30,61 +30,57 @@ public class AddPatronController {
     }
 
     @GetMapping("/addPatron")
-    public ModelAndView getAddPatronView() {
+    public ModelAndView mostrarFormularioRegistro() {
         this.modelAndView.setViewName("patron/addPatronView");
         this.modelAndView.addObject("newPatron", new Patron());
         return modelAndView;
     }
 
     @PostMapping("/addPatron")
-    public String addPatron(@ModelAttribute Patron newPatron, SessionStatus sessionStatus) {
+    public String procesarNuevoPatron(@ModelAttribute("newPatron") Patron patronSolicitado, SessionStatus estadoSesion) {
 
-        System.out.println("[AddPatronController] Received info: id=" + newPatron.getId() +
-                " name=" + newPatron.getName() +
-                " surname=" + newPatron.getSurname() +
-                " birth=" + newPatron.getBirthDate() +
-                " titleIssueDate=" + newPatron.getTitleIssueDate());
+        System.out.println("[AddPatronController] Received info: id=" + patronSolicitado.getId() +
+                " name=" + patronSolicitado.getName() +
+                " surname=" + patronSolicitado.getSurname() +
+                " birth=" + patronSolicitado.getBirthDate() +
+                " titleIssueDate=" + patronSolicitado.getTitleIssueDate());
 
-        // Validar que el patrón es mayor de edad (18 años o más)
-        if (!isAdult(newPatron.getBirthDate())) {
+        if (!esMayorDeEdad(patronSolicitado.getBirthDate())) {
             System.out.println("[AddPatronController] Error: el patrón es menor de edad");
             return "patron/addPatronFailNOADULTView";
         }
 
-        Patron existingPatron = patronRepository.findById(newPatron.getId());
-        if (existingPatron != null) {
-            System.out.println("[AddPatronController] Error: ya existe un patron con el ID " + newPatron.getId());
+        Patron patronExistente = patronRepository.findById(patronSolicitado.getId());
+        if (patronExistente != null) {
+            System.out.println("[AddPatronController] Error: ya existe un patron con el ID " + patronSolicitado.getId());
             return "patron/addPatronDuplicateIdView"; 
         }
-        Socio existingSocio = socioRepository.findById(newPatron.getId());
-        if (existingSocio != null) {
-            System.out.println("[AddPatronController] Error: ya existe un socio con el ID " + newPatron.getId());
+        
+        Socio socioExistente = socioRepository.findById(patronSolicitado.getId());
+        if (socioExistente != null) {
+            System.out.println("[AddPatronController] Error: ya existe un socio con el ID " + patronSolicitado.getId());
             return "patron/addPatronDuplicateIdView";
         }
 
-        boolean success = patronRepository.addPatron(newPatron);
-        String nextPage;
+        boolean registroCompletado = patronRepository.addPatron(patronSolicitado);
+        String vistaDestino;
 
-        if (success) {
-            nextPage = "patron/addPatronSuccessView";
-        } else
-            nextPage = "patron/addPatronFailView";
+        if (registroCompletado) {
+            vistaDestino = "patron/addPatronSuccessView";
+        } else {
+            vistaDestino = "patron/addPatronFailView";
+        }
 
-        sessionStatus.setComplete();
-        return nextPage;
+        estadoSesion.setComplete();
+        return vistaDestino;
     }
 
-    /**
-     * Verifica si una persona es mayor de edad (18 años o más)
-     * @param birthDate la fecha de nacimiento
-     * @return true si es mayor de edad, false en caso contrario
-     */
-    private boolean isAdult(LocalDate birthDate) {
-        if (birthDate == null) {
+    private boolean esMayorDeEdad(LocalDate fechaNacimiento) {
+        if (fechaNacimiento == null) {
             return false;
         }
-        LocalDate today = LocalDate.now();
-        Period age = Period.between(birthDate, today);
-        return age.getYears() >= 18;
+        LocalDate fechaActual = LocalDate.now();
+        Period edad = Period.between(fechaNacimiento, fechaActual);
+        return edad.getYears() >= 18;
     }
 }

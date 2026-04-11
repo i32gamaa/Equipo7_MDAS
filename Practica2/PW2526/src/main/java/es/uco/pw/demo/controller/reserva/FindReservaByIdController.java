@@ -12,7 +12,7 @@ import es.uco.pw.demo.model.repository.ReservaRepository;
 @Controller
 public class FindReservaByIdController {
 
-    ReservaRepository reservaRepository;
+    private ReservaRepository reservaRepository;
 
     public FindReservaByIdController(ReservaRepository reservaRepository) {
         this.reservaRepository = reservaRepository;
@@ -21,23 +21,22 @@ public class FindReservaByIdController {
     }
 
     @GetMapping("/findReservaById")
-    public ModelAndView showForm() {
+    public ModelAndView mostrarFormularioBusqueda() {
         return new ModelAndView("reserva/findReservaByIdView");
     }
 
     @PostMapping("/findReservaById")
-    public ModelAndView findReserva(@RequestParam("id") int id) {
-        Reserva r = reservaRepository.findById(id);
-        ModelAndView mav;
+    public ModelAndView procesarBusquedaPorId(@RequestParam("id") int idBuscado) {
+        Reserva reservaEncontrada = reservaRepository.findById(idBuscado);
+        ModelAndView vistaResultados;
 
-        if (r != null) {
-            mav = new ModelAndView("reserva/findReservaByIdSuccessView");
-            mav.addObject("reserva", r);
+        if (reservaEncontrada != null) {
+            vistaResultados = new ModelAndView("reserva/findReservaByIdSuccessView");
+            vistaResultados.addObject("reserva", reservaEncontrada);
         } else {
-            mav = new ModelAndView("reserva/findReservaByIdFailView");
+            vistaResultados = new ModelAndView("reserva/findReservaByIdFailView");
         }
 
-        return mav;
+        return vistaResultados;
     }
-
 }

@@ -36,134 +36,95 @@ public class AddAlquilerController {
     }
 
     @GetMapping("/addAlquiler")
-    public ModelAndView getAddAlquilerView(@RequestParam(value = "registrationNumber", required = false) String registrationNumber,
-                                         @RequestParam(value = "startDate", required = false) String startDateStr,
-                                         @RequestParam(value = "endDate", required = false) String endDateStr) {
-        System.out.println("=== AddAlquilerController.getAddAlquilerView() LLAMADO ===");
+    public ModelAndView mostrarFormularioAlquiler(@RequestParam(value = "registrationNumber", required = false) String matricula,
+                                         @RequestParam(value = "startDate", required = false) String fechaInicioTexto,
+                                         @RequestParam(value = "endDate", required = false) String fechaFinTexto) {
         
         this.modelAndView = new ModelAndView();
         this.modelAndView.setViewName("alquiler/addAlquilerView");
         
-        // Crear nuevo alquiler
-        Alquiler newAlquiler = new Alquiler();
+        Alquiler alquilerSolicitado = new Alquiler();
         
-        // Si vienen parámetros, pre-llenar los datos desde la búsqueda
-        if (registrationNumber != null && !registrationNumber.isEmpty()) {
-            newAlquiler.setRegistrationNumber(registrationNumber);
-            System.out.println("[AddAlquilerController] Pre-llenando matrícula: " + registrationNumber);
+        if (matricula != null && !matricula.isEmpty()) {
+            alquilerSolicitado.setRegistrationNumber(matricula);
             
-            // Obtener información de la embarcación para mostrar
-            Embarcacion embarcacion = embarcacionRepository.findByRegistration(registrationNumber);
-            if (embarcacion != null) {
-                this.modelAndView.addObject("embarcacion", embarcacion);
-                System.out.println("[AddAlquilerController] Embarcación encontrada: " + embarcacion.getName());
+            Embarcacion embarcacionEncontrada = embarcacionRepository.findByRegistration(matricula);
+            if (embarcacionEncontrada != null) {
+                this.modelAndView.addObject("embarcacion", embarcacionEncontrada);
             }
         }
         
-        if (startDateStr != null && !startDateStr.isEmpty()) {
+        if (fechaInicioTexto != null && !fechaInicioTexto.isEmpty()) {
             try {
-                LocalDate startDate = LocalDate.parse(startDateStr);
-                newAlquiler.setStartDate(startDate);
-                System.out.println("[AddAlquilerController] Pre-llenando fecha inicio: " + startDate);
+                LocalDate fechaInicio = LocalDate.parse(fechaInicioTexto);
+                alquilerSolicitado.setStartDate(fechaInicio);
             } catch (Exception e) {
-                System.err.println("Error parsing startDate: " + e.getMessage());
+                System.err.println("Error parsing startDate");
             }
         }
         
-        if (endDateStr != null && !endDateStr.isEmpty()) {
+        if (fechaFinTexto != null && !fechaFinTexto.isEmpty()) {
             try {
-                LocalDate endDate = LocalDate.parse(endDateStr);
-                newAlquiler.setEndDate(endDate);
-                System.out.println("[AddAlquilerController] Pre-llenando fecha fin: " + endDate);
+                LocalDate fechaFin = LocalDate.parse(fechaFinTexto);
+                alquilerSolicitado.setEndDate(fechaFin);
             } catch (Exception e) {
-                System.err.println("Error parsing endDate: " + e.getMessage());
+                System.err.println("Error parsing endDate");
             }
         }
         
-        this.modelAndView.addObject("newAlquiler", newAlquiler);
+        this.modelAndView.addObject("newAlquiler", alquilerSolicitado); 
         
-        // Añadir mensaje informativo sobre restricciones temporales
-        String infoMessage = getRentalPeriodInfo();
-        this.modelAndView.addObject("infoMessage", infoMessage);
+        String mensajeInformativoRestricciones = obtenerRestriccionesTemporales();
+        this.modelAndView.addObject("infoMessage", mensajeInformativoRestricciones);
         
-        System.out.println("=== FIN AddAlquilerController.getAddAlquilerView() ===");
         return modelAndView;
     }
 
     @PostMapping("/addAlquiler")
-    public ModelAndView addAlquiler(@ModelAttribute("newAlquiler") Alquiler newAlquiler, SessionStatus sessionStatus) {
-        System.out.println("=== AddAlquilerController.addAlquiler() LLAMADO ===");
+    public ModelAndView procesarNuevoAlquiler(@ModelAttribute("newAlquiler") Alquiler alquilerSolicitado, SessionStatus estadoSesion) {
         
         this.modelAndView = new ModelAndView();
-        
-        System.out.println("[AddAlquilerController] Received info: " +
-                " startDate=" + newAlquiler.getStartDate() +
-                " endDate=" + newAlquiler.getEndDate() +
-                " numSeats=" + newAlquiler.getNumSeats() +
-                " registrationNumber=" + newAlquiler.getRegistrationNumber() +
-                " userId=" + newAlquiler.getUserId() +
-                " amount=" + newAlquiler.getAmount());
 
-        // Validaciones completas
-        String validationError = isValidAlquiler(newAlquiler);
-        if (validationError != null) {
-            System.out.println("[AddAlquilerController] Validación fallida: " + validationError);
+        String mensajeErrorValidacion = validarReglasAlquiler(alquilerSolicitado);
+        if (mensajeErrorValidacion != null) {
             this.modelAndView.setViewName("alquiler/addAlquilerFailView");
-            this.modelAndView.addObject("error", validationError);
-            this.modelAndView.addObject("newAlquiler", newAlquiler);
+            this.modelAndView.addObject("error", mensajeErrorValidacion);
+            this.modelAndView.addObject("newAlquiler", alquilerSolicitado);
             
-            // Añadir información de la embarcación para mostrar en el error
-            if (newAlquiler.getRegistrationNumber() != null) {
-                Embarcacion embarcacion = embarcacionRepository.findByRegistration(newAlquiler.getRegistrationNumber());
-                if (embarcacion != null) {
-                    this.modelAndView.addObject("embarcacion", embarcacion);
+            if (alquilerSolicitado.getRegistrationNumber() != null) {
+                Embarcacion embarcacionEncontrada = embarcacionRepository.findByRegistration(alquilerSolicitado.getRegistrationNumber());
+                if (embarcacionEncontrada != null) {
+                    this.modelAndView.addObject("embarcacion", embarcacionEncontrada);
                 }
             }
             
-            sessionStatus.setComplete();
-            
-            System.out.println("=== FIN AddAlquilerController.addAlquiler() - VALIDACIÓN FALLIDA ===");
+            estadoSesion.setComplete();
             return modelAndView;
         }
 
-        // Calcular el importe automáticamente (20€ x plazas x días)
-        double calculatedAmount = calculateAmount(newAlquiler.getStartDate(), newAlquiler.getEndDate(), newAlquiler.getNumSeats());
-        newAlquiler.setAmount(calculatedAmount);
-        System.out.println("[AddAlquilerController] Importe calculado: " + calculatedAmount);
+        double importeTotalCalculado = calcularImporteTotal(alquilerSolicitado.getStartDate(), alquilerSolicitado.getEndDate(), alquilerSolicitado.getNumSeats());
+        alquilerSolicitado.setAmount(importeTotalCalculado);
 
-        int success = alquilerRepository.addAlquiler(newAlquiler);
+        int filasInsertadasDb = alquilerRepository.addAlquiler(alquilerSolicitado);
 
-        if (success!=-1) {
-            System.out.println("[AddAlquilerController] Alquiler guardado exitosamente");
+        if (filasInsertadasDb != -1) {
             this.modelAndView.setViewName("alquiler/addAlquilerSuccessView");
-            this.modelAndView.addObject("alquiler", newAlquiler);
+            this.modelAndView.addObject("alquiler", alquilerSolicitado);
             
-            // Añadir información adicional para la vista de éxito
-            Socio socio = socioRepository.findById(newAlquiler.getUserId());
-            Embarcacion embarcacion = embarcacionRepository.findByRegistration(newAlquiler.getRegistrationNumber());
-            long days = ChronoUnit.DAYS.between(newAlquiler.getStartDate(), newAlquiler.getEndDate()) + 1;
+            Socio socio = socioRepository.findById(alquilerSolicitado.getUserId());
+            Embarcacion embarcacionEncontrada = embarcacionRepository.findByRegistration(alquilerSolicitado.getRegistrationNumber());
+            long diasAlquiler = ChronoUnit.DAYS.between(alquilerSolicitado.getStartDate(), alquilerSolicitado.getEndDate()) + 1;
             
             this.modelAndView.addObject("socio", socio);
-            this.modelAndView.addObject("embarcacion", embarcacion);
-            this.modelAndView.addObject("days", days);
-            
+            this.modelAndView.addObject("embarcacion", embarcacionEncontrada);
+            this.modelAndView.addObject("days", diasAlquiler);
         } else {
-            System.out.println("[AddAlquilerController] Error al guardar alquiler");
             this.modelAndView.setViewName("alquiler/addAlquilerFailView");
-            this.modelAndView.addObject("error", 
-                "Error al guardar en la base de datos. " +
-                "Posibles causas:\n" +
-                "- El ID de socio no existe\n" +
-                "- La matrícula no existe\n" +
-                "- Error de conexión con la base de datos\n\n" +
-                "IDs de socio válidos: 11111111C, 22222222D\n" +
-                "Matrículas válidas: REG001, REG002");
-            this.modelAndView.addObject("newAlquiler", newAlquiler);
+            this.modelAndView.addObject("error", "Error al guardar en la base de datos.");
+            this.modelAndView.addObject("newAlquiler", alquilerSolicitado);
         }
 
-        sessionStatus.setComplete();
-        
-        System.out.println("=== FIN AddAlquilerController.addAlquiler() ===");
+        estadoSesion.setComplete();
         return modelAndView;
     }
 

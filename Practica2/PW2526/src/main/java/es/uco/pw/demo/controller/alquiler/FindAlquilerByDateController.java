@@ -20,49 +20,46 @@ public class FindAlquilerByDateController {
     }
 
     @GetMapping("/findAlquilerByDate")
-    public ModelAndView getFindAlquilerForm() {
+    public ModelAndView mostrarFormularioBusqueda() {
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("alquiler/findAlquilerByDateView");
         return modelAndView;
     }
 
     @PostMapping("/findAlquilerByDate")
-    public ModelAndView findAlquilerByDate(
-            @RequestParam("startDate") String startDateStr,
-            @RequestParam("endDate") String endDateStr) {
+    public ModelAndView procesarBusquedaEmbarcaciones(
+            @RequestParam("startDate") String fechaInicioTexto,
+            @RequestParam("endDate") String fechaFinTexto) {
         
         ModelAndView modelAndView = new ModelAndView();
         
-        System.out.println("[FindAlquilerByDateController] Received dates - Start: " + startDateStr + ", End: " + endDateStr);
+        System.out.println("[FindAlquilerByDateController] Fechas recibidas - Inicio: " + fechaInicioTexto + ", Fin: " + fechaFinTexto);
 
         try {
-            LocalDate startDate = LocalDate.parse(startDateStr);
-            LocalDate endDate = LocalDate.parse(endDateStr);
+            LocalDate fechaInicioParsed = LocalDate.parse(fechaInicioTexto);
+            LocalDate fechaFinParsed = LocalDate.parse(fechaFinTexto);
             
-            // Validar que las fechas sean válidas
-            if (startDate.isAfter(endDate)) {
+            if (fechaInicioParsed.isAfter(fechaFinParsed)) {
                 modelAndView.setViewName("alquiler/findAlquilerByDateFailView");
                 modelAndView.addObject("error", "La fecha de inicio no puede ser posterior a la fecha de fin");
                 return modelAndView;
             }
             
-            if (startDate.isBefore(LocalDate.now())) {
+            if (fechaInicioParsed.isBefore(LocalDate.now())) {
                 modelAndView.setViewName("alquiler/findAlquilerByDateFailView");
                 modelAndView.addObject("error", "La fecha de inicio no puede ser anterior a la fecha actual");
                 return modelAndView;
             }
 
-            // Buscar embarcaciones disponibles en el rango de fechas
-            List<Embarcacion> embarcacionesDisponibles = embarcacionRepository.findAvailableByDateRange(startDate, endDate);
+            List<Embarcacion> embarcacionesDisponibles = embarcacionRepository.findAvailableByDateRange(fechaInicioParsed, fechaFinParsed);
 
             if (embarcacionesDisponibles != null && !embarcacionesDisponibles.isEmpty()) {
-                System.out.println("[FindAlquilerByDateController] Found " + embarcacionesDisponibles.size() + " embarcaciones disponibles");
+                System.out.println("[FindAlquilerByDateController] Encontradas " + embarcacionesDisponibles.size() + " embarcaciones");
                 modelAndView.setViewName("alquiler/findAlquilerByDateSuccessView");
                 modelAndView.addObject("embarcaciones", embarcacionesDisponibles);
-                modelAndView.addObject("startDate", startDate);
-                modelAndView.addObject("endDate", endDate);
+                modelAndView.addObject("startDate", fechaInicioParsed);
+                modelAndView.addObject("endDate", fechaFinParsed);
             } else {
-                System.out.println("[FindAlquilerByDateController] No embarcaciones found for the date range");
                 modelAndView.setViewName("alquiler/findAlquilerByDateFailView");
                 modelAndView.addObject("error", "No se encontraron embarcaciones disponibles para el rango de fechas seleccionado");
             }

@@ -21,10 +21,12 @@ public class ListReservasController {
     }
 
     @GetMapping("/listReservas")
-    public ModelAndView listReservas() {
+    public ModelAndView mostrarTodasLasReservas() {
         this.modelAndView.setViewName("reserva/listReservasView");
-        List<Reserva> listOfReservas = reservaRepository.findAllReservas();
-        this.modelAndView.addObject("reservas", listOfReservas);
+        
+        List<Reserva> reservasRegistradas = reservaRepository.findAllReservas();
+        
+        this.modelAndView.addObject("reservas", reservasRegistradas);
         return modelAndView;
     }
 }

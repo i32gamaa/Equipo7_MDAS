@@ -1,5 +1,3 @@
-// LISTA TODOS LOS EMBARCACIONES
-
 package es.uco.pw.demo.controller.embarcacion;
 
 import org.springframework.stereotype.Controller;
@@ -14,7 +12,7 @@ import es.uco.pw.demo.model.domain.Embarcacion;
 public class ListEmbarcacionesController {
 
     private final EmbarcacionRepository embarcacionRepository;
-    private ModelAndView model = new ModelAndView();
+    private ModelAndView modelAndView = new ModelAndView();
 
     public ListEmbarcacionesController(EmbarcacionRepository embarcacionRepository) {
         this.embarcacionRepository = embarcacionRepository;
@@ -23,10 +21,13 @@ public class ListEmbarcacionesController {
     }
 
     @GetMapping("/listEmbarcacion")
-    public ModelAndView listAllEmbarcaciones() {
-        this.model.setViewName("embarcacion/listEmbarcacionesView");
-        List<Embarcacion> listOfEmbarcaciones = embarcacionRepository.findAllEmbarcaciones();
-        this.model.addObject("listOfEmbarcaciones", listOfEmbarcaciones);
-        return model;
+    public ModelAndView mostrarTodasLasEmbarcaciones() {
+        this.modelAndView.setViewName("embarcacion/listEmbarcacionesView");
+        
+        List<Embarcacion> catalogoEmbarcaciones = embarcacionRepository.findAllEmbarcaciones();
+        
+        this.modelAndView.addObject("listOfEmbarcaciones", catalogoEmbarcaciones);
+        
+        return modelAndView;
     }
 }

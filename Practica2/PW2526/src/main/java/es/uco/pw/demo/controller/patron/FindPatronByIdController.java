@@ -14,38 +14,35 @@ public class FindPatronByIdController {
 
     public FindPatronByIdController(PatronRepository patronRepository) {
         this.patronRepository = patronRepository;
-        // El repositorio ya carga las queries en su constructor
     }
 
     @GetMapping("/findPatronById")
-    public ModelAndView getFindPatronForm() {
+    public ModelAndView mostrarFormularioBusqueda() {
         modelAndView.setViewName("patron/findPatronByIdView");
         return modelAndView;
     }
 
     @PostMapping("/findPatronById")
-    public ModelAndView findPatronById(@RequestParam("idNumber") String patronId) {
+    public ModelAndView procesarBusquedaPorId(@RequestParam("idNumber") String dniBuscado) {
         
-        System.out.println("[FindPatronByIdController] Searching for patron with ID: " + patronId);
+        System.out.println("[FindPatronByIdController] Searching for patron with ID: " + dniBuscado);
 
-        // Validar entrada
-        if (patronId == null || patronId.trim().isEmpty()) {
+        if (dniBuscado == null || dniBuscado.trim().isEmpty()) {
             modelAndView.setViewName("patron/findPatronByIdFailView");
             modelAndView.addObject("errorMessage", "El DNI no puede estar vacío");
             return modelAndView;
         }
 
-        // Buscar el patrón
-        Patron patron = patronRepository.findById(patronId);
+        Patron patronEncontrado = patronRepository.findById(dniBuscado);
 
-        if (patron != null) {
-            System.out.println("[FindPatronByIdController] Found patron: " + patron);
+        if (patronEncontrado != null) {
+            System.out.println("[FindPatronByIdController] Found patron: " + patronEncontrado);
             modelAndView.setViewName("patron/findPatronByIdSuccessView");
-            modelAndView.addObject("patron", patron);
+            modelAndView.addObject("patron", patronEncontrado);
         } else {
-            System.out.println("[FindPatronByIdController] Patron not found with ID: " + patronId);
+            System.out.println("[FindPatronByIdController] Patron not found with ID: " + dniBuscado);
             modelAndView.setViewName("patron/findPatronByIdFailView");
-            modelAndView.addObject("errorMessage", "No se encontró ningún patrón con DNI: " + patronId);
+            modelAndView.addObject("errorMessage", "No se encontró ningún patrón con DNI: " + dniBuscado);
         }
 
         return modelAndView;

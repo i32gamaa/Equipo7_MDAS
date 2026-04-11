@@ -10,6 +10,7 @@ import es.uco.pw.demo.model.domain.EmbarcacionType;
 import es.uco.pw.demo.model.repository.EmbarcacionRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import java.util.List;
 
 @Controller
 public class AddEmbarcacionController {
@@ -24,7 +25,7 @@ public class AddEmbarcacionController {
     }
 
     @GetMapping("/addEmbarcacion")
-    public ModelAndView getAddEmbarcacionView() {
+    public ModelAndView mostrarFormularioRegistro() {
         this.modelAndView.setViewName("embarcacion/addEmbarcacionView");
         this.modelAndView.addObject("embarcacion", new Embarcacion());
         this.modelAndView.addObject("types", EmbarcacionType.values());
@@ -32,63 +33,53 @@ public class AddEmbarcacionController {
     }
 
     @PostMapping("/addEmbarcacion")
-    public String addEmbarcacion(@ModelAttribute Embarcacion embarcacion, SessionStatus sessionStatus) {
+    public String procesarNuevaEmbarcacion(@ModelAttribute Embarcacion nuevaEmbarcacion, SessionStatus estadoSesion) {
         
-        if (embarcacion.getPatronId() == null || embarcacion.getPatronId().isEmpty()) {
-            embarcacion.setPatronId(null);
+        if (nuevaEmbarcacion.getPatronId() == null || nuevaEmbarcacion.getPatronId().isEmpty()) {
+            nuevaEmbarcacion.setPatronId(null);
         }
         
-        System.out.println("[AddEmbarcacionController] Received info: registrationNumber=" + embarcacion.getRegistrationNumber() +
-                " type=" + embarcacion.getType().toString() +
-                " name=" + embarcacion.getName() +
-                " numSeats=" + embarcacion.getNumSeats() +
-                " patronId=" + embarcacion.getPatronId() +
-                " length=" + embarcacion.getLength() +
-                " width=" + embarcacion.getWidth() +
-                " height=" + embarcacion.getHeight());
+        System.out.println("[AddEmbarcacionController] Info recibida: matricula=" + nuevaEmbarcacion.getRegistrationNumber() +
+                " tipo=" + nuevaEmbarcacion.getType().toString() +
+                " nombre=" + nuevaEmbarcacion.getName() +
+                " plazas=" + nuevaEmbarcacion.getNumSeats() +
+                " patronId=" + nuevaEmbarcacion.getPatronId());
         
-        // Verificar si ya existe una embarcación con el mismo nombre
-        boolean nameExists = checkIfNameExists(embarcacion.getName());
-        if (nameExists) {
-            System.out.println("[AddEmbarcacionController] Error: Name '" + embarcacion.getName() + "' already exists");
+        boolean existeNombreDuplicado = comprobarNombreDuplicado(nuevaEmbarcacion.getName());
+        if (existeNombreDuplicado) {
+            System.out.println("[AddEmbarcacionController] Error: El nombre '" + nuevaEmbarcacion.getName() + "' ya existe");
             return "embarcacion/addEmbarcacionFailView";
         }
                 
-        boolean success = embarcacionRepository.addEmbarcacion(embarcacion);
-        String nextPage;
+        boolean registroCompletado = embarcacionRepository.addEmbarcacion(nuevaEmbarcacion);
+        String vistaDestino;
 
-        if (success) {
-            nextPage = "embarcacion/addEmbarcacionSuccessView";
+        if (registroCompletado) {
+            vistaDestino = "embarcacion/addEmbarcacionSuccessView";
         } else {
-            nextPage = "embarcacion/addEmbarcacionFailView";
+            vistaDestino = "embarcacion/addEmbarcacionFailView";
         }
 
-        sessionStatus.setComplete();
-        return nextPage;
+        estadoSesion.setComplete();
+        return vistaDestino;
     }
 
-    /**
-     * Verifica si ya existe una embarcación con el mismo nombre en la base de datos
-     * @param name El nombre a verificar
-     * @return true si el nombre ya existe, false en caso contrario
-     */
-    private boolean checkIfNameExists(String name) {
+    private boolean comprobarNombreDuplicado(String nombreAComprobar) {
         try {
-            // Obtener todas las embarcaciones
-            java.util.List<Embarcacion> allEmbarcaciones = embarcacionRepository.findAllEmbarcaciones();
+            List<Embarcacion> inventarioEmbarcaciones = embarcacionRepository.findAllEmbarcaciones();
             
-            if (allEmbarcaciones != null) {
-                for (Embarcacion embarcacion : allEmbarcaciones) {
-                    if (embarcacion.getName() != null && embarcacion.getName().equalsIgnoreCase(name)) {
-                        return true; // Nombre ya existe
+            if (inventarioEmbarcaciones != null) {
+                for (Embarcacion embarcacionRegistrada : inventarioEmbarcaciones) {
+                    if (embarcacionRegistrada.getName() != null && embarcacionRegistrada.getName().equalsIgnoreCase(nombreAComprobar)) {
+                        return true; 
                     }
                 }
             }
-            return false; // Nombre no existe
+            return false; 
         } catch (Exception e) {
-            System.err.println("Error checking if name exists: " + e.getMessage());
+            System.err.println("Error comprobando nombre duplicado: " + e.getMessage());
             e.printStackTrace();
-            return true; // En caso de error, asumimos que existe para prevenir duplicados
+            return true; 
         }
     }
 }

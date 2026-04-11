@@ -7,11 +7,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import ch.qos.logback.core.model.Model;
-
 @Controller
 public class FindEmbarcacionByRegistrartionController {
-    EmbarcacionRepository embarcacionRepository;
+    
+    private EmbarcacionRepository embarcacionRepository;
     private ModelAndView modelAndView = new ModelAndView();
 
     public FindEmbarcacionByRegistrartionController(EmbarcacionRepository embarcacionRepository) {
@@ -21,22 +20,22 @@ public class FindEmbarcacionByRegistrartionController {
     }
 
     @GetMapping("/findEmbarcacionByRegistration")
-    public ModelAndView getFindEmbarcacionForm() {
+    public ModelAndView mostrarFormularioBusquedaPorMatricula() {
         modelAndView.setViewName("embarcacion/findEmbarcacionByRegistrationView");
         modelAndView.addObject("embarcacionId", "12345678A");
         return modelAndView;
     }
 
     @PostMapping("/findEmbarcacionByRegistration")
-    public ModelAndView findEmbarcacionByRegistration(@RequestParam("registrationNumber") String registrationNumber) {
-        System.out.println("[FindEmbarcacionByRegistrationController] Received registrationNumber: " + registrationNumber);
+    public ModelAndView procesarBusquedaPorMatricula(@RequestParam("registrationNumber") String matriculaBuscada) {
+        System.out.println("[FindEmbarcacionByRegistrationController] Matricula recibida: " + matriculaBuscada);
 
-        Embarcacion embarcacion = embarcacionRepository.findByRegistration(registrationNumber);
+        Embarcacion embarcacionEncontrada = embarcacionRepository.findByRegistration(matriculaBuscada);
 
-        if (embarcacion != null) {
-            System.out.println("[FindEmbarcacionByRegistrationController] Found embarcacion: id=" + embarcacion.getRegistrationNumber());
+        if (embarcacionEncontrada != null) {
+            System.out.println("[FindEmbarcacionByRegistrationController] Embarcacion encontrada: matricula=" + embarcacionEncontrada.getRegistrationNumber());
             modelAndView.setViewName("embarcacion/findEmbarcacionByRegistrationSuccessView");
-            modelAndView.addObject("embarcacion", embarcacion);
+            modelAndView.addObject("embarcacion", embarcacionEncontrada);
         } else {
             modelAndView.setViewName("embarcacion/findEmbarcacionByRegistrationFailView");
         }

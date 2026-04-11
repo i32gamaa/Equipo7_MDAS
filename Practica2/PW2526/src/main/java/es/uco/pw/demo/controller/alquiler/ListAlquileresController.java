@@ -22,27 +22,26 @@ public class ListAlquileresController {
     }
 
     @GetMapping("/listAlquileres")
-    public ModelAndView listCurrentAndFutureAlquileres() {
-        System.out.println("=== ListAlquileresController.listCurrentAndFutureAlquileres() LLAMADO ===");
+    public ModelAndView mostrarAlquileresActivosYFuturos() {
+        System.out.println("=== ListAlquileresController LLAMADO ===");
         
         this.modelAndView.setViewName("alquiler/listAlquileresView");
         
-        // Obtener solo alquileres actuales y futuros
-        List<Alquiler> listOfAlquileres = alquilerRepository.findCurrentAndFutureAlquileres();
+        List<Alquiler> alquileresVigentes = alquilerRepository.findCurrentAndFutureAlquileres();
         
-        System.out.println("Resultado del repositorio: " + (listOfAlquileres != null ? listOfAlquileres.size() + " elementos" : "NULL"));
+        System.out.println("Resultado del repositorio: " + (alquileresVigentes != null ? alquileresVigentes.size() + " elementos" : "NULL"));
         
-        if (listOfAlquileres != null && !listOfAlquileres.isEmpty()) {
-            System.out.println("Detalle de alquileres actuales y futuros encontrados:");
-            for (int i = 0; i < listOfAlquileres.size(); i++) {
-                Alquiler a = listOfAlquileres.get(i);
-                System.out.println("  [" + i + "] " + a);
+        if (alquileresVigentes != null && !alquileresVigentes.isEmpty()) {
+            System.out.println("Detalle de alquileres encontrados:");
+            for (int i = 0; i < alquileresVigentes.size(); i++) {
+                Alquiler alquilerEncontrado = alquileresVigentes.get(i);
+                System.out.println("  [" + i + "] " + alquilerEncontrado);
             }
         } else {
-            System.out.println("No se encontraron alquileres actuales o futuros");
+            System.out.println("No se encontraron alquileres");
         }
         
-        this.modelAndView.addObject("alquileres", listOfAlquileres);
+        this.modelAndView.addObject("alquileres", alquileresVigentes);
         
         System.out.println("=== FIN ListAlquileresController ===");
         return modelAndView;

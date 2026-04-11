@@ -12,7 +12,7 @@ import es.uco.pw.demo.model.repository.SocioRepository;
 @Controller
 public class FindSocioByIdController {
 
-    SocioRepository socioRepository;
+    private SocioRepository socioRepository;
 
     public FindSocioByIdController(SocioRepository socioRepository) {
         this.socioRepository = socioRepository;
@@ -21,22 +21,22 @@ public class FindSocioByIdController {
     }
 
     @GetMapping("/findSocioById")
-    public ModelAndView showForm() {
+    public ModelAndView mostrarFormularioBusqueda() {
         return new ModelAndView("socioinscripcion/findSocioByIdView");
     }
 
     @PostMapping("/findSocioById")
-    public ModelAndView findSocioById(@RequestParam("id") String id) {
-        Socio s = socioRepository.findById(id);
-        ModelAndView mav;
+    public ModelAndView procesarBusquedaPorId(@RequestParam("id") String dniBuscado) {
+        Socio socioEncontrado = socioRepository.findById(dniBuscado);
+        ModelAndView vistaResultados;
 
-        if (s != null) {
-            mav = new ModelAndView("socioinscripcion/findSocioByIdSuccessView");
-            mav.addObject("socio", s);
+        if (socioEncontrado != null) {
+            vistaResultados = new ModelAndView("socioinscripcion/findSocioByIdSuccessView");
+            vistaResultados.addObject("socio", socioEncontrado);
         } else {
-            mav = new ModelAndView("socioinscripcion/findSocioByIdFailView");
+            vistaResultados = new ModelAndView("socioinscripcion/findSocioByIdFailView");
         }
 
-        return mav;
+        return vistaResultados;
     }
 }

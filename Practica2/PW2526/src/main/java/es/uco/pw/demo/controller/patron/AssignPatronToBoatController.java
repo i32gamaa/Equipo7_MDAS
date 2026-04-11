@@ -22,7 +22,7 @@ public class AssignPatronToBoatController {
     }
 
     @GetMapping("/assignPatronToBoat")
-    public ModelAndView showAssignForm() {
+    public ModelAndView mostrarFormularioAsignacion() {
         this.modelAndView.setViewName("patron/assignPatronToBoatView");
         this.modelAndView.addObject("embarcaciones", embarcacionRepository.findAllEmbarcaciones());
         this.modelAndView.addObject("patrones", patronRepository.findAllPatrones());
@@ -30,37 +30,36 @@ public class AssignPatronToBoatController {
     }
 
     @PostMapping("/assignPatronToBoat")
-    public String assignPatronToBoat(@RequestParam String registrationNumber, @RequestParam String patronId) {
+    public String procesarAsignacionPatron(@RequestParam String registrationNumber, @RequestParam String patronId) {
 
         System.out.println("[AssignPatronToBoatController] Asignando patrón " + patronId + " a embarcación " + registrationNumber);
 
-        boolean success = patronRepository.assignPatronToBoat(patronId, registrationNumber);
-        String nextPage;
+        boolean asignacionExitosa = patronRepository.assignPatronToBoat(patronId, registrationNumber);
+        String vistaDestino;
 
-        if (success) {
-            nextPage = "patron/assignPatronToBoatSuccessView";
+        if (asignacionExitosa) {
+            vistaDestino = "patron/assignPatronToBoatSuccessView";
         } else {
-            nextPage = "patron/assignPatronToBoatFailView";
+            vistaDestino = "patron/assignPatronToBoatFailView";
         }
 
-        return nextPage;
+        return vistaDestino;
     }
 
-    // Nuevo método para desasignar patrón
     @PostMapping("/unassignPatronFromBoat")
-    public String unassignPatronFromBoat(@RequestParam String registrationNumber) {
+    public String procesarDesasignacionPatron(@RequestParam String registrationNumber) {
 
         System.out.println("[AssignPatronToBoatController] Desasignando patrón de la embarcación " + registrationNumber);
 
-        boolean success = patronRepository.unassignPatronFromBoat(registrationNumber);
-        String nextPage;
+        boolean desasignacionExitosa = patronRepository.unassignPatronFromBoat(registrationNumber);
+        String vistaDestino;
 
-        if (success) {
-            nextPage = "patron/unassignPatronSuccessView";
+        if (desasignacionExitosa) {
+            vistaDestino = "patron/unassignPatronSuccessView";
         } else {
-            nextPage = "patron/unassignPatronFailView";
+            vistaDestino = "patron/unassignPatronFailView";
         }
 
-        return nextPage;
+        return vistaDestino;
     }
 }

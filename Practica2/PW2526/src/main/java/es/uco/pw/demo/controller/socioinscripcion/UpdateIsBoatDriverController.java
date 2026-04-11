@@ -12,7 +12,7 @@ import es.uco.pw.demo.model.repository.SocioRepository;
 @Controller
 public class UpdateIsBoatDriverController {
 
-    SocioRepository socioRepository;
+    private SocioRepository socioRepository;
 
     public UpdateIsBoatDriverController(SocioRepository socioRepository) {
         this.socioRepository = socioRepository;
@@ -21,36 +21,35 @@ public class UpdateIsBoatDriverController {
     }
 
     @GetMapping("/updateIsBoatDriver")
-    public ModelAndView showForm() {
+    public ModelAndView mostrarFormularioActualizacion() {
         return new ModelAndView("socioinscripcion/updateIsBoatDriverView");
     }
 
     @PostMapping("/updateIsBoatDriver")
-    public ModelAndView findSocioById(@RequestParam("id") String id) {
-        Socio s = socioRepository.findById(id);
-        ModelAndView mav;
+    public ModelAndView procesarActualizacionPatron(@RequestParam("id") String dniBuscado) {
+        Socio socioEncontrado = socioRepository.findById(dniBuscado);
+        ModelAndView vistaResultados;
 
-        if (s != null) {
-            if (!s.getIsBoatDriver()) {
-                s.setIsBoatDriver(true);
-                socioRepository.updateIsBoatDriver(s.getId(), s.getIsBoatDriver());
+        if (socioEncontrado != null) {
+            if (!socioEncontrado.getIsBoatDriver()) {
+                socioEncontrado.setIsBoatDriver(true);
+                socioRepository.updateIsBoatDriver(socioEncontrado.getId(), socioEncontrado.getIsBoatDriver());
 
-                System.out.println("[UpdateIsBoatDriverController] Socio " + s.getId() +
+                System.out.println("[UpdateIsBoatDriverController] Socio " + socioEncontrado.getId() +
                         " actualizado: isBoatDriver = true");
 
-                mav = new ModelAndView("socioinscripcion/updateIsBoatDriverSuccessView");
-                mav.addObject("socio", s);
+                vistaResultados = new ModelAndView("socioinscripcion/updateIsBoatDriverSuccessView");
+                vistaResultados.addObject("socio", socioEncontrado);
             } else {
-                System.out.println("[UpdateIsBoatDriverController] Socio " + s.getId() +
+                System.out.println("[UpdateIsBoatDriverController] Socio " + socioEncontrado.getId() +
                         " ya tenía isBoatDriver = true, no se actualiza.");
-                mav = new ModelAndView("socioinscripcion/updateIsBoatDriverFailView");
-                mav.addObject("socio", s);
+                vistaResultados = new ModelAndView("socioinscripcion/updateIsBoatDriverFailView");
+                vistaResultados.addObject("socio", socioEncontrado);
             }
         } else {
-            mav = new ModelAndView("socioinscripcion/updateIsBoatDriverFailView");
+            vistaResultados = new ModelAndView("socioinscripcion/updateIsBoatDriverFailView");
         }
 
-        return mav;
+        return vistaResultados;
     }
-
 }
