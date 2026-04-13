@@ -56,7 +56,7 @@
     <div class="overlay">
         <h5 class="white">Alquilar Embarcación</h5>
 
-        <form th:action="@{/addAlquiler}" method="post" th:object="${newAlquiler}" id="alquilerForm">
+        <form th:action="@{/addAlquiler}" method="post" th:object="${alquilerForm}" id="alquilerForm">
             <!-- Matrícula de la Embarcación -->
             <div class="form-group">
                 <label for="registrationNumber">Matrícula</label>
@@ -74,14 +74,14 @@
             <div class="form-group">
                 <label for="startDate">Fecha de Inicio</label>
                 <input type="date" id="startDate" th:field="*{startDate}" 
-                       th:value="${newAlquiler.startDate != null} ? ${#temporals.format(newAlquiler.startDate, 'yyyy-MM-dd')} : ${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" required>
+                       th:value="${alquilerForm.startDate != null} ? ${#temporals.format(alquilerForm.startDate, 'yyyy-MM-dd')} : ${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" required>
             </div>
 
             <!-- Fecha de Fin -->
             <div class="form-group">
                 <label for="endDate">Fecha de Fin</label>
                 <input type="date" id="endDate" th:field="*{endDate}" 
-                       th:value="${newAlquiler.endDate != null} ? ${#temporals.format(newAlquiler.endDate, 'yyyy-MM-dd')} : ''" required>
+                       th:value="${alquilerForm.endDate != null} ? ${#temporals.format(alquilerForm.endDate, 'yyyy-MM-dd')} : ''" required>
             </div>
 
             <!-- Número de Plazas con tooltip -->

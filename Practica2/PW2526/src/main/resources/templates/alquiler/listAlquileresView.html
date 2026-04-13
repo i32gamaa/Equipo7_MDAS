@@ -28,18 +28,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="a : ${alquileres}">
-                        <td th:text="${a.rentalId}"></td>
-                        <td th:text="${a.userId}"></td>
-                        <td th:text="${a.registrationNumber}"></td>
-                        <td th:text="${a.startDate}"></td>
-                        <td th:text="${a.endDate}"></td>
-                        <td th:text="${a.numSeats}"></td>
-                        <td th:text="${a.amount}"></td>
+                    <tr th:each="alquiler : ${alquileres}">
+                        <td th:text="${alquiler.rentalId}"></td>
+                        <td th:text="${alquiler.userId}"></td>
+                        <td th:text="${alquiler.registrationNumber}"></td>
+                        <td th:text="${alquiler.startDate}"></td>
+                        <td th:text="${alquiler.endDate}"></td>
+                        <td th:text="${alquiler.numSeats}"></td>
+                        <td th:text="${alquiler.amount}"></td>
                         <td>
-                            <span th:if="${a.endDate != null and a.endDate.isBefore(T(java.time.LocalDate).now())}" 
+                            <span th:if="${alquiler.endDate != null and alquiler.endDate.isBefore(T(java.time.LocalDate).now())}" 
                                   class="status-completed">Completado</span>
-                            <span th:unless="${a.endDate != null and a.endDate.isBefore(T(java.time.LocalDate).now())}" 
+                            <span th:unless="${alquiler.endDate != null and alquiler.endDate.isBefore(T(java.time.LocalDate).now())}" 
                                   class="status-active">Activo</span>
                         </td>
                     </tr>

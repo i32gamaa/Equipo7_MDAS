@@ -18,7 +18,7 @@
 
         <div class="error-message">
             <i class="fas fa-exclamation-triangle"></i>
-            <span th:text="${error}">Error message</span>
+            <span th:text="${mensajeError}">Error message</span>
         </div>
 
         <!-- Mostrar información de la embarcación si está disponible -->
@@ -33,13 +33,13 @@
         </div>
 
         <!-- Mostrar datos del formulario para corrección -->
-        <div th:if="${newAlquiler != null}" class="detail-section">
+        <div th:if="${alquilerForm != null}" class="detail-section">
             <div class="detail-label">DATOS INTRODUCIDOS</div>
             <div class="detail-value">
-                <strong>Socio (ID):</strong> <span th:text="${newAlquiler.userId}"></span><br>
-                <strong>Embarcación (Matrícula):</strong> <span th:text="${newAlquiler.registrationNumber}"></span><br>
-                <strong>Fechas:</strong> <span th:text="${newAlquiler.startDate}"></span> a <span th:text="${newAlquiler.endDate}"></span><br>
-                <strong>Plazas:</strong> <span th:text="${newAlquiler.numSeats}"></span>
+                <strong>Socio (ID):</strong> <span th:text="${alquilerForm.userId}"></span><br>
+                <strong>Embarcación (Matrícula):</strong> <span th:text="${alquilerForm.registrationNumber}"></span><br>
+                <strong>Fechas:</strong> <span th:text="${alquilerForm.startDate}"></span> a <span th:text="${alquilerForm.endDate}"></span><br>
+                <strong>Plazas:</strong> <span th:text="${alquilerForm.numSeats}"></span>
             </div>
         </div>
 
