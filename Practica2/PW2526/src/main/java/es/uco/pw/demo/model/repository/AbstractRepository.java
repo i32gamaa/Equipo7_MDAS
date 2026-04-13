@@ -14,6 +14,7 @@ public class AbstractRepository {
     protected Properties sqlQueries;
     protected String sqlQueriesFileName;
 
+    // REFACTORIZACIÓN (Regla 1): Se cambia el parámetro para que coincida exactamente con la intención del campo de clase.
     public void setSQLQueriesFileName(String sqlQueriesFileName){
         this.sqlQueriesFileName = sqlQueriesFileName;
         createProperties();
@@ -23,8 +24,8 @@ public class AbstractRepository {
         sqlQueries = new Properties();
         try {
             BufferedReader reader;
-            File f = new File(sqlQueriesFileName);
-            reader = new BufferedReader(new FileReader(f));
+            File sqlFile = new File(sqlQueriesFileName); // REFACTORIZACIÓN: f por sqlFile (Regla 6)
+            reader = new BufferedReader(new FileReader(sqlFile));
             sqlQueries.load(reader);
         } catch (IOException e) {
             System.err.println("Error creating properties object for SQL queries");

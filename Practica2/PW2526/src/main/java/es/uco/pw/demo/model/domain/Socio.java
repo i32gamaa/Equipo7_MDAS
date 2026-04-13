@@ -17,7 +17,8 @@ import java.time.LocalDate;
 
 public class Socio {
 
-    private String id;
+    // REFACTORIZACIÓN (Regla 1 y 4): Se cambia 'id' por 'socioId' para ser más específicos.
+    private String socioId;
     private String name;
     private String surname;
     private String address;
@@ -28,18 +29,8 @@ public class Socio {
     private boolean isAdult;
     private int inscriptionId;
 
-    /**
-     * Constructor principal de la clase {@code Socio}.
-     * 
-     * @param id Identificador del socio.
-     * @param name Nombre del socio.
-     * @param surname Apellidos del socio.
-     * @param address Dirección del socio.
-     * @param birthdate Fecha de nacimiento del socio.
-     * @param isBoatDriver Indica si el socio posee licencia de patrón.
-     */
-    public Socio(String id, String name, String surname, String address, LocalDate birthdate, boolean isBoatDriver) {
-        this.id = id;
+    public Socio(String socioId, String name, String surname, String address, LocalDate birthdate, boolean isBoatDriver) {
+        this.socioId = socioId;
         this.name = name;
         this.surname = surname;
         this.address = address;
@@ -50,122 +41,46 @@ public class Socio {
         this.isAdult = true;
     }
 
-    /**
-     * Constructor vacío de la clase {@code Socio}.
-     * Permite crear un objeto sin inicializar sus atributos.
-     */
     public Socio() {
     }
 
-    /** @return Identificador del socio. */
-    public String getId() {
-        return id;
-    }
+    public String getSocioId() { return socioId; }
+    public void setSocioId(String socioId) { this.socioId = socioId; }
 
-    /** @param id Nuevo identificador del socio. */
-    public void setId(String id) {
-        this.id = id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    /** @return Nombre del socio. */
-    public String getName() {
-        return name;
-    }
+    public String getSurname() { return surname; }
+    public void setSurname(String surname) { this.surname = surname; }
 
-    /** @param name Nuevo nombre del socio. */
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    /** @return Apellidos del socio. */
-    public String getSurname() {
-        return surname;
-    }
+    public LocalDate getBirthdate() { return birthdate; }
+    public void setBirthdate(LocalDate birthdate) { this.birthdate = birthdate; }
 
-    /** @param surname Nuevos apellidos del socio. */
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
+    public LocalDate getInscriptionDate() { return inscriptionDate; }
+    public void setInscriptionDate(LocalDate inscriptionDate) { this.inscriptionDate = inscriptionDate; }
 
-    /** @return Dirección del socio. */
-    public String getAddress() {
-        return address;
-    }
+    // REFACTORIZACIÓN: Se renombra el getter siguiendo la convención de Java para booleanos (isX en lugar de getIsX).
+    public boolean isHolderInscription() { return isHolderInscription; }
+    public void setHolderInscription(boolean holderInscription) { this.isHolderInscription = holderInscription; }
 
-    /** @param address Nueva dirección del socio. */
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    // REFACTORIZACIÓN: Se renombra el getter.
+    public boolean isBoatDriver() { return isBoatDriver; }
+    public void setBoatDriver(boolean boatDriver) { this.isBoatDriver = boatDriver; }
 
-    /** @return Fecha de nacimiento del socio. */
-    public LocalDate getBirthdate() {
-        return birthdate;
-    }
+    // REFACTORIZACIÓN: Se renombra el getter.
+    public boolean isAdult() { return isAdult; }
+    public void setAdult(boolean adult) { this.isAdult = adult; }
 
-    /** @param birthdate Nueva fecha de nacimiento del socio. */
-    public void setBirthdate(LocalDate birthdate) {
-        this.birthdate = birthdate;
-    }
+    public int getInscriptionId() { return inscriptionId; }
+    public void setInscriptionId(int inscriptionId) { this.inscriptionId = inscriptionId; }
 
-    /** @return Fecha de inscripción del socio. */
-    public LocalDate getInscriptionDate() {
-        return inscriptionDate;
-    }
-
-    /** @param inscriptionDate Nueva fecha de inscripción. */
-    public void setInscriptionDate(LocalDate inscriptionDate) {
-        this.inscriptionDate = inscriptionDate;
-    }
-
-    /** @return {@code true} si el socio es titular de la inscripción; {@code false} en caso contrario. */
-    public boolean getIsHolderInscription() {
-        return isHolderInscription;
-    }
-
-    /** @param isHolderInscription Valor que indica si el socio es titular de la inscripción. */
-    public void setIsHolderInscription(boolean isHolderInscription) {
-        this.isHolderInscription = isHolderInscription;
-    }
-
-    /** @return {@code true} si el socio tiene licencia de patrón; {@code false} en caso contrario. */
-    public boolean getIsBoatDriver() {
-        return isBoatDriver;
-    }
-
-    /** @param isBoatDriver Valor que indica si el socio tiene licencia de patrón. */
-    public void setIsBoatDriver(boolean isBoatDriver) {
-        this.isBoatDriver = isBoatDriver;
-    }
-
-    /** @return {@code true} si el socio es mayor de edad; {@code false} en caso contrario. */
-    public boolean getIsAdult() {
-        return isAdult;
-    }
-
-    /** @param isAdult Valor que indica si el socio es mayor de edad. */
-    public void setIsAdult(boolean isAdult) {
-        this.isAdult = isAdult;
-    }
-
-    /** @return Identificador de la inscripción asociada al socio. */
-    public int getInscriptionId() {
-        return inscriptionId;
-    }
-
-    /** @param inscriptionId Nuevo identificador de la inscripción asociada. */
-    public void setInscriptionId(int inscriptionId) {
-        this.inscriptionId = inscriptionId;
-    }
-
-    /**
-     * Devuelve una representación textual del objeto {@code Socio}.
-     *
-     * @return Cadena con los valores de los atributos del socio.
-     */
     @Override
     public String toString() {
         return "Socio{" +
-                "DNI='" + id + '\'' +
+                "DNI='" + socioId + '\'' +
                 ", Nombre='" + name + '\'' +
                 ", Apellidos='" + surname + '\'' +
                 ", Dirección='" + address + '\'' +

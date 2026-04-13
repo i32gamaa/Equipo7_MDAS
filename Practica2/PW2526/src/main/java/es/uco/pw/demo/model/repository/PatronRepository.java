@@ -16,63 +16,39 @@ public class PatronRepository extends AbstractRepository {
 
     public PatronRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        // Cargar las queries SQL al inicializar el repositorio
         String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
         this.setSQLQueriesFileName(sqlQueriesFileName);
-        
-        // Verificar que las queries se cargaron
-        if (sqlQueries != null) {
-            System.out.println("[PatronRepository] Successfully loaded SQL queries. Total: " + sqlQueries.size());
-            // Debug: mostrar las queries cargadas
-            sqlQueries.forEach((key, value) -> 
-                System.out.println("[PatronRepository] Loaded: " + key + " = " + value)
-            );
-        } else {
-            System.err.println("[PatronRepository] ERROR: SQL queries not loaded!");
-        }
     }
 
     public List<Patron> findAllPatrones() {
         try {
             String query = sqlQueries.getProperty("patron.findAll");
-            System.out.println("[PatronRepository] Executing findAll: " + query);
-            
-            if (query == null) {
-                System.err.println("[PatronRepository] ERROR: Query 'patron.findAll' not found!");
-                return null;
-            }
+            if (query == null) return null;
 
-            List<Patron> result = jdbcTemplate.query(query, new RowMapper<Patron>() {
+            List<Patron> fetchedPatrones = jdbcTemplate.query(query, new RowMapper<Patron>() {
                 @Override
                 public Patron mapRow(ResultSet rs, int rowNumber) throws SQLException {
                     return new Patron(
-                            rs.getString("id"),
+                            rs.getString("id"), // La bbdd lo tiene como id
                             rs.getString("name"),
                             rs.getString("surname"),
                             rs.getDate("birthdate").toLocalDate(),
                             rs.getDate("titleIssueDate").toLocalDate());
                 }
             });
-            return result;
+            return fetchedPatrones;
 
         } catch (DataAccessException e) {
-            System.err.println("Unable to find patrones");
-            e.printStackTrace();
             return null;
         }
     }
 
-    public Patron findById(String id) {
+    public Patron findById(String patronId) { // REFACTORIZACIÓN (Regla 1): id -> patronId
         try {
             String query = sqlQueries.getProperty("patron.findById");
-            System.out.println("[PatronRepository] Executing findById: " + query + " with id: " + id);
-            
-            if (query == null) {
-                System.err.println("[PatronRepository] ERROR: Query 'patron.findById' not found!");
-                return null;
-            }
+            if (query == null) return null;
 
-            List<Patron> result = jdbcTemplate.query(query, new RowMapper<Patron>() {
+            List<Patron> fetchedPatrones = jdbcTemplate.query(query, new RowMapper<Patron>() {
                 @Override
                 public Patron mapRow(ResultSet rs, int rowNum) throws SQLException {
                     return new Patron(
@@ -83,13 +59,11 @@ public class PatronRepository extends AbstractRepository {
                         rs.getDate("titleIssueDate").toLocalDate()
                     );
                 }
-            }, id);
+            }, patronId);
             
-            return result.isEmpty() ? null : result.get(0);
+            return fetchedPatrones.isEmpty() ? null : fetchedPatrones.get(0);
             
         } catch (DataAccessException e) {
-            System.err.println("Unable to find patron by id: " + id);
-            e.printStackTrace();
             return null;
         }
     }
@@ -97,167 +71,110 @@ public class PatronRepository extends AbstractRepository {
     public boolean addPatron(Patron patron) {
         try {
             String query = sqlQueries.getProperty("patron.insert");
-            System.out.println("[PatronRepository] Executing insert: " + query);
-            
-            if (query == null) {
-                System.err.println("[PatronRepository] ERROR: Query 'patron.insert' not found!");
-                return false;
-            }
+            if (query == null) return false;
 
-            int result = jdbcTemplate.update(query,
-                    patron.getId(),
+            int rowsAffected = jdbcTemplate.update(query,
+                    patron.getPatronId(), // Adaptado
                     patron.getName(),
                     patron.getSurname(),
                     patron.getBirthDate(),
                     patron.getTitleIssueDate());
 
-            return result > 0;
+            return rowsAffected > 0;
             
         } catch (DataAccessException e) {
-            System.err.println("Unable to save patron: " + e.getMessage());
-            e.printStackTrace();
             return false;
         }
     }
 
-    public boolean existsById(String id) {
+    public boolean existsById(String patronId) {
         try {
             String query = sqlQueries.getProperty("patron.existsById");
-            System.out.println("[PatronRepository] Executing existsById: " + query + " with id: " + id);
-            
-            if (query == null) {
-                System.err.println("[PatronRepository] ERROR: Query 'patron.existsById' not found!");
-                return false;
-            }
+            if (query == null) return false;
 
-            Integer count = jdbcTemplate.queryForObject(query, Integer.class, id);
-            return count != null && count > 0;
+            Integer existenceCount = jdbcTemplate.queryForObject(query, Integer.class, patronId);
+            return existenceCount != null && existenceCount > 0;
             
         } catch (DataAccessException e) {
-            System.err.println("Unable to check existence of patron by id: " + id);
-            e.printStackTrace();
             return false;
         }
     }
 
     public boolean assignPatronToBoat(String patronId, String registrationNumber) {
-    try {
-        System.out.println("[PatronRepository] Asignando patrón " + patronId + " a embarcación " + registrationNumber);
-        
-        // 1. Verificar que el patrón existe
-        Patron patron = findById(patronId);
-        if (patron == null) {
-            System.err.println("El patrón con ID " + patronId + " no existe");
+        try {
+            Patron patron = findById(patronId);
+            if (patron == null) return false;
+            
+            String queryToVerifyBoatExists = "SELECT COUNT(*) FROM Embarcacion WHERE registrationNumber = ?"; // REFACTORIZACIÓN
+            Integer boatExistenceCount = jdbcTemplate.queryForObject(queryToVerifyBoatExists, Integer.class, registrationNumber);
+            if (boatExistenceCount == null || boatExistenceCount == 0) return false;
+            
+            String queryToVerifyPatronAvailability = "SELECT COUNT(*) FROM Embarcacion WHERE patronId = ? AND registrationNumber != ?";
+            Integer assignmentCount = jdbcTemplate.queryForObject(queryToVerifyPatronAvailability, Integer.class, patronId, registrationNumber);
+            if (assignmentCount != null && assignmentCount > 0) return false;
+            
+            String queryToUpdateBoat = "UPDATE Embarcacion SET patronId = ? WHERE registrationNumber = ?";
+            int rowsAffected = jdbcTemplate.update(queryToUpdateBoat, patronId, registrationNumber);
+            
+            return rowsAffected > 0;
+            
+        } catch (DataAccessException e) {
             return false;
         }
-        
-        // 2. Verificar que la embarcación existe
-        String checkBoatSql = "SELECT COUNT(*) FROM Embarcacion WHERE registrationNumber = ?";
-        Integer boatCount = jdbcTemplate.queryForObject(checkBoatSql, Integer.class, registrationNumber);
-        
-        if (boatCount == null || boatCount == 0) {
-            System.err.println("La embarcación con matrícula " + registrationNumber + " no existe");
-            return false;
-        }
-        
-        // 3. Verificar que el patrón no esté asignado a otra embarcación
-        String checkPatronAssignmentSql = "SELECT COUNT(*) FROM Embarcacion WHERE patronId = ? AND registrationNumber != ?";
-        Integer assignmentCount = jdbcTemplate.queryForObject(checkPatronAssignmentSql, Integer.class, patronId, registrationNumber);
-        
-        if (assignmentCount != null && assignmentCount > 0) {
-            System.err.println("El patrón " + patronId + " ya está asignado a otra embarcación");
-            return false;
-        }
-        
-        // 4. Asignar el patrón a la embarcación
-        String updateSql = "UPDATE Embarcacion SET patronId = ? WHERE registrationNumber = ?";
-        int result = jdbcTemplate.update(updateSql, patronId, registrationNumber);
-        
-        System.out.println("[PatronRepository] Asignación completada. Resultado: " + (result > 0));
-        return result > 0;
-        
-    } catch (DataAccessException e) {
-        System.err.println("Error al asignar patrón a embarcación: " + e.getMessage());
-        e.printStackTrace();
-        return false;
     }
-}
-
 
     public boolean unassignPatronFromBoat(String registrationNumber) {
         try {
-            System.out.println("[PatronRepository] Desasignando patrón de la embarcación " + registrationNumber);
+            String queryToVerifyBoatExists = "SELECT COUNT(*) FROM Embarcacion WHERE registrationNumber = ?";
+            Integer boatExistenceCount = jdbcTemplate.queryForObject(queryToVerifyBoatExists, Integer.class, registrationNumber);
+            if (boatExistenceCount == null || boatExistenceCount == 0) return false;
             
-            // 1. Verificar que la embarcación existe
-            String checkBoatSql = "SELECT COUNT(*) FROM Embarcacion WHERE registrationNumber = ?";
-            Integer boatCount = jdbcTemplate.queryForObject(checkBoatSql, Integer.class, registrationNumber);
+            String queryToFindCurrentPatron = "SELECT patronId FROM Embarcacion WHERE registrationNumber = ?";
+            String currentPatronId = jdbcTemplate.queryForObject(queryToFindCurrentPatron, String.class, registrationNumber);
+            if (currentPatronId == null || currentPatronId.equals("NULL")) return false;
             
-            if (boatCount == null || boatCount == 0) {
-                System.err.println("La embarcación con matrícula " + registrationNumber + " no existe");
-                return false;
-            }
+            String queryToRemovePatron = "UPDATE Embarcacion SET patronId = NULL WHERE registrationNumber = ?";
+            int rowsAffected = jdbcTemplate.update(queryToRemovePatron, registrationNumber);
             
-            // 2. Verificar que la embarcación tiene un patrón asignado
-            String checkPatronSql = "SELECT patronId FROM Embarcacion WHERE registrationNumber = ?";
-            String currentPatronId = jdbcTemplate.queryForObject(checkPatronSql, String.class, registrationNumber);
-            
-            if (currentPatronId == null || currentPatronId.equals("NULL")) {
-                System.err.println("La embarcación " + registrationNumber + " no tiene ningún patrón asignado");
-                return false;
-            }
-            
-            // 3. Desasignar el patrón (establecer patronId a NULL)
-            String updateSql = "UPDATE Embarcacion SET patronId = NULL WHERE registrationNumber = ?";
-            int result = jdbcTemplate.update(updateSql, registrationNumber);
-            
-            System.out.println("[PatronRepository] Desasignación completada. Resultado: " + (result > 0));
-            return result > 0;
+            return rowsAffected > 0;
             
         } catch (DataAccessException e) {
-            System.err.println("Error al desasignar patrón de la embarcación: " + e.getMessage());
-            e.printStackTrace();
             return false;
         }
     }
 
-    // Actualizar datos de un patrón
     public boolean updatePatron(Patron patron) {
         try {
             String query = sqlQueries.getProperty("patron.update");
-            int result = jdbcTemplate.update(query,
+            int rowsAffected = jdbcTemplate.update(query,
                     patron.getName(),
                     patron.getSurname(),
                     patron.getBirthDate(),
                     patron.getTitleIssueDate(),
-                    patron.getId()); // El ID va al final en el WHERE
-            return result > 0;
+                    patron.getPatronId()); // Adaptado
+            return rowsAffected > 0;
         } catch (DataAccessException e) {
-            System.err.println("Error updating patron: " + e.getMessage());
             return false;
         }
     }
 
-    // Borrar un patrón
-    public boolean deletePatron(String id) {
+    public boolean deletePatron(String patronId) {
         try {
             String query = sqlQueries.getProperty("patron.delete");
-            int result = jdbcTemplate.update(query, id);
-            return result > 0;
+            int rowsAffected = jdbcTemplate.update(query, patronId);
+            return rowsAffected > 0;
         } catch (DataAccessException e) {
-            System.err.println("Error deleting patron: " + e.getMessage());
             return false;
         }
     }
 
-    // Comprobar si un patrón tiene barcos asignados (Para restricción B.6)
     public boolean hasAssignedBoats(String patronId) {
         try {
             String query = sqlQueries.getProperty("patron.countEmbarcaciones");
-            Integer count = jdbcTemplate.queryForObject(query, Integer.class, patronId);
-            return count != null && count > 0;
+            Integer assignedBoatsCount = jdbcTemplate.queryForObject(query, Integer.class, patronId); // REFACTORIZACIÓN
+            return assignedBoatsCount != null && assignedBoatsCount > 0;
         } catch (DataAccessException e) {
-            System.err.println("Error checking assigned boats for patron: " + e.getMessage());
-            return false; // Ante la duda, asumimos false, pero lo ideal es manejar el error
+            return false; 
         }
     }
 }

@@ -20,198 +20,59 @@ public class Embarcacion {
     private String registrationNumber;
     private EmbarcacionType type;
     private String name;
-    private int numSeats;
+    // REFACTORIZACIÓN (Regla 1 y 5): Se cambia 'numSeats' por 'numberOfSeats' para usar un nombre completo y descriptivo.
+    private int numberOfSeats;
     private double length;
     private double width;
     private double height;
     private String patronId;
 
-    /**
-     * Constructor completo de la clase {@code Embarcacion}.
-     * 
-     * @param registrationNumber Matrícula o número de registro único de la embarcación.
-     * @param type Tipo de embarcación.
-     * @param name Nombre de la embarcación.
-     * @param numSeats Número total de plazas disponibles.
-     * @param length Longitud (eslora) en metros.
-     * @param width Anchura (manga) en metros.
-     * @param height Altura o calado en metros.
-     */
-    public Embarcacion(String registrationNumber, EmbarcacionType type, String name, int numSeats,
+    public Embarcacion(String registrationNumber, EmbarcacionType type, String name, int numberOfSeats,
                        double length, double width, double height) {
         this.registrationNumber = registrationNumber;
         this.type = type;
         this.name = name;
-        this.numSeats = numSeats;
+        this.numberOfSeats = numberOfSeats;
         this.length = length;
         this.width = width;
         this.height = height;
-        this.patronId = null; // Se asignará posteriormente mediante un método externo
+        this.patronId = null;
     }
 
-    /**
-     * Constructor vacío de la clase {@code Embarcacion}.
-     * Permite crear un objeto sin inicializar sus atributos.
-     */
     public Embarcacion() {
     }
 
-    /** 
-     * Devuelve la matrícula o número de registro de la embarcación.
-     * 
-     * @return Matrícula de la embarcación.
-     */
-    public String getRegistrationNumber() {
-        return registrationNumber;
-    }
+    public String getRegistrationNumber() { return registrationNumber; }
+    public void setRegistrationNumber(String registrationNumber) { this.registrationNumber = registrationNumber; }
 
-    /** 
-     * Asigna la matrícula o número de registro de la embarcación.
-     * 
-     * @param registrationNumber Nueva matrícula de la embarcación.
-     */
-    public void setRegistrationNumber(String registrationNumber) {
-        this.registrationNumber = registrationNumber;
-    }
+    public EmbarcacionType getType() { return type; }
+    public void setType(EmbarcacionType type) { this.type = type; }
 
-    /** 
-     * Devuelve el tipo de embarcación.
-     * 
-     * @return Tipo de embarcación.
-     */
-    public EmbarcacionType getType() {
-        return type;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    /** 
-     * Asigna el tipo de embarcación.
-     * 
-     * @param type Nuevo tipo de embarcación.
-     */
-    public void setType(EmbarcacionType type) {
-        this.type = type;
-    }
+    public int getNumberOfSeats() { return numberOfSeats; }
+    public void setNumberOfSeats(int numberOfSeats) { this.numberOfSeats = numberOfSeats; }
 
-    /** 
-     * Devuelve el nombre de la embarcación.
-     * 
-     * @return Nombre de la embarcación.
-     */
-    public String getName() {
-        return name;
-    }
+    public double getLength() { return length; }
+    public void setLength(double length) { this.length = length; }
 
-    /** 
-     * Asigna el nombre de la embarcación.
-     * 
-     * @param name Nuevo nombre de la embarcación.
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
+    public double getWidth() { return width; }
+    public void setWidth(double width) { this.width = width; }
 
-    /** 
-     * Devuelve el número total de plazas de la embarcación.
-     * 
-     * @return Número de plazas disponibles.
-     */
-    public int getNumSeats() {
-        return numSeats;
-    }
+    public double getHeight() { return height; }
+    public void setHeight(double height) { this.height = height; }
 
-    /** 
-     * Asigna el número total de plazas de la embarcación.
-     * 
-     * @param numSeats Nuevo número de plazas.
-     */
-    public void setNumSeats(int numSeats) {
-        this.numSeats = numSeats;
-    }
+    public String getPatronId() { return patronId; }
+    public void setPatronId(String patronId) { this.patronId = patronId; }
 
-    /** 
-     * Devuelve la longitud (eslora) de la embarcación.
-     * 
-     * @return Longitud en metros.
-     */
-    public double getLength() {
-        return length;
-    }
-
-    /** 
-     * Asigna la longitud (eslora) de la embarcación.
-     * 
-     * @param length Nueva longitud en metros.
-     */
-    public void setLength(double length) {
-        this.length = length;
-    }
-
-    /** 
-     * Devuelve la anchura (manga) de la embarcación.
-     * 
-     * @return Anchura en metros.
-     */
-    public double getWidth() {
-        return width;
-    }
-
-    /** 
-     * Asigna la anchura (manga) de la embarcación.
-     * 
-     * @param width Nueva anchura en metros.
-     */
-    public void setWidth(double width) {
-        this.width = width;
-    }
-
-    /** 
-     * Devuelve la altura o calado de la embarcación.
-     * 
-     * @return Altura o calado en metros.
-     */
-    public double getHeight() {
-        return height;
-    }
-
-    /** 
-     * Asigna la altura o calado de la embarcación.
-     * 
-     * @param height Nueva altura o calado en metros.
-     */
-    public void setHeight(double height) {
-        this.height = height;
-    }
-
-    /** 
-     * Devuelve el identificador del patrón asignado a la embarcación.
-     * 
-     * @return Identificador del patrón asignado.
-     */
-    public String getPatronId() {
-        return patronId;
-    }
-
-    /** 
-     * Asigna el identificador del patrón a la embarcación.
-     * 
-     * @param patronId Nuevo identificador del patrón.
-     */
-    public void setPatronId(String patronId) {
-        this.patronId = patronId;
-    }
-
-    /**
-     * Devuelve una representación textual del objeto {@code Embarcacion}.
-     * 
-     * @return Cadena con los valores de los atributos de la embarcación.
-     */
     @Override
     public String toString() {
         return "Embarcacion{" +
                 "registrationNumber='" + registrationNumber + '\'' +
                 ", type='" + type + '\'' +
                 ", name='" + name + '\'' +
-                ", numSeats=" + numSeats +
+                ", numberOfSeats=" + numberOfSeats +
                 ", length=" + length +
                 ", width=" + width +
                 ", height=" + height +

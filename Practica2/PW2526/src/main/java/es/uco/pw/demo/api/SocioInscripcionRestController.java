@@ -17,7 +17,6 @@ import es.uco.pw.demo.model.domain.Patron;
 import es.uco.pw.demo.model.repository.SocioRepository;
 import es.uco.pw.demo.model.repository.InscripcionRepository;
 import es.uco.pw.demo.model.repository.PatronRepository;
-//import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,278 +36,232 @@ public class SocioInscripcionRestController {
         this.socioRepository = socioRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.patronRepository=patronRepository;
-
         String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-
         this.socioRepository.setSQLQueriesFileName(sqlQueriesFileName);
         this.inscripcionRepository.setSQLQueriesFileName(sqlQueriesFileName);
         this.patronRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
-    //GET /api/socioinscripcion/socios -> lista todos los socios
+
     @GetMapping("/socios")
     public ResponseEntity<List<Socio>> getAllSocios(){
         List<Socio> socios = socioRepository.findAllSocios();
-        ResponseEntity<List<Socio>> response = new ResponseEntity<>(socios, HttpStatus.OK);
-        return response;
+        return new ResponseEntity<>(socios, HttpStatus.OK);
     }
-    //GET /api/socioinscripcion/inscripciones/individuales -> lista inscripciones individuales
+
     @GetMapping("/inscripciones/individuales")
-    public ResponseEntity<List<Inscripcion>> getIndividuales(){
+    public ResponseEntity<List<Inscripcion>> getIndividualInscripciones(){ // REFACTORIZACIÓN (Regla 11): getIndividuales -> getIndividualInscripciones
         List<Inscripcion> inscripciones = inscripcionRepository.findIndividualInscripciones();
-        ResponseEntity<List<Inscripcion>> response = new ResponseEntity<>(inscripciones, HttpStatus.OK);
-        return response;
+        return new ResponseEntity<>(inscripciones, HttpStatus.OK);
     }
-    //GET /api/socioinscripcion/inscripciones/familiares -> lista inscripciones familiares
+
     @GetMapping("/inscripciones/familiares")
-    public ResponseEntity<List<Inscripcion>> getFamiliares(){
-        List<Inscripcion> inscripciones = inscripcionRepository.findFamiliarInscripciones(); // totalAmount > 300
-        ResponseEntity<List<Inscripcion>> response = new ResponseEntity<>(inscripciones, HttpStatus.OK);
-        return response;
+    public ResponseEntity<List<Inscripcion>> getFamiliarInscripciones(){ // REFACTORIZACIÓN (Regla 11): getFamiliares -> getFamiliarInscripciones
+        List<Inscripcion> inscripciones = inscripcionRepository.findFamiliarInscripciones(); 
+        return new ResponseEntity<>(inscripciones, HttpStatus.OK);
     }
-    //GET /api/socioinscripcion/socios/{id} -> obtiene un socio por id
+
     @GetMapping("/socios/{id}")
     public ResponseEntity<Socio> getSocioById(@PathVariable String id){
         Socio socio = socioRepository.findById(id);            
-        ResponseEntity<Socio> response;
         if(socio != null){
-            response = new ResponseEntity<>(socio, HttpStatus.OK);
+            return new ResponseEntity<>(socio, HttpStatus.OK);
+        } else{
+            return new ResponseEntity<>(socio, HttpStatus.NOT_FOUND);
         }
-        else{
-            response = new ResponseEntity<>(socio, HttpStatus.NOT_FOUND);
-        }
-        return response;
     }
-    //GET /api/socioinscripcion/inscripciones/{userId} -> obtiene una inscripcion por userId
+
     @GetMapping("/inscripciones/{userId}")
     public ResponseEntity<Inscripcion> getInscripcionById(@PathVariable String userId){
         Inscripcion inscripcion = inscripcionRepository.findByUserId(userId);            
-        ResponseEntity<Inscripcion> response;
         if(inscripcion != null){
-            response = new ResponseEntity<>(inscripcion, HttpStatus.OK);
+            return new ResponseEntity<>(inscripcion, HttpStatus.OK);
+        } else{
+            return new ResponseEntity<>(inscripcion, HttpStatus.NOT_FOUND);
         }
-        else{
-            response = new ResponseEntity<>(inscripcion, HttpStatus.NOT_FOUND);
-        }
-        return response;
     }
 
-    //AÑADIR SOCIO TITULAR + INSCRIPCION
-    // POST /api/socioinscripcion/titular -> crea un nuevo socio titular con inscripcion
     @PostMapping(path="/titular", consumes="application/json")
-    public ResponseEntity<Socio> createSocioWithInscripcion(@RequestBody Socio newSocio) {
+    public ResponseEntity<Socio> registerSocioHolder(@RequestBody Socio newSocio) { // REFACTORIZACIÓN (Regla 11): createSocioWithInscripcion -> registerSocioHolder
 
-        ResponseEntity<Socio> response;
-
-        Socio existingSocio = socioRepository.findById(newSocio.getId());
-        Patron existingPatron = patronRepository.findById(newSocio.getId());
+        Socio existingSocio = socioRepository.findById(newSocio.getSocioId()); // Adaptado (getSocioId)
+        Patron existingPatron = patronRepository.findById(newSocio.getSocioId());
 
         if (existingSocio != null || existingPatron != null) {
-            response = new ResponseEntity<>(newSocio, HttpStatus.UNPROCESSABLE_ENTITY);
-            return response;
+            return new ResponseEntity<>(newSocio, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
-
-        boolean isAdult = Period.between(newSocio.getBirthdate(), LocalDate.now())
-                .getYears() >= 18;
+        boolean isAdult = Period.between(newSocio.getBirthdate(), LocalDate.now()).getYears() >= 18;
 
         if (!isAdult) {
-            response = new ResponseEntity<>(newSocio, HttpStatus.UNPROCESSABLE_ENTITY);
-            return response;
+            return new ResponseEntity<>(newSocio, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
-        newSocio.setIsAdult(true);
-        newSocio.setIsHolderInscription(true);
+        newSocio.setAdult(true); // Adaptado
+        newSocio.setHolderInscription(true); // Adaptado
         newSocio.setInscriptionDate(LocalDate.now());
 
-        boolean createdSocio = socioRepository.addSocioAdult(newSocio);
+        boolean isSocioSaved = socioRepository.addSocioAdult(newSocio); // REFACTORIZACIÓN: createdSocio -> isSocioSaved
 
-        if (!createdSocio) {
-            response = new ResponseEntity<>(newSocio, HttpStatus.INTERNAL_SERVER_ERROR);
-            return response;
+        if (!isSocioSaved) {
+            return new ResponseEntity<>(newSocio, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         Inscripcion inscripcion = new Inscripcion();
-        inscripcion.setDate(LocalDate.now());
+        inscripcion.setRegistrationDate(LocalDate.now()); // Adaptado
         inscripcion.setTotalAmount(300);
-        inscripcion.setUserId(newSocio.getId());
+        inscripcion.setUserId(newSocio.getSocioId()); // Adaptado
         inscripcion.setRegisteredAdults(1);
         inscripcion.setRegisteredKids(0);
 
-        boolean createdInscripcion = inscripcionRepository.addInscripcion(inscripcion);
+        boolean isInscripcionSaved = inscripcionRepository.addInscripcion(inscripcion); // REFACTORIZACIÓN: createdInscripcion -> isInscripcionSaved
 
-        if (!createdInscripcion) {
-            response = new ResponseEntity<>(newSocio, HttpStatus.INTERNAL_SERVER_ERROR);
-            return response;
+        if (!isInscripcionSaved) {
+            return new ResponseEntity<>(newSocio, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        Inscripcion inscripcionDB = inscripcionRepository.findByUserId(newSocio.getId());
+        Inscripcion savedInscripcion = inscripcionRepository.findByUserId(newSocio.getSocioId()); // REFACTORIZACIÓN: inscripcionDB -> savedInscripcion
 
-        if (inscripcionDB == null) {
-            response = new ResponseEntity<>(newSocio, HttpStatus.INTERNAL_SERVER_ERROR);
-            return response;
+        if (savedInscripcion == null) {
+            return new ResponseEntity<>(newSocio, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        newSocio.setInscriptionId(inscripcionDB.getId());
+        newSocio.setInscriptionId(savedInscripcion.getId());
 
-        boolean updatedSocio = socioRepository.updateInscriptionId(newSocio);
+        boolean isSocioUpdated = socioRepository.updateInscriptionId(newSocio); // REFACTORIZACIÓN: updatedSocio -> isSocioUpdated
 
-        if (!updatedSocio) {
-            response = new ResponseEntity<>(newSocio, HttpStatus.INTERNAL_SERVER_ERROR);
+        if (!isSocioUpdated) {
+            return new ResponseEntity<>(newSocio, HttpStatus.INTERNAL_SERVER_ERROR);
         } else {
-            response = new ResponseEntity<>(newSocio, HttpStatus.CREATED);
+            return new ResponseEntity<>(newSocio, HttpStatus.CREATED);
         }
-
-        return response;
     }
 
-    //AÑADIR SOCIO NO TITULAR
-    // POST /api/socioinscripcion/noTitular -> crea un nuevo socio no titular
     @PostMapping(path="/noTitular", consumes="application/json")
-    public ResponseEntity<Socio> addSocioToInscripcion(@RequestBody Socio newSocio) {
+    public ResponseEntity<Socio> registerSocioToExistingInscripcion(@RequestBody Socio newSocio) { // REFACTORIZACIÓN (Regla 11): addSocioToInscripcion -> registerSocioToExistingInscripcion
 
-        ResponseEntity<Socio> response;
-
-        Socio existingSocio = socioRepository.findById(newSocio.getId());
-        Patron existingPatron = patronRepository.findById(newSocio.getId());
+        Socio existingSocio = socioRepository.findById(newSocio.getSocioId()); // Adaptado
+        Patron existingPatron = patronRepository.findById(newSocio.getSocioId()); // Adaptado
 
         if (existingSocio != null || existingPatron != null) {
-            response = new ResponseEntity<>(newSocio, HttpStatus.UNPROCESSABLE_ENTITY);
-            return response;
+            return new ResponseEntity<>(newSocio, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
-        boolean esAdulto = Period.between(newSocio.getBirthdate(), LocalDate.now())
-                .getYears() >= 18;
+        boolean isAdult = Period.between(newSocio.getBirthdate(), LocalDate.now()).getYears() >= 18; // REFACTORIZACIÓN: esAdulto -> isAdult
 
-        newSocio.setIsAdult(esAdulto);
+        newSocio.setAdult(isAdult); // Adaptado
         newSocio.setInscriptionDate(LocalDate.now());
 
-        if (!esAdulto) {
-            newSocio.setIsBoatDriver(false);
+        if (!isAdult) {
+            newSocio.setBoatDriver(false); // Adaptado
         }
 
-        Inscripcion inscripcion = inscripcionRepository.findById(newSocio.getInscriptionId());
+        Inscripcion parentInscripcion = inscripcionRepository.findById(newSocio.getInscriptionId()); // REFACTORIZACIÓN: inscripcion -> parentInscripcion
 
-        if (inscripcion == null) {
-            response = new ResponseEntity<>(newSocio, HttpStatus.UNPROCESSABLE_ENTITY);
-            return response;
+        if (parentInscripcion == null) {
+            return new ResponseEntity<>(newSocio, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
-        int cuotaExtra = esAdulto ? 250 : 100;
+        int extraFee = isAdult ? 250 : 100; // REFACTORIZACIÓN: cuotaExtra -> extraFee
 
-        inscripcion.setTotalAmount(inscripcion.getTotalAmount() + cuotaExtra);
+        parentInscripcion.setTotalAmount(parentInscripcion.getTotalAmount() + extraFee);
 
-        if (esAdulto) {
-            inscripcion.setRegisteredAdults(inscripcion.getRegisteredAdults() + 1);
+        if (isAdult) {
+            parentInscripcion.setRegisteredAdults(parentInscripcion.getRegisteredAdults() + 1);
         } else {
-            inscripcion.setRegisteredKids(inscripcion.getRegisteredKids() + 1);
+            parentInscripcion.setRegisteredKids(parentInscripcion.getRegisteredKids() + 1);
         }
 
-        if (inscripcion.getRegisteredAdults() > 2) {
-            response = new ResponseEntity<>(newSocio, HttpStatus.UNPROCESSABLE_ENTITY);
-            return response;
+        if (parentInscripcion.getRegisteredAdults() > 2) {
+            return new ResponseEntity<>(newSocio, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
-        boolean updatedIns = inscripcionRepository.update(inscripcion);
+        boolean isInscripcionUpdated = inscripcionRepository.update(parentInscripcion); // REFACTORIZACIÓN: updatedIns -> isInscripcionUpdated
 
-        if (!updatedIns) {
-            response = new ResponseEntity<>(newSocio, HttpStatus.INTERNAL_SERVER_ERROR);
-            return response;
+        if (!isInscripcionUpdated) {
+            return new ResponseEntity<>(newSocio, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        newSocio.setInscriptionId(inscripcion.getId());
+        newSocio.setInscriptionId(parentInscripcion.getId());
 
-        boolean socioCreated = socioRepository.addSocio(newSocio);
+        boolean isSocioSaved = socioRepository.addSocio(newSocio); // REFACTORIZACIÓN: socioCreated -> isSocioSaved
 
-        if (socioCreated) {
-            response = new ResponseEntity<>(newSocio, HttpStatus.CREATED);
+        if (isSocioSaved) {
+            return new ResponseEntity<>(newSocio, HttpStatus.CREATED);
         } else {
-            response = new ResponseEntity<>(newSocio, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(newSocio, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return response;
     }
-    //DELETE /api/socioinscripcion/eliminarnotitular/{id} -> elimina un socio no titular por id
+
     @DeleteMapping("/eliminarnotitular/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteIsNotHolder(@PathVariable String id){
+    public void deleteSocioIfNotHolder(@PathVariable String id){ // REFACTORIZACIÓN (Regla 11): deleteIsNotHolder -> deleteSocioIfNotHolder
         Socio socio = this.socioRepository.findById(id);
         if(socio !=null){
-            if(!socio.getIsHolderInscription()){
-                int inscriptionId=socio.getInscriptionId();
-                Inscripcion inscripcion=this.inscripcionRepository.findById(inscriptionId);
-                if(socio.getIsAdult()){
-                    inscripcion.setRegisteredAdults(inscripcion.getRegisteredAdults()-1);
-                    inscripcion.setTotalAmount(inscripcion.getTotalAmount()-250);
+            if(!socio.isHolderInscription()){ // Adaptado
+                int inscriptionId = socio.getInscriptionId();
+                Inscripcion parentInscripcion = this.inscripcionRepository.findById(inscriptionId); // REFACTORIZACIÓN: inscripcion -> parentInscripcion
+                if(socio.isAdult()){ // Adaptado
+                    parentInscripcion.setRegisteredAdults(parentInscripcion.getRegisteredAdults()-1);
+                    parentInscripcion.setTotalAmount(parentInscripcion.getTotalAmount()-250);
                 }else{
-                    inscripcion.setRegisteredKids((inscripcion.getRegisteredKids()-1));
-                    inscripcion.setTotalAmount(inscripcion.getTotalAmount()-100);
+                    parentInscripcion.setRegisteredKids((parentInscripcion.getRegisteredKids()-1));
+                    parentInscripcion.setTotalAmount(parentInscripcion.getTotalAmount()-100);
                 }
-                if(socio != null){
-                    this.socioRepository.deleteIsNotHolder(id);
-                    this.inscripcionRepository.update(inscripcion);
-                }
-            }else{
+                
+                this.socioRepository.deleteIfNotHolder(id); // Adaptado al cambio de nombre en el repo
+                this.inscripcionRepository.update(parentInscripcion);
+                
+            } else{
                 System.out.println("[SocioInscripcionRestController]\n\tSocio is holder inscription...");
-
             }
         }
-       
-        
     }
-    //PATCH /api/socioinscripcion/modificarDatosSocio/{id} -> actualiza los datos de un socio
+
     @PatchMapping(path="/modificarDatosSocio/{id}", consumes="application/json")
-    public Socio patchSocio(@PathVariable String id, @RequestBody Socio requestSocio) {
-       Socio response = requestSocio;
+    public Socio updateSocioData(@PathVariable String id, @RequestBody Socio requestSocio) { // REFACTORIZACIÓN (Regla 11): patchSocio -> updateSocioData
         try{
-            // Get socio by id
-            Socio currentSocio = this.socioRepository.findById(id);
-            if(currentSocio != null){
+            Socio existingSocio = this.socioRepository.findById(id); // REFACTORIZACIÓN: currentSocio -> existingSocio
+            if(existingSocio != null){
                 
-                // Update properties
-                requestSocio.setId(currentSocio.getId());
+                requestSocio.setSocioId(existingSocio.getSocioId()); // Adaptado
                 
                 if(requestSocio.getName() != null){
-                    currentSocio.setName(requestSocio.getName());
+                    existingSocio.setName(requestSocio.getName());
                 }
 
                 if(requestSocio.getSurname() != null){
-                    currentSocio.setSurname(requestSocio.getSurname());
+                    existingSocio.setSurname(requestSocio.getSurname());
                 }
 
                 if(requestSocio.getAddress() != null){
-                    currentSocio.setAddress(requestSocio.getAddress());
+                    existingSocio.setAddress(requestSocio.getAddress());
                 }
 
                 if(requestSocio.getBirthdate() != null){
-                    currentSocio.setBirthdate(requestSocio.getBirthdate());
-                    currentSocio.setIsAdult(Period.between(requestSocio.getBirthdate(), LocalDate.now()).getYears() >= 18);
+                    existingSocio.setBirthdate(requestSocio.getBirthdate());
+                    existingSocio.setAdult(Period.between(requestSocio.getBirthdate(), LocalDate.now()).getYears() >= 18); // Adaptado
                 }
 
-                // Save updated resource
-                boolean resultOk = socioRepository.updateSocio(currentSocio);
-                if(resultOk){
-                     response = currentSocio;
+                boolean isUpdated = socioRepository.updateSocio(existingSocio); // REFACTORIZACIÓN: resultOk -> isUpdated
+                if(isUpdated){
+                     return existingSocio;
                 }
             }
         }catch(Exception e){
              return requestSocio;
         }
-        return response;
+        return requestSocio;
     }   
-    //PATCH /api/socioinscripcion/modificarInscripcionNoTitular/{id} -> actualiza la inscripcion de un socio no titular
-    @PatchMapping(path="/modificarInscripcionNoTitular/{id}", consumes="application/json")
-    public Socio patchNoTitular(@PathVariable String id, @RequestBody Socio requestSocio) {
-        Socio response = requestSocio;
-        try {
-            // Obtener socio actual
-            Socio currentSocio = this.socioRepository.findById(id);
-            if (currentSocio != null) {
-                // Obtener inscripción actual del socio
-                Inscripcion oldInscripcion = this.inscripcionRepository.findById(currentSocio.getInscriptionId());
 
-                // Si existe inscripción actual, restar el socio de ella
+    @PatchMapping(path="/modificarInscripcionNoTitular/{id}", consumes="application/json")
+    public Socio transferSocioToAnotherInscripcion(@PathVariable String id, @RequestBody Socio requestSocio) { // REFACTORIZACIÓN (Regla 11): patchNoTitular -> transferSocioToAnotherInscripcion
+        try {
+            Socio existingSocio = this.socioRepository.findById(id); // REFACTORIZACIÓN: currentSocio -> existingSocio
+            if (existingSocio != null) {
+                Inscripcion oldInscripcion = this.inscripcionRepository.findById(existingSocio.getInscriptionId());
+
                 if (oldInscripcion != null) {
-                    if (currentSocio.getIsAdult()) {
+                    if (existingSocio.isAdult()) { // Adaptado
                         oldInscripcion.setRegisteredAdults(oldInscripcion.getRegisteredAdults() - 1);
                         oldInscripcion.setTotalAmount(oldInscripcion.getTotalAmount() - 250);
                     } else {
@@ -318,15 +271,12 @@ public class SocioInscripcionRestController {
                     this.inscripcionRepository.update(oldInscripcion);
                 }
 
-                // Actualizar ID de inscripción del socio
                 if (requestSocio.getInscriptionId() != 0) {
-                    currentSocio.setInscriptionId(requestSocio.getInscriptionId());
+                    existingSocio.setInscriptionId(requestSocio.getInscriptionId());
 
-                    // Obtener nueva inscripción
                     Inscripcion newInscripcion = this.inscripcionRepository.findById(requestSocio.getInscriptionId());
                     if (newInscripcion != null) {
-                        // Sumar el socio a la nueva inscripción
-                        if (currentSocio.getIsAdult()) {
+                        if (existingSocio.isAdult()) { // Adaptado
                             newInscripcion.setRegisteredAdults(newInscripcion.getRegisteredAdults() + 1);
                             newInscripcion.setTotalAmount(newInscripcion.getTotalAmount() + 250);
                         } else {
@@ -337,32 +287,31 @@ public class SocioInscripcionRestController {
                     }
                 }
 
-                // Guardar cambios del socio
-                boolean resultOk = socioRepository.updateInscriptionId(currentSocio);
-                if (resultOk) {
-                    response = currentSocio;
+                boolean isUpdated = socioRepository.updateInscriptionId(existingSocio); // REFACTORIZACIÓN: resultOk -> isUpdated
+                if (isUpdated) {
+                    return existingSocio;
                 }
             }
         } catch (Exception e) {
             return requestSocio;
         }
-        return response;
+        return requestSocio;
     }
-    // PUT /api/socioinscripcion/reemplazarSocio/{id} -> reemplaza un socio por id
+
     @PutMapping(path="/reemplazarSocio/{id}", consumes="application/json")
     @ResponseStatus(HttpStatus.OK)
-    public void putSocio(@PathVariable String id, @RequestBody Socio requestSocio) {
+    public void replaceSocio(@PathVariable String id, @RequestBody Socio requestSocio) { // REFACTORIZACIÓN (Regla 11): putSocio -> replaceSocio
         try{
-            // Get course by id
-            Socio currentSocio = this.socioRepository.findById(id);
-            if(currentSocio != null){
-                requestSocio.setId(currentSocio.getId());
-                requestSocio.setInscriptionDate(currentSocio.getInscriptionDate());
-                requestSocio.setInscriptionId(currentSocio.getInscriptionId());
-                requestSocio.setIsHolderInscription(currentSocio.getIsHolderInscription());
-                requestSocio.setIsAdult(Period.between(requestSocio.getBirthdate(), LocalDate.now()).getYears() >= 18);
-                boolean resultOk = socioRepository.updateTodo(requestSocio);
-                if(resultOk){
+            Socio existingSocio = this.socioRepository.findById(id); // REFACTORIZACIÓN: currentSocio -> existingSocio
+            if(existingSocio != null){
+                requestSocio.setSocioId(existingSocio.getSocioId()); // Adaptado
+                requestSocio.setInscriptionDate(existingSocio.getInscriptionDate());
+                requestSocio.setInscriptionId(existingSocio.getInscriptionId());
+                requestSocio.setHolderInscription(existingSocio.isHolderInscription()); // Adaptado
+                requestSocio.setAdult(Period.between(requestSocio.getBirthdate(), LocalDate.now()).getYears() >= 18); // Adaptado
+                
+                boolean isUpdated = socioRepository.updateAllSocioFields(requestSocio); // Adaptado al nombre del método del repo
+                if(isUpdated){
                     System.out.println("[SocioInscripcionRestController]\n\tSocio update correct...");
                 }
                 else{
@@ -371,16 +320,9 @@ public class SocioInscripcionRestController {
             }
             else{
                 System.out.println("[SocioInscripcionRestController]\n\tSocio not found...");
-                
             }
         }catch(Exception e){
             System.out.println("[SocioInscripcionRestController]\n\tDatabase exception...");
         }
     }
-  
-        
 }
-
-
-
-

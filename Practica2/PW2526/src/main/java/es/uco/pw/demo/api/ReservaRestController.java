@@ -2,9 +2,7 @@ package es.uco.pw.demo.api;
 
 import java.util.List;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,157 +31,123 @@ public class ReservaRestController {
         this.reservaRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
-    // ======= Lista completa de reservas ============================
-    // GET /api/reservas -> lista todas las reservas
     @GetMapping
     public ResponseEntity<List<Reserva>> getAllReservas() {
         List<Reserva> reservas = reservaRepository.findAllReservas();
-        ResponseEntity<List<Reserva>> response = new ResponseEntity<>(reservas, HttpStatus.OK);
-        return response;
+        return new ResponseEntity<>(reservas, HttpStatus.OK);
     }
 
-    // ======= Información completa dado su identificador ======================
-    // GET /api/reservas/{id} -> obtiene una reserva por id
     @GetMapping("/{id}")
     public ResponseEntity<Reserva> getReservaById(@PathVariable Integer id) {
         Reserva reserva = reservaRepository.findById(id);
-        ResponseEntity<Reserva> response;
         if (reserva != null) {
-            response = new ResponseEntity<>(reserva, HttpStatus.OK);
+            return new ResponseEntity<>(reserva, HttpStatus.OK);
         } else {
-            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return response;
     }
 
-    // ======= Listas de reservas futuras apartir de una fecha
-    // GET /api/reservas?date=YYYY-MM-DD -> lista las reservas a partir de una fecha
     @GetMapping(params = "date")
-    public ResponseEntity<List<Reserva>> getReservaByDate(
+    public ResponseEntity<List<Reserva>> getReservasByDate( // REFACTORIZACIÓN: getReservaByDate -> getReservasByDate (devuelve lista)
             @RequestParam LocalDate date) {
         List<Reserva> reservas = reservaRepository.findByDate(date);
-        ResponseEntity<List<Reserva>> response = new ResponseEntity<>(reservas, HttpStatus.OK);
-        return response;
+        return new ResponseEntity<>(reservas, HttpStatus.OK);
     }
 
-    // ======== Crea reserva si la embarcación está disponible y + factores=========
-    // POST /api/reservas -> crea una nueva reserva
     @PostMapping(consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public Reserva postReserva(@RequestBody Reserva reserva) {
-        int resultOk = reservaRepository.addReserva(reserva);
-        if (resultOk > 0)
+    public Reserva createReserva(@RequestBody Reserva reserva) { // REFACTORIZACIÓN (Regla 11): postReserva -> createReserva
+        int generatedReservaId = reservaRepository.addReserva(reserva); // REFACTORIZACIÓN: resultOk -> generatedReservaId
+        if (generatedReservaId > 0)
             return reserva;
         else
             return null;
     }
 
-    // ----------Modifica la reserva solo si la embarcación está
-    // disponible-----------
-    // PATCH /api/reservas/{id}/fecha -> actualiza la fecha de una reserva
     @PatchMapping(path = "/{id}/fecha", consumes = "application/json")
-    public Reserva patchReservaDate(@PathVariable int id, @RequestBody Reserva requestReserva) {
-        Reserva response = requestReserva;
+    public Reserva updateReservaDate(@PathVariable int id, @RequestBody Reserva requestReserva) { // REFACTORIZACIÓN: patchReservaDate -> updateReservaDate
         try {
-            // Get reserva by id
-            Reserva currentReserva = this.reservaRepository.findById(id);
-            if (currentReserva != null) {
-                // Usar siempre la embarcación actual para validar
-                String embarcacionActual = currentReserva.getRegistrationNumber();
+            Reserva existingReserva = this.reservaRepository.findById(id); // REFACTORIZACIÓN: currentReserva -> existingReserva
+            if (existingReserva != null) {
+                String embarcacionAsignada = existingReserva.getRegistrationNumber(); // REFACTORIZACIÓN: embarcacionActual -> embarcacionAsignada
 
-                // Solo actualizar fecha si la embarcación está disponible
-                if (requestReserva.getDate() != null) {
-                    boolean disponible = false;
-                    if (reservaRepository.isAvailable(embarcacionActual, requestReserva.getDate())
-                            && reservaRepository.isAvailableInAlquiler(embarcacionActual, requestReserva.getDate())) {
-                        disponible = true;
-                    }
-                    if (disponible) {
-                        currentReserva.setDate(requestReserva.getDate());
+                if (requestReserva.getReservationDate() != null) { // Adaptado (getReservationDate)
+                    boolean isBoatAvailable = reservaRepository.isAvailable(embarcacionAsignada, requestReserva.getReservationDate())
+                            && reservaRepository.isAvailableInAlquiler(embarcacionAsignada, requestReserva.getReservationDate()); // REFACTORIZACIÓN: disponible -> isBoatAvailable
+                    
+                    if (isBoatAvailable) {
+                        existingReserva.setReservationDate(requestReserva.getReservationDate());
                     }
                 }
+                // (El resto de actualizaciones se mantienen igual, adaptando los getters/setters del modelo)
                 if (requestReserva.getRegistrationNumber() != null) {
-                    currentReserva.setRegistrationNumber(requestReserva.getRegistrationNumber());
+                    existingReserva.setRegistrationNumber(requestReserva.getRegistrationNumber());
                 }
-
                 if (requestReserva.getPurpose() != null) {
-                    currentReserva.setPurpose(requestReserva.getPurpose());
+                    existingReserva.setPurpose(requestReserva.getPurpose());
                 }
-                if (requestReserva.getNumSeats() != 0) {
-                    currentReserva.setNumSeats(requestReserva.getNumSeats());
+                if (requestReserva.getNumberOfSeats() != 0) { // Adaptado
+                    existingReserva.setNumberOfSeats(requestReserva.getNumberOfSeats());
                 }
-
                 if (requestReserva.getUserId() != null) {
-                    currentReserva.setUserId(requestReserva.getUserId());
+                    existingReserva.setUserId(requestReserva.getUserId());
                 }
                 if (requestReserva.getTotalAmount() != 0) {
-                    currentReserva.setTotalAmount(requestReserva.getNumSeats() * 40);
+                    existingReserva.setTotalAmount(requestReserva.getNumberOfSeats() * 40); // Adaptado
                 }
-                // Save updated resource
-                boolean resultOk = reservaRepository.updateReserva(currentReserva);
-                if (resultOk) {
-                    response = currentReserva;
+
+                boolean isUpdated = reservaRepository.updateReserva(existingReserva); // REFACTORIZACIÓN: resultOk -> isUpdated
+                if (isUpdated) {
+                    return existingReserva;
                 }
             }
         } catch (Exception e) {
             return requestReserva;
         }
-        return response;
+        return requestReserva;
     }
 
-    // ----------Modifica la reserva si numSeats no es mayor de las
-    // disponibles-----------
-    // PATCH /api/reservas/{id}/plazas -> actualiza el propósito y número de plazas de una reserva
     @PatchMapping(path = "/{id}/plazas", consumes = "application/json")
-    public Reserva patchReservaPurposeYNumSeats(@PathVariable int id, @RequestBody Reserva requestReserva) {
-        Reserva response = requestReserva;
+    public Reserva updateReservaPurposeAndSeats(@PathVariable int id, @RequestBody Reserva requestReserva) { // REFACTORIZACIÓN: patchReservaPurposeYNumSeats -> updateReservaPurposeAndSeats
         try {
-            // Get reserva by id
-            Reserva currentReserva = this.reservaRepository.findById(id);
-            if (currentReserva != null) {
-                // Usar siempre la embarcación actual para validar
-                String embarcacionActual = currentReserva.getRegistrationNumber();
+            Reserva existingReserva = this.reservaRepository.findById(id);
+            if (existingReserva != null) {
+                String embarcacionAsignada = existingReserva.getRegistrationNumber();
 
-                // Solo actualizar numSeats si la embarcación tiene plazas disponibles
-                if (requestReserva.getNumSeats() != 0) {
-                    boolean disponible = false;
-                    if (reservaRepository.hasCapacity(embarcacionActual, requestReserva.getNumSeats())) {
-                        disponible = true;
-                    }
-                    if (disponible) {
-                        currentReserva.setNumSeats(requestReserva.getNumSeats());
+                if (requestReserva.getNumberOfSeats() != 0) { // Adaptado
+                    boolean hasEnoughCapacity = reservaRepository.hasCapacity(embarcacionAsignada, requestReserva.getNumberOfSeats()); // REFACTORIZACIÓN: disponible -> hasEnoughCapacity
+                    if (hasEnoughCapacity) {
+                        existingReserva.setNumberOfSeats(requestReserva.getNumberOfSeats());
                     }
                 }
 
                 if (requestReserva.getRegistrationNumber() != null) {
-                    currentReserva.setRegistrationNumber(requestReserva.getRegistrationNumber());
+                    existingReserva.setRegistrationNumber(requestReserva.getRegistrationNumber());
                 }
                 if (requestReserva.getPurpose() != null) {
-                    currentReserva.setPurpose(requestReserva.getPurpose());
+                    existingReserva.setPurpose(requestReserva.getPurpose());
                 }
-                if (requestReserva.getDate() != null) {
-                    currentReserva.setDate(requestReserva.getDate());
+                if (requestReserva.getReservationDate() != null) { // Adaptado
+                    existingReserva.setReservationDate(requestReserva.getReservationDate());
                 }
-
                 if (requestReserva.getUserId() != null) {
-                    currentReserva.setUserId(requestReserva.getUserId());
+                    existingReserva.setUserId(requestReserva.getUserId());
                 }
                 if (requestReserva.getTotalAmount() != 0) {
-                    currentReserva.setTotalAmount(requestReserva.getNumSeats() * 40);
+                    existingReserva.setTotalAmount(requestReserva.getNumberOfSeats() * 40); // Adaptado
                 }
 
-                // Save updated resource
-                boolean resultOk = reservaRepository.updateReserva(currentReserva);
-                if (resultOk) {
-                    response = currentReserva;
+                boolean isUpdated = reservaRepository.updateReserva(existingReserva);
+                if (isUpdated) {
+                    return existingReserva;
                 }
             }
         } catch (Exception e) {
             return requestReserva;
         }
-        return response;
+        return requestReserva;
     }
-    // DELETE /api/reservas/{id} -> elimina una reserva por id
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReserva(@PathVariable int id) {

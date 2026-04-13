@@ -23,90 +23,75 @@ public class PatronRestController {
         this.patronRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
-    // GET /api/patrones --> Lista todos los patrones
     @GetMapping
     public ResponseEntity<List<Patron>> getAllPatrones(){
         List<Patron> patrones = patronRepository.findAllPatrones();
-        ResponseEntity<List<Patron>> response = new ResponseEntity<>(patrones, HttpStatus.OK);
-        return response;
+        return new ResponseEntity<>(patrones, HttpStatus.OK);
     }
-     //GET /api/patrones/{id} --> Obtiene un patrón por su ID
+    
     @GetMapping("/{id}")
     public ResponseEntity<Patron> getPatronById(@PathVariable String id){
         Patron patron = patronRepository.findById(id); 
-        ResponseEntity<Patron> response;
         if(patron != null){
-            response = new ResponseEntity<>(patron, HttpStatus.OK);
+            return new ResponseEntity<>(patron, HttpStatus.OK);
         } else {
-            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return response;
     }
 
-    //POST /api/patrones --> Crea un nuevo patrón
     @PostMapping(consumes="application/json")
-    public ResponseEntity<Patron> postPatron(@RequestBody Patron patron) {
-        ResponseEntity<Patron> response;
-
-        if(patron.getId() == null || patron.getBirthDate() == null) {
-             response = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } else if(patronRepository.findById(patron.getId()) != null){
-            response = new ResponseEntity<>(patron, HttpStatus.UNPROCESSABLE_ENTITY);
+    public ResponseEntity<Patron> createPatron(@RequestBody Patron patron) { // REFACTORIZACIÓN (Regla 11): postPatron -> createPatron
+        if(patron.getPatronId() == null || patron.getBirthDate() == null) { // Adaptado (getPatronId)
+             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else if(patronRepository.findById(patron.getPatronId()) != null){
+            return new ResponseEntity<>(patron, HttpStatus.UNPROCESSABLE_ENTITY);
         } else if(!isAdult(patron.getBirthDate())){
-            response = new ResponseEntity<>(patron, HttpStatus.UNPROCESSABLE_ENTITY);
+            return new ResponseEntity<>(patron, HttpStatus.UNPROCESSABLE_ENTITY);
         } else {
-            boolean resultOk = patronRepository.addPatron(patron);
-            if(resultOk){
-                response = new ResponseEntity<>(patron, HttpStatus.CREATED);
+            boolean isSaved = patronRepository.addPatron(patron); // REFACTORIZACIÓN: resultOk -> isSaved
+            if(isSaved){
+                return new ResponseEntity<>(patron, HttpStatus.CREATED);
             } else {
-                response = new ResponseEntity<>(patron, HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(patron, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
-        return response;
     }
 
-    //PATCH /api/patrones/{id} --> Actualiza los datos de un patrón
     @PatchMapping(path="/{id}", consumes="application/json")
     public ResponseEntity<Patron> updatePatron(@PathVariable String id, @RequestBody Patron patronUpdates) {
-        ResponseEntity<Patron> response;
-        Patron currentPatron = patronRepository.findById(id);
+        Patron existingPatron = patronRepository.findById(id); // REFACTORIZACIÓN: currentPatron -> existingPatron
         
-        if (currentPatron == null) {
-            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if (existingPatron == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            if (patronUpdates.getName() != null) currentPatron.setName(patronUpdates.getName());
-            if (patronUpdates.getSurname() != null) currentPatron.setSurname(patronUpdates.getSurname());
-            if (patronUpdates.getBirthDate() != null) currentPatron.setBirthDate(patronUpdates.getBirthDate());
-            if (patronUpdates.getTitleIssueDate() != null) currentPatron.setTitleIssueDate(patronUpdates.getTitleIssueDate());
+            if (patronUpdates.getName() != null) existingPatron.setName(patronUpdates.getName());
+            if (patronUpdates.getSurname() != null) existingPatron.setSurname(patronUpdates.getSurname());
+            if (patronUpdates.getBirthDate() != null) existingPatron.setBirthDate(patronUpdates.getBirthDate());
+            if (patronUpdates.getTitleIssueDate() != null) existingPatron.setTitleIssueDate(patronUpdates.getTitleIssueDate());
 
-            boolean resultOk = patronRepository.updatePatron(currentPatron);
-            if (resultOk) {
-                response = new ResponseEntity<>(currentPatron, HttpStatus.OK);
+            boolean isUpdated = patronRepository.updatePatron(existingPatron); // REFACTORIZACIÓN: resultOk -> isUpdated
+            if (isUpdated) {
+                return new ResponseEntity<>(existingPatron, HttpStatus.OK);
             } else {
-                response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
-        return response;
     }
 
-    //DELETE /api/patrones/{id} --> Elimina un patrón
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePatron(@PathVariable String id) {
-        ResponseEntity<Void> response;
-        
         if (patronRepository.findById(id) == null) {
-            response = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else if (patronRepository.hasAssignedBoats(id)) {
-            response = new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         } else {
-            boolean resultOk = patronRepository.deletePatron(id);
-            if (resultOk) {
-                response = new ResponseEntity<>(HttpStatus.NO_CONTENT); 
+            boolean isDeleted = patronRepository.deletePatron(id); // REFACTORIZACIÓN: resultOk -> isDeleted
+            if (isDeleted) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT); 
             } else {
-                response = new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
-        return response;
     }
 
     private boolean isAdult(LocalDate birthDate) {
