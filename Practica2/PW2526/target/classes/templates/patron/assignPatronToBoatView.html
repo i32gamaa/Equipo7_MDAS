@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <title>Asignar Patrón a Embarcación</title>
+    <link rel="stylesheet" href="stylehome.css">
+    <style>
+        .danger-section {
+            background: rgba(220, 53, 69, 0.15) !important;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+            border: 2px solid #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+        
+        .warning-box {
+            background: rgba(220, 53, 69, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+        
+        .form-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .form-section h3 {
+            color: #00bfff;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #00bfff;
+            padding-bottom: 10px;
+        }
+        
+        .danger-section h3 {
+            color: #dc3545 !important;
+            border-bottom: 2px solid #dc3545 !important;
+        }
+        
+        .form-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+            padding-top: 15px;
+        }
+        
+        .btn-primary {
+            border: 2px solid #007bff;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="overlay">
+        <h1>Asignar Patrón a Embarcación</h1>
+
+        <div class="info-box">
+            <h3><i class="fas fa-info-circle"></i> Información Importante</h3>
+            <p><strong>Nota:</strong> Un patrón solo puede estar asignado a una embarcación a la vez.</p>
+        </div>
+
+        <!-- Sección de Asignación -->
+        <div class="form-section">
+            <h3>Asignar Patrón</h3>
+            
+            <form th:action="@{/assignPatronToBoat}" method="post">
+                <div class="form-group">
+                    <label for="registrationNumber">Seleccionar Embarcación:</label>
+                    <select id="registrationNumber" name="registrationNumber" required>
+                        <option value="">-- Seleccione una embarcación --</option>
+                        <option th:each="embarcacion : ${embarcaciones}" th:value="${embarcacion.registrationNumber}"
+                            th:text="${embarcacion.registrationNumber + ' - ' + embarcacion.name + (embarcacion.patronId != null ? ' (Patrón: ' + embarcacion.patronId + ')' : '')}">
+                        </option>
+                    </select>
+
+                    <label for="patronId">Seleccionar Patrón:</label>
+                    <select id="patronId" name="patronId" required>
+                        <option value="">-- Seleccione un patrón --</option>
+                        <option th:each="patron : ${patrones}" th:value="${patron.id}"
+                            th:text="${patron.id + ' - ' + patron.name + ' ' + patron.surname}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-primary">Asignar Patrón</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sección de Desasignación -->
+        <div class="danger-section">
+            <h3>Desasignar Patrón</h3>
+            
+            <div class="warning-box">
+                <p><strong>⚠️ Advertencia:</strong> Esta acción eliminará la asignación actual del patrón.</p>
+            </div>
+            
+            <form th:action="@{/unassignPatronFromBoat}" method="post">
+                <div class="form-group">
+                    <label for="unassignRegistrationNumber">Seleccionar Embarcación para Desasignar:</label>
+                    <select id="unassignRegistrationNumber" name="registrationNumber" required>
+                        <option value="">-- Seleccione una embarcación con patrón asignado --</option>
+                        <option th:each="embarcacion : ${embarcaciones}" 
+                                th:if="${embarcacion.patronId != null}"
+                                th:value="${embarcacion.registrationNumber}"
+                                th:text="${embarcacion.registrationNumber + ' - ' + embarcacion.name + ' (Patrón actual: ' + embarcacion.patronId + ')'}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times-circle"></i>
+                        Desasignar Patrón
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group">
+            <a th:href="@{/listPatrones}" class="btn btn-outline-light">Ver Patrones</a>
+            <a th:href="@{/listEmbarcacion}" class="btn btn-outline-light">Ver Embarcaciones</a>
+            <a th:href="@{/}" class="btn btn-secondary">Volver al Inicio</a>
+        </div>
+    </main>
+</body>
+</html>

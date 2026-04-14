@@ -31,36 +31,22 @@ public class AddReservaController {
 
     @PostMapping("/addReserva")
     public String procesarNuevaReserva(@ModelAttribute("newReserva") Reserva reservaSolicitada, SessionStatus estadoSesion) {
-        System.out.println("[AddReservaController] Info recibida: userId=" + reservaSolicitada.getUserId() +
-                " matricula=" + reservaSolicitada.getRegistrationNumber() +
-                " fecha=" + reservaSolicitada.getDate() +
-                " plazas=" + reservaSolicitada.getNumSeats() +
-                " proposito=" + reservaSolicitada.getPurpose() +
-                " importeTotal=" + reservaSolicitada.getTotalAmount());
-
+        
         boolean tienePatronAsignado = reservaRepository.patronAssigned(reservaSolicitada.getRegistrationNumber());
         boolean tieneCapacidadSuficiente = reservaRepository.hasCapacity(reservaSolicitada.getRegistrationNumber(),
-                reservaSolicitada.getNumSeats());
-        boolean estaDisponibleReserva = reservaRepository.isAvailable(reservaSolicitada.getRegistrationNumber(), reservaSolicitada.getDate());
+                reservaSolicitada.getNumberOfSeats());
+        boolean estaDisponibleReserva = reservaRepository.isAvailable(reservaSolicitada.getRegistrationNumber(), reservaSolicitada.getReservationDate());
         boolean estaDisponibleAlquiler = reservaRepository.isAvailableInAlquiler(reservaSolicitada.getRegistrationNumber(),
-                reservaSolicitada.getDate());
+                reservaSolicitada.getReservationDate());
         boolean esSocioMayorDeEdad = reservaRepository.isAdult(reservaSolicitada.getUserId());
         
         if (!tienePatronAsignado) {
-            System.out.println("[AddReservaController] Error: no tiene patrón asignado la embarcación con matrícula "
-                    + reservaSolicitada.getRegistrationNumber());
             return "reserva/addReservaFailNOPATRONView";
         } else if (!tieneCapacidadSuficiente) {
-            System.out.println("[AddReservaController] Error: La embarcación no tiene suficiente capacidad para "
-                    + reservaSolicitada.getNumSeats() + " plazas.");
             return "reserva/addReservaFailNOCAPACITYView";
         } else if (!estaDisponibleReserva || !estaDisponibleAlquiler) {
-            System.out.println("[AddReservaController] Error: La embarcación no está disponible en la fecha: "
-                    + reservaSolicitada.getDate());
             return "reserva/addReservaFailNOAVAILABLEView";
         } else if (!esSocioMayorDeEdad) {
-            System.out.println("[AddReservaController] Error: El socio con id: " + reservaSolicitada.getUserId()
-                    + " no es mayor de edad.");
             return "reserva/addReservaFailNOADULTView";
         }
 

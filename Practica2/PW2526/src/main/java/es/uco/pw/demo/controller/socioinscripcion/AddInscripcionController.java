@@ -28,7 +28,7 @@ public class AddInscripcionController {
     public AddInscripcionController(SocioRepository socioRepository, InscripcionRepository inscripcionRepository, PatronRepository patronRepository) {
         this.socioRepository = socioRepository;
         this.inscripcionRepository = inscripcionRepository;
-        this.patronRepository=patronRepository;
+        this.patronRepository = patronRepository;
 
         String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
         this.socioRepository.setSQLQueriesFileName(sqlQueriesFileName);
@@ -36,88 +36,66 @@ public class AddInscripcionController {
     }
 
     @GetMapping("/addInscripcion")
-    public ModelAndView getAddSocioForm() {
+    public ModelAndView mostrarFormularioInscripcion() {
         this.modelAndView.setViewName("socioinscripcion/addInscripcionView");
         this.modelAndView.addObject("newSocio", new Socio());
         return modelAndView;
     }
 
     @PostMapping("/addInscripcion")
-    public String addSocio(@ModelAttribute Socio newSocio, SessionStatus sessionStatus) {
+    public String procesarNuevaInscripcion(@ModelAttribute("newSocio") Socio socioTitular, SessionStatus estadoSesion) {
 
-        System.out.println("[AddInscripcionController] Datos recibidos: " +
-                "id=" + newSocio.getId() +
-                ", name=" + newSocio.getName() +
-                ", surname=" + newSocio.getSurname() +
-                ", address=" + newSocio.getAddress() +
-                ", birthdate=" + newSocio.getBirthdate() +
-                ", isBoatDriver=" + newSocio.getIsBoatDriver());
-        
-         //1. Comprobar si el ID ya existe en la base de datos en socio o en patron
-        Socio existingSocio = socioRepository.findById(newSocio.getId());
-        if (existingSocio != null) {
-            System.out.println("[AddInscripcionController] Error: ya existe un socio con el ID " + newSocio.getId());
+        Socio socioExistente = socioRepository.findById(socioTitular.getSocioId());
+        if (socioExistente != null) {
             return "socioinscripcion/addInscripcionDuplicateIdView"; 
         }
-        Patron existingPatron = patronRepository.findById(newSocio.getId());
-        if (existingPatron != null) {
-            System.out.println("[AddInscripcionController] Error: ya existe un patron con el ID " + newSocio.getId());
+        Patron patronExistente = patronRepository.findById(socioTitular.getSocioId());
+        if (patronExistente != null) {
             return "socioinscripcion/addInscripcionDuplicateIdView"; 
         }
 
-        newSocio.setIsAdult(Period.between(newSocio.getBirthdate(), LocalDate.now()).getYears() >= 18);
-        newSocio.setIsHolderInscription(true);
-        newSocio.setInscriptionDate(LocalDate.now());
+        socioTitular.setAdult(Period.between(socioTitular.getBirthdate(), LocalDate.now()).getYears() >= 18);
+        socioTitular.setHolderInscription(true);
+        socioTitular.setInscriptionDate(LocalDate.now());
 
-
-        if(newSocio.getIsAdult()==false){
-            System.out.println("[AddInscripcionController] El socio es menor de edad. No se puede crear inscripción ni socio.");
-            return "socioinscripcion/addInscripcionFailNotAdultView"; // o tu vista específica
+        if (socioTitular.isAdult() == false) {
+            return "socioinscripcion/addInscripcionFailNotAdultView";
         }
 
-        // Crear socio sin inscripción (inscriptionId NULL)
-        boolean socioCreated = socioRepository.addSocioAdult(newSocio);
-        if (!socioCreated) {
-            System.out.println("[AddInscripcionController] Error al crear socio.");
+        boolean socioCreadoCorrectamente = socioRepository.addSocioAdult(socioTitular);
+        if (!socioCreadoCorrectamente) {
             return "socioinscripcion/addInscripcionFailView";
         }
 
-        // Crear inscripción asociada
-        Inscripcion inscripcion = new Inscripcion();
-        inscripcion.setDate(LocalDate.now());
-        inscripcion.setTotalAmount(300);
-        inscripcion.setUserId(newSocio.getId());
-        inscripcion.setRegisteredAdults(1);
-        inscripcion.setRegisteredKids(0);
+        Inscripcion nuevaInscripcion = new Inscripcion();
+        nuevaInscripcion.setRegistrationDate(LocalDate.now());
+        nuevaInscripcion.setTotalAmount(300);
+        nuevaInscripcion.setUserId(socioTitular.getSocioId());
+        nuevaInscripcion.setRegisteredAdults(1);
+        nuevaInscripcion.setRegisteredKids(0);
 
-        boolean inscriptionCreated = inscripcionRepository.addInscripcion(inscripcion);
-        if (!inscriptionCreated) {
-            System.out.println("[AddInscripcionController] Error al crear inscripción.");
+        boolean inscripcionCreadaCorrectamente = inscripcionRepository.addInscripcion(nuevaInscripcion);
+        if (!inscripcionCreadaCorrectamente) {
             return "socioinscripcion/addInscripcionFailView";
         }
 
-        // Recuperar ID inscripción creada
-        Inscripcion inscripcion2 = inscripcionRepository.findByUserId(newSocio.getId());
-        if (inscripcion2 == null) {
-            System.out.println("[AddInscripcionController] No se pudo recuperar el ID de inscripción creada.");
+        Inscripcion inscripcionRecuperada = inscripcionRepository.findByUserId(socioTitular.getSocioId());
+        if (inscripcionRecuperada == null) {
             return "socioinscripcion/addInscripcionFailView";
         }
 
-        // 4Actualizar socio con el ID de la inscripción
-        newSocio.setInscriptionId(inscripcion2.getId());
+        socioTitular.setInscriptionId(inscripcionRecuperada.getId());
 
-        boolean socioUpdated = socioRepository.updateInscriptionId(newSocio);
-        String nextPage;
+        boolean socioActualizadoCorrectamente = socioRepository.updateInscriptionId(socioTitular);
+        String vistaDestino;
 
-        if (socioUpdated) {
-            nextPage = "socioinscripcion/addSocioSuccessView";
+        if (socioActualizadoCorrectamente) {
+            vistaDestino = "socioinscripcion/addSocioSuccessView";
         } else {
-            nextPage = "socioinscripcion/addSocioFailView";
+            vistaDestino = "socioinscripcion/addSocioFailView";
         }
 
-        sessionStatus.setComplete();
-        return nextPage;
+        estadoSesion.setComplete();
+        return vistaDestino;
     }
-
 }
-

@@ -40,14 +40,11 @@ public class AddEmbarcacionController {
         }
         
         System.out.println("[AddEmbarcacionController] Info recibida: matricula=" + nuevaEmbarcacion.getRegistrationNumber() +
-                " tipo=" + nuevaEmbarcacion.getType().toString() +
-                " nombre=" + nuevaEmbarcacion.getName() +
-                " plazas=" + nuevaEmbarcacion.getNumSeats() +
+                " plazas=" + nuevaEmbarcacion.getNumberOfSeats() +
                 " patronId=" + nuevaEmbarcacion.getPatronId());
         
         boolean existeNombreDuplicado = comprobarNombreDuplicado(nuevaEmbarcacion.getName());
         if (existeNombreDuplicado) {
-            System.out.println("[AddEmbarcacionController] Error: El nombre '" + nuevaEmbarcacion.getName() + "' ya existe");
             return "embarcacion/addEmbarcacionFailView";
         }
                 
@@ -67,7 +64,6 @@ public class AddEmbarcacionController {
     private boolean comprobarNombreDuplicado(String nombreAComprobar) {
         try {
             List<Embarcacion> inventarioEmbarcaciones = embarcacionRepository.findAllEmbarcaciones();
-            
             if (inventarioEmbarcaciones != null) {
                 for (Embarcacion embarcacionRegistrada : inventarioEmbarcaciones) {
                     if (embarcacionRegistrada.getName() != null && embarcacionRegistrada.getName().equalsIgnoreCase(nombreAComprobar)) {
@@ -77,8 +73,6 @@ public class AddEmbarcacionController {
             }
             return false; 
         } catch (Exception e) {
-            System.err.println("Error comprobando nombre duplicado: " + e.getMessage());
-            e.printStackTrace();
             return true; 
         }
     }

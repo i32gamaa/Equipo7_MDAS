@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Error al Buscar Socio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="stylefail.css">
+    <link rel="icon" href="images/logo.png" type="image/png">
+</head>
+
+<body>
+    <main class="overlay error">
+        <h1>Error al Buscar Inscripción</h1>
+
+        <div class="error-message">No se ha encontrado ninguna inscripción con el id introducido</div>
+
+        <div class="btn-group">
+            <a th:href="@{/findInscripcionById}" class="btn btn-primary">Intentar de Nuevo</a>
+            <a th:href="@{/listInscripciones}" class="btn btn-secondary">Ver Todas las Inscripciones</a>
+            <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
+        </div>
+    </main>
+</body>
+
+</html>

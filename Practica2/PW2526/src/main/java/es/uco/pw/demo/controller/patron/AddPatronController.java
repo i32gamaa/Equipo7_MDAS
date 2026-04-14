@@ -39,26 +39,17 @@ public class AddPatronController {
     @PostMapping("/addPatron")
     public String procesarNuevoPatron(@ModelAttribute("newPatron") Patron patronSolicitado, SessionStatus estadoSesion) {
 
-        System.out.println("[AddPatronController] Received info: id=" + patronSolicitado.getId() +
-                " name=" + patronSolicitado.getName() +
-                " surname=" + patronSolicitado.getSurname() +
-                " birth=" + patronSolicitado.getBirthDate() +
-                " titleIssueDate=" + patronSolicitado.getTitleIssueDate());
-
         if (!esMayorDeEdad(patronSolicitado.getBirthDate())) {
-            System.out.println("[AddPatronController] Error: el patrón es menor de edad");
             return "patron/addPatronFailNOADULTView";
         }
 
-        Patron patronExistente = patronRepository.findById(patronSolicitado.getId());
+        Patron patronExistente = patronRepository.findById(patronSolicitado.getPatronId());
         if (patronExistente != null) {
-            System.out.println("[AddPatronController] Error: ya existe un patron con el ID " + patronSolicitado.getId());
             return "patron/addPatronDuplicateIdView"; 
         }
         
-        Socio socioExistente = socioRepository.findById(patronSolicitado.getId());
+        Socio socioExistente = socioRepository.findById(patronSolicitado.getPatronId());
         if (socioExistente != null) {
-            System.out.println("[AddPatronController] Error: ya existe un socio con el ID " + patronSolicitado.getId());
             return "patron/addPatronDuplicateIdView";
         }
 
@@ -76,11 +67,7 @@ public class AddPatronController {
     }
 
     private boolean esMayorDeEdad(LocalDate fechaNacimiento) {
-        if (fechaNacimiento == null) {
-            return false;
-        }
-        LocalDate fechaActual = LocalDate.now();
-        Period edad = Period.between(fechaNacimiento, fechaActual);
-        return edad.getYears() >= 18;
+        if (fechaNacimiento == null) return false;
+        return Period.between(fechaNacimiento, LocalDate.now()).getYears() >= 18;
     }
 }

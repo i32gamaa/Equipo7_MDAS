@@ -31,18 +31,13 @@ public class UpdateIsBoatDriverController {
         ModelAndView vistaResultados;
 
         if (socioEncontrado != null) {
-            if (!socioEncontrado.getIsBoatDriver()) {
-                socioEncontrado.setIsBoatDriver(true);
-                socioRepository.updateIsBoatDriver(socioEncontrado.getId(), socioEncontrado.getIsBoatDriver());
-
-                System.out.println("[UpdateIsBoatDriverController] Socio " + socioEncontrado.getId() +
-                        " actualizado: isBoatDriver = true");
+            if (!socioEncontrado.isBoatDriver()) {
+                socioEncontrado.setBoatDriver(true);
+                socioRepository.updateIsBoatDriver(socioEncontrado.getSocioId(), socioEncontrado.isBoatDriver());
 
                 vistaResultados = new ModelAndView("socioinscripcion/updateIsBoatDriverSuccessView");
                 vistaResultados.addObject("socio", socioEncontrado);
             } else {
-                System.out.println("[UpdateIsBoatDriverController] Socio " + socioEncontrado.getId() +
-                        " ya tenía isBoatDriver = true, no se actualiza.");
                 vistaResultados = new ModelAndView("socioinscripcion/updateIsBoatDriverFailView");
                 vistaResultados.addObject("socio", socioEncontrado);
             }

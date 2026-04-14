@@ -45,33 +45,22 @@ public class AddSocioController {
     @PostMapping("/addSocio")
     public String procesarNuevoSocio(@ModelAttribute("newSocio") Socio socioSolicitado, SessionStatus estadoSesion) {
 
-        System.out.println("[AddSocioController] Recibido socio: dni=" + socioSolicitado.getId() +
-                ", nombre=" + socioSolicitado.getName() +
-                ", apellidos=" + socioSolicitado.getSurname() +
-                " direccion=" + socioSolicitado.getAddress() +
-                ", nacimiento=" + socioSolicitado.getBirthdate() +
-                ", inscripción ID=" + socioSolicitado.getInscriptionId());
-
-       Socio socioExistente = socioRepository.findById(socioSolicitado.getId());
+       Socio socioExistente = socioRepository.findById(socioSolicitado.getSocioId());
        if (socioExistente != null) {
-           System.out.println("[AddSocioController] Error: ya existe un socio con el ID " + socioSolicitado.getId());
            return "socioinscripcion/addSocioDuplicateIdView"; 
        }
-       Patron patronExistente = patronRepository.findById(socioSolicitado.getId());
+       Patron patronExistente = patronRepository.findById(socioSolicitado.getSocioId());
         if (patronExistente != null) {
-            System.out.println("[AddSocioController] Error: ya existe un patron con el ID " + socioSolicitado.getId());
             return "socioinscripcion/addInscripcionDuplicateIdView"; 
         }
 
         boolean esAdulto = Period.between(socioSolicitado.getBirthdate(), LocalDate.now()).getYears() >= 18;
-        socioSolicitado.setIsAdult(esAdulto);
+        socioSolicitado.setAdult(esAdulto);
         socioSolicitado.setInscriptionDate(LocalDate.now());
 
         if (!esAdulto) {
-            socioSolicitado.setIsBoatDriver(false);
+            socioSolicitado.setBoatDriver(false);
         }
-
-        System.out.println("[AddSocioController] Es adulto: " + esAdulto);
 
         Inscripcion inscripcionEncontrada = inscripcionRepository.findById(socioSolicitado.getInscriptionId());
 
@@ -85,19 +74,12 @@ public class AddSocioController {
             }
 
             if (inscripcionEncontrada.getRegisteredAdults() > 2) {
-                System.out.println("[AddSocioController] Error: ya existen dos adultos asociados a la inscripcion familiar");
                 return "socioinscripcion/addSocioFailView"; 
             }
 
             inscripcionRepository.update(inscripcionEncontrada);
-
-            System.out.println("[AddSocioController] Actualizada inscripción " + inscripcionEncontrada.getId() + " con cuota +" + cuotaExtra + " Euros. Total: " + inscripcionEncontrada.getTotalAmount() + "adultos: " + inscripcionEncontrada.getRegisteredAdults() + "niños: " + inscripcionEncontrada.getRegisteredKids());
-
             socioSolicitado.setInscriptionId(inscripcionEncontrada.getId());
-            System.out.println("[AddSocioController] InscriptionId del socio actualizado a: " + socioSolicitado.getInscriptionId());
 
-        } else {
-            System.out.println("[AddSocioController] No se encontró inscripción con ID: " + socioSolicitado.getInscriptionId());
         }
 
         boolean registroCompletado = socioRepository.addSocio(socioSolicitado);
