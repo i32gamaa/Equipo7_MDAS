@@ -4,14 +4,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
-
 import es.uco.pw.demo.model.domain.Patron;
 import es.uco.pw.demo.model.domain.Socio;
 import es.uco.pw.demo.model.repository.PatronRepository;
 import es.uco.pw.demo.model.repository.SocioRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -38,7 +36,6 @@ public class AddPatronController {
 
     @PostMapping("/addPatron")
     public String procesarNuevoPatron(@ModelAttribute("newPatron") Patron patronSolicitado, SessionStatus estadoSesion) {
-
         if (!esMayorDeEdad(patronSolicitado.getBirthDate())) {
             return "patron/addPatronFailNOADULTView";
         }
@@ -67,7 +64,9 @@ public class AddPatronController {
     }
 
     private boolean esMayorDeEdad(LocalDate fechaNacimiento) {
-        if (fechaNacimiento == null) return false;
+        if (fechaNacimiento == null) {
+            return false;
+        }
         return Period.between(fechaNacimiento, LocalDate.now()).getYears() >= 18;
     }
 }

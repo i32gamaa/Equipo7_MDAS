@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-
 import es.uco.pw.demo.model.domain.Socio;
 import es.uco.pw.demo.model.repository.SocioRepository;
 
@@ -34,7 +33,7 @@ public class UpdateIsBoatDriverController {
             if (!socioEncontrado.isBoatDriver()) {
                 socioEncontrado.setBoatDriver(true);
                 socioRepository.updateIsBoatDriver(socioEncontrado.getSocioId(), socioEncontrado.isBoatDriver());
-
+                
                 vistaResultados = new ModelAndView("socioinscripcion/updateIsBoatDriverSuccessView");
                 vistaResultados.addObject("socio", socioEncontrado);
             } else {

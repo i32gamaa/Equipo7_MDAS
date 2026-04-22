@@ -32,7 +32,6 @@ public class FindAlquilerByDateController {
             @RequestParam("endDate") String fechaFinTexto) {
         
         ModelAndView modelAndView = new ModelAndView();
-        
         System.out.println("[FindAlquilerByDateController] Fechas recibidas - Inicio: " + fechaInicioTexto + ", Fin: " + fechaFinTexto);
 
         try {

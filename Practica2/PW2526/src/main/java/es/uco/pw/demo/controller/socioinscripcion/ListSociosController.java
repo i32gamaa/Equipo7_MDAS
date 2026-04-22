@@ -22,9 +22,7 @@ public class ListSociosController {
     @GetMapping("/listSocios")
     public ModelAndView mostrarTodosLosSocios() {
         this.modelAndView.setViewName("socioinscripcion/listSociosView");
-        
         List<Socio> sociosRegistrados = socioRepository.findAllSocios();
-        
         this.modelAndView.addObject("socios", sociosRegistrados);
         return modelAndView;
     }

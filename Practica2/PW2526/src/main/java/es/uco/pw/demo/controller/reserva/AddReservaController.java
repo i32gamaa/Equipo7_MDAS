@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
-
 import es.uco.pw.demo.model.domain.Reserva;
 import es.uco.pw.demo.model.repository.ReservaRepository;
 
@@ -31,22 +30,34 @@ public class AddReservaController {
 
     @PostMapping("/addReserva")
     public String procesarNuevaReserva(@ModelAttribute("newReserva") Reserva reservaSolicitada, SessionStatus estadoSesion) {
-        
-        boolean tienePatronAsignado = reservaRepository.patronAssigned(reservaSolicitada.getRegistrationNumber());
-        boolean tieneCapacidadSuficiente = reservaRepository.hasCapacity(reservaSolicitada.getRegistrationNumber(),
+        System.out.println("[AddReservaController] Info recibida: userId=" + reservaSolicitada.getUserId() +
+                " matricula=" + reservaSolicitada.getRegistrationNumber() +
+                " fecha=" + reservaSolicitada.getReservationDate() +
+                " plazas=" + reservaSolicitada.getNumberOfSeats() +
+                " proposito=" + reservaSolicitada.getPurpose() +
+                " totalAmount=" + reservaSolicitada.getTotalAmount());
+
+        boolean tienePatron = reservaRepository.patronAssigned(reservaSolicitada.getRegistrationNumber());
+        boolean tieneCapacidad = reservaRepository.hasCapacity(reservaSolicitada.getRegistrationNumber(),
                 reservaSolicitada.getNumberOfSeats());
-        boolean estaDisponibleReserva = reservaRepository.isAvailable(reservaSolicitada.getRegistrationNumber(), reservaSolicitada.getReservationDate());
-        boolean estaDisponibleAlquiler = reservaRepository.isAvailableInAlquiler(reservaSolicitada.getRegistrationNumber(),
+        boolean estaDisponible = reservaRepository.isAvailable(reservaSolicitada.getRegistrationNumber(), reservaSolicitada.getReservationDate());
+        boolean disponibleAlquiler = reservaRepository.isAvailableInAlquiler(reservaSolicitada.getRegistrationNumber(),
                 reservaSolicitada.getReservationDate());
-        boolean esSocioMayorDeEdad = reservaRepository.isAdult(reservaSolicitada.getUserId());
-        
-        if (!tienePatronAsignado) {
+        boolean esAdulto = reservaRepository.isAdult(reservaSolicitada.getUserId());
+
+        if (!tienePatron) {
             return "reserva/addReservaFailNOPATRONView";
-        } else if (!tieneCapacidadSuficiente) {
+        } 
+        
+        if (!tieneCapacidad) {
             return "reserva/addReservaFailNOCAPACITYView";
-        } else if (!estaDisponibleReserva || !estaDisponibleAlquiler) {
+        } 
+        
+        if (!estaDisponible || !disponibleAlquiler) {
             return "reserva/addReservaFailNOAVAILABLEView";
-        } else if (!esSocioMayorDeEdad) {
+        } 
+        
+        if (!esAdulto) {
             return "reserva/addReservaFailNOADULTView";
         }
 

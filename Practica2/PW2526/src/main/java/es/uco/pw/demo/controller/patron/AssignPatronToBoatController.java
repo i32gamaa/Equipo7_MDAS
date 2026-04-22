@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-
 import es.uco.pw.demo.model.repository.EmbarcacionRepository;
 import es.uco.pw.demo.model.repository.PatronRepository;
 
@@ -31,7 +30,6 @@ public class AssignPatronToBoatController {
 
     @PostMapping("/assignPatronToBoat")
     public String procesarAsignacionPatron(@RequestParam String registrationNumber, @RequestParam String patronId) {
-
         System.out.println("[AssignPatronToBoatController] Asignando patrón " + patronId + " a embarcación " + registrationNumber);
 
         boolean asignacionExitosa = patronRepository.assignPatronToBoat(patronId, registrationNumber);
@@ -48,7 +46,6 @@ public class AssignPatronToBoatController {
 
     @PostMapping("/unassignPatronFromBoat")
     public String procesarDesasignacionPatron(@RequestParam String registrationNumber) {
-
         System.out.println("[AssignPatronToBoatController] Desasignando patrón de la embarcación " + registrationNumber);
 
         boolean desasignacionExitosa = patronRepository.unassignPatronFromBoat(registrationNumber);

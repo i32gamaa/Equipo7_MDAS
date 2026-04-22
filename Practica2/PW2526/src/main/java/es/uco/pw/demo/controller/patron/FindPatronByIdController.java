@@ -24,7 +24,6 @@ public class FindPatronByIdController {
 
     @PostMapping("/findPatronById")
     public ModelAndView procesarBusquedaPorId(@RequestParam("idNumber") String dniBuscado) {
-        
         System.out.println("[FindPatronByIdController] Searching for patron with ID: " + dniBuscado);
 
         if (dniBuscado == null || dniBuscado.trim().isEmpty()) {

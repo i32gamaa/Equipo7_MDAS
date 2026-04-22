@@ -6,14 +6,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
-
 import es.uco.pw.demo.model.domain.Socio;
 import es.uco.pw.demo.model.domain.Inscripcion;
 import es.uco.pw.demo.model.domain.Patron;
 import es.uco.pw.demo.model.repository.SocioRepository;
 import es.uco.pw.demo.model.repository.InscripcionRepository;
 import es.uco.pw.demo.model.repository.PatronRepository;
-
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -29,7 +27,6 @@ public class AddInscripcionController {
         this.socioRepository = socioRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.patronRepository = patronRepository;
-
         String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
         this.socioRepository.setSQLQueriesFileName(sqlQueriesFileName);
         this.inscripcionRepository.setSQLQueriesFileName(sqlQueriesFileName);
@@ -49,6 +46,7 @@ public class AddInscripcionController {
         if (socioExistente != null) {
             return "socioinscripcion/addInscripcionDuplicateIdView"; 
         }
+        
         Patron patronExistente = patronRepository.findById(socioTitular.getSocioId());
         if (patronExistente != null) {
             return "socioinscripcion/addInscripcionDuplicateIdView"; 
@@ -58,7 +56,7 @@ public class AddInscripcionController {
         socioTitular.setHolderInscription(true);
         socioTitular.setInscriptionDate(LocalDate.now());
 
-        if (socioTitular.isAdult() == false) {
+        if (!socioTitular.isAdult()) {
             return "socioinscripcion/addInscripcionFailNotAdultView";
         }
 
@@ -85,15 +83,9 @@ public class AddInscripcionController {
         }
 
         socioTitular.setInscriptionId(inscripcionRecuperada.getId());
-
         boolean socioActualizadoCorrectamente = socioRepository.updateInscriptionId(socioTitular);
-        String vistaDestino;
-
-        if (socioActualizadoCorrectamente) {
-            vistaDestino = "socioinscripcion/addSocioSuccessView";
-        } else {
-            vistaDestino = "socioinscripcion/addSocioFailView";
-        }
+        
+        String vistaDestino = socioActualizadoCorrectamente ? "socioinscripcion/addSocioSuccessView" : "socioinscripcion/addSocioFailView";
 
         estadoSesion.setComplete();
         return vistaDestino;

@@ -3,9 +3,7 @@ package es.uco.pw.demo.controller.embarcacion;
 import es.uco.pw.demo.model.domain.Embarcacion;
 import es.uco.pw.demo.model.domain.EmbarcacionType;
 import es.uco.pw.demo.model.repository.EmbarcacionRepository;
-
 import java.util.List;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;

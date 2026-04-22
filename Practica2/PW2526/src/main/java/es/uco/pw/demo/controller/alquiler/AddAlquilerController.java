@@ -26,9 +26,7 @@ public class AddAlquilerController {
     private final EmbarcacionRepository embarcacionRepository;
     private ModelAndView modelAndView = new ModelAndView();
 
-    public AddAlquilerController(AlquilerRepository alquilerRepository, 
-                               SocioRepository socioRepository,
-                               EmbarcacionRepository embarcacionRepository) {
+    public AddAlquilerController(AlquilerRepository alquilerRepository, SocioRepository socioRepository, EmbarcacionRepository embarcacionRepository) {
         this.alquilerRepository = alquilerRepository;
         this.socioRepository = socioRepository;
         this.embarcacionRepository = embarcacionRepository;
@@ -47,7 +45,6 @@ public class AddAlquilerController {
         
         if (matricula != null && !matricula.isEmpty()) {
             alquilerSolicitado.setRegistrationNumber(matricula);
-            
             Embarcacion embarcacionEncontrada = embarcacionRepository.findByRegistration(matricula);
             if (embarcacionEncontrada != null) {
                 this.modelAndView.addObject("embarcacion", embarcacionEncontrada);
@@ -73,7 +70,6 @@ public class AddAlquilerController {
         }
         
         this.modelAndView.addObject("newAlquiler", alquilerSolicitado); 
-        
         String mensajeInformativoRestricciones = obtenerRestriccionesTemporales();
         this.modelAndView.addObject("infoMessage", mensajeInformativoRestricciones);
         
@@ -82,7 +78,6 @@ public class AddAlquilerController {
 
     @PostMapping("/addAlquiler")
     public ModelAndView procesarNuevoAlquiler(@ModelAttribute("newAlquiler") Alquiler alquilerSolicitado, SessionStatus estadoSesion) {
-        
         this.modelAndView = new ModelAndView();
 
         String mensajeErrorValidacion = validarReglasAlquiler(alquilerSolicitado);

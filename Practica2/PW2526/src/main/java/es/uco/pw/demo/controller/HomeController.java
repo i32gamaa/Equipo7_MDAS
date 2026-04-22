@@ -41,4 +41,3 @@ public class HomeController {
         return "socioinscripcion/homeSocioInscripcion"; 
     }
 }
-

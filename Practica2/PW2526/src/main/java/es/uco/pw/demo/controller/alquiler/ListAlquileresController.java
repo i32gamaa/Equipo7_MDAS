@@ -26,7 +26,6 @@ public class ListAlquileresController {
         System.out.println("=== ListAlquileresController LLAMADO ===");
         
         this.modelAndView.setViewName("alquiler/listAlquileresView");
-        
         List<Alquiler> alquileresVigentes = alquilerRepository.findCurrentAndFutureAlquileres();
         
         System.out.println("Resultado del repositorio: " + (alquileresVigentes != null ? alquileresVigentes.size() + " elementos" : "NULL"));

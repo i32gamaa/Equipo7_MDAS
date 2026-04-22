@@ -3,10 +3,8 @@ package es.uco.pw.demo.controller.patron;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
-
 import es.uco.pw.demo.model.repository.PatronRepository;
 import es.uco.pw.demo.model.domain.Patron;
-
 import java.util.List;
 
 @Controller

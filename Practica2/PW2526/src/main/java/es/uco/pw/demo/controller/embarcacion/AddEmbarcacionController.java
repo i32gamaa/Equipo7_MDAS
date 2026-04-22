@@ -4,7 +4,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
-
 import es.uco.pw.demo.model.domain.Embarcacion;
 import es.uco.pw.demo.model.domain.EmbarcacionType;
 import es.uco.pw.demo.model.repository.EmbarcacionRepository;
@@ -34,7 +33,6 @@ public class AddEmbarcacionController {
 
     @PostMapping("/addEmbarcacion")
     public String procesarNuevaEmbarcacion(@ModelAttribute Embarcacion nuevaEmbarcacion, SessionStatus estadoSesion) {
-        
         if (nuevaEmbarcacion.getPatronId() == null || nuevaEmbarcacion.getPatronId().isEmpty()) {
             nuevaEmbarcacion.setPatronId(null);
         }

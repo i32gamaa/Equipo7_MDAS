@@ -6,14 +6,12 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
-
 import es.uco.pw.demo.model.domain.Socio;
 import es.uco.pw.demo.model.domain.Inscripcion;
 import es.uco.pw.demo.model.domain.Patron;
 import es.uco.pw.demo.model.repository.SocioRepository;
 import es.uco.pw.demo.model.repository.InscripcionRepository;
 import es.uco.pw.demo.model.repository.PatronRepository;
-
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -29,7 +27,6 @@ public class AddSocioController {
         this.socioRepository = socioRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.patronRepository = patronRepository;
-
         String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
         this.socioRepository.setSQLQueriesFileName(sqlQueriesFileName);
         this.inscripcionRepository.setSQLQueriesFileName(sqlQueriesFileName);
@@ -44,32 +41,35 @@ public class AddSocioController {
 
     @PostMapping("/addSocio")
     public String procesarNuevoSocio(@ModelAttribute("newSocio") Socio socioSolicitado, SessionStatus estadoSesion) {
+        System.out.println("[AddSocioController] Recibido socio: dni=" + socioSolicitado.getSocioId());
 
        Socio socioExistente = socioRepository.findById(socioSolicitado.getSocioId());
        if (socioExistente != null) {
            return "socioinscripcion/addSocioDuplicateIdView"; 
        }
+       
        Patron patronExistente = patronRepository.findById(socioSolicitado.getSocioId());
         if (patronExistente != null) {
             return "socioinscripcion/addInscripcionDuplicateIdView"; 
         }
 
-        boolean esAdulto = Period.between(socioSolicitado.getBirthdate(), LocalDate.now()).getYears() >= 18;
-        socioSolicitado.setAdult(esAdulto);
+        boolean cumpleMayoriaEdad = Period.between(socioSolicitado.getBirthdate(), LocalDate.now()).getYears() >= 18;
+        socioSolicitado.setAdult(cumpleMayoriaEdad);
         socioSolicitado.setInscriptionDate(LocalDate.now());
 
-        if (!esAdulto) {
+        if (!cumpleMayoriaEdad) {
             socioSolicitado.setBoatDriver(false);
         }
 
         Inscripcion inscripcionEncontrada = inscripcionRepository.findById(socioSolicitado.getInscriptionId());
 
         if (inscripcionEncontrada != null) {
-            int cuotaExtra = esAdulto ? 250 : 100;
+            int cuotaExtra = cumpleMayoriaEdad ? 250 : 100;
             inscripcionEncontrada.setTotalAmount(inscripcionEncontrada.getTotalAmount() + cuotaExtra);
-            if(esAdulto){
+            
+            if (cumpleMayoriaEdad) {
                 inscripcionEncontrada.setRegisteredAdults(inscripcionEncontrada.getRegisteredAdults() + 1);
-            }else{
+            } else {
                 inscripcionEncontrada.setRegisteredKids(inscripcionEncontrada.getRegisteredKids() + 1);
             }
 
@@ -79,17 +79,10 @@ public class AddSocioController {
 
             inscripcionRepository.update(inscripcionEncontrada);
             socioSolicitado.setInscriptionId(inscripcionEncontrada.getId());
-
         }
 
         boolean registroCompletado = socioRepository.addSocio(socioSolicitado);
-        String vistaDestino;
-
-        if (registroCompletado) {
-            vistaDestino = "socioinscripcion/addSocioSuccessView";
-        } else {
-            vistaDestino = "socioinscripcion/addSocioFailView";
-        }
+        String vistaDestino = registroCompletado ? "socioinscripcion/addSocioSuccessView" : "socioinscripcion/addSocioFailView";
 
         estadoSesion.setComplete();
         return vistaDestino;

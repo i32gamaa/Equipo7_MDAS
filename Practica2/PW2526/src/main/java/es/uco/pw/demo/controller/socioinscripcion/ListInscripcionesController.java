@@ -22,9 +22,7 @@ public class ListInscripcionesController {
     @GetMapping("/listInscripciones")
     public ModelAndView mostrarTodasLasInscripciones() {
         this.modelAndView.setViewName("socioinscripcion/listInscripcionesView");
-        
         List<Inscripcion> inscripcionesRegistradas = inscripcionRepository.findAllInscripciones();
-        
         this.modelAndView.addObject("inscripciones", inscripcionesRegistradas);
         return modelAndView;
     }
