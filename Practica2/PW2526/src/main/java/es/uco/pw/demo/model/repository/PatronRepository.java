@@ -4,11 +4,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-
 import es.uco.pw.demo.model.domain.Patron;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 @Repository
@@ -16,165 +12,83 @@ public class PatronRepository extends AbstractRepository {
 
     public PatronRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.setSQLQueriesFileName(sqlQueriesFileName);
+        this.setSQLQueriesFileName("./src/main/resources/db/sql.properties");
+    }
+
+    // Regla 20: Saco el try-catch de la lógica principal. 
+    public Patron findById(String patronId) {
+        try { return executeFindById(patronId); } 
+        catch (Exception e) { return null; } // Lo capturo aquí para compatibilidad con Controladores
+    }
+
+    // Regla 20: Función que hace una sola cosa (consulta SQL).
+    private Patron executeFindById(String patronId) {
+        String query = sqlQueries.getProperty("patron.findById", "SELECT * FROM Patron WHERE id = ?");
+        List<Patron> fetchedPatrones = jdbcTemplate.query(query, patronRowMapper(), patronId);
+        
+        // Regla 19: Uso excepciones en vez de null para controlar el flujo de error real.
+        if (fetchedPatrones.isEmpty() || fetchedPatrones.get(0) == null) {
+            throw new IllegalArgumentException("Patrón no encontrado");
+        }
+        return fetchedPatrones.get(0);
+    }
+
+    // Regla 20: Aislar bloque try-catch.
+    public boolean addPatron(Patron patron) {
+        try { executeAddPatron(patron); return true; } 
+        catch (Exception e) { return false; }
+    }
+
+    // Regla 15: Recibe el objeto Patron entero. Regla 20: Lógica aislada.
+    private void executeAddPatron(Patron patron) {
+        String query = sqlQueries.getProperty("patron.insert", "INSERT INTO Patron (id, name, surname, birthdate, titleIssueDate) VALUES (?, ?, ?, ?, ?)");
+        int rowsAffected = jdbcTemplate.update(query, patron.getPatronId(), patron.getName(),
+                patron.getSurname(), patron.getBirthDate(), patron.getTitleIssueDate());
+                
+        // Regla 19: Excepción si no se inserta nada.
+        if (rowsAffected == 0) throw new RuntimeException("No se pudo insertar el patrón");
+    }
+
+    // Regla 20: Extracción try-catch.
+    public void updatePatron(Patron patron) {
+        try { executeUpdatePatron(patron); } 
+        catch (DataAccessException e) { throw new RuntimeException("Fallo al actualizar el Patrón", e); } // Regla 19
+    }
+
+    private void executeUpdatePatron(Patron patron) {
+        String query = sqlQueries.getProperty("patron.update", "UPDATE Patron SET name=?, surname=?, birthdate=?, titleIssueDate=? WHERE id=?");
+        int rowsAffected = jdbcTemplate.update(query, patron.getName(), patron.getSurname(),
+                patron.getBirthDate(), patron.getTitleIssueDate(), patron.getPatronId());
+        
+        // Regla 19: Excepción
+        if (rowsAffected == 0) throw new IllegalArgumentException("El patrón a actualizar no existe");
+    }
+
+    private RowMapper<Patron> patronRowMapper() {
+        return (rs, rowNum) -> new Patron(
+                rs.getString("id"), rs.getString("name"), rs.getString("surname"),
+                rs.getDate("birthdate").toLocalDate(), rs.getDate("titleIssueDate").toLocalDate()
+        );
     }
 
     public List<Patron> findAllPatrones() {
         try {
-            String query = sqlQueries.getProperty("patron.findAll");
-            if (query == null) return null;
-
-            List<Patron> fetchedPatrones = jdbcTemplate.query(query, new RowMapper<Patron>() {
-                @Override
-                public Patron mapRow(ResultSet rs, int rowNumber) throws SQLException {
-                    return new Patron(
-                            rs.getString("id"), // La bbdd lo tiene como id
-                            rs.getString("name"),
-                            rs.getString("surname"),
-                            rs.getDate("birthdate").toLocalDate(),
-                            rs.getDate("titleIssueDate").toLocalDate());
-                }
-            });
-            return fetchedPatrones;
-
-        } catch (DataAccessException e) {
-            return null;
-        }
-    }
-
-    public Patron findById(String patronId) { // REFACTORIZACIÓN (Regla 1): id -> patronId
-        try {
-            String query = sqlQueries.getProperty("patron.findById");
-            if (query == null) return null;
-
-            List<Patron> fetchedPatrones = jdbcTemplate.query(query, new RowMapper<Patron>() {
-                @Override
-                public Patron mapRow(ResultSet rs, int rowNum) throws SQLException {
-                    return new Patron(
-                        rs.getString("id"),
-                        rs.getString("name"),
-                        rs.getString("surname"),
-                        rs.getDate("birthdate").toLocalDate(),
-                        rs.getDate("titleIssueDate").toLocalDate()
-                    );
-                }
-            }, patronId);
-            
-            return fetchedPatrones.isEmpty() ? null : fetchedPatrones.get(0);
-            
-        } catch (DataAccessException e) {
-            return null;
-        }
-    }
-
-    public boolean addPatron(Patron patron) {
-        try {
-            String query = sqlQueries.getProperty("patron.insert");
-            if (query == null) return false;
-
-            int rowsAffected = jdbcTemplate.update(query,
-                    patron.getPatronId(), // Adaptado
-                    patron.getName(),
-                    patron.getSurname(),
-                    patron.getBirthDate(),
-                    patron.getTitleIssueDate());
-
-            return rowsAffected > 0;
-            
-        } catch (DataAccessException e) {
-            return false;
-        }
-    }
-
-    public boolean existsById(String patronId) {
-        try {
-            String query = sqlQueries.getProperty("patron.existsById");
-            if (query == null) return false;
-
-            Integer existenceCount = jdbcTemplate.queryForObject(query, Integer.class, patronId);
-            return existenceCount != null && existenceCount > 0;
-            
-        } catch (DataAccessException e) {
-            return false;
-        }
+            String query = sqlQueries.getProperty("patron.findAll", "SELECT * FROM Patron");
+            return jdbcTemplate.query(query, patronRowMapper());
+        } catch (Exception e) { return null; }
     }
 
     public boolean assignPatronToBoat(String patronId, String registrationNumber) {
         try {
-            Patron patron = findById(patronId);
-            if (patron == null) return false;
-            
-            String queryToVerifyBoatExists = "SELECT COUNT(*) FROM Embarcacion WHERE registrationNumber = ?"; // REFACTORIZACIÓN
-            Integer boatExistenceCount = jdbcTemplate.queryForObject(queryToVerifyBoatExists, Integer.class, registrationNumber);
-            if (boatExistenceCount == null || boatExistenceCount == 0) return false;
-            
-            String queryToVerifyPatronAvailability = "SELECT COUNT(*) FROM Embarcacion WHERE patronId = ? AND registrationNumber != ?";
-            Integer assignmentCount = jdbcTemplate.queryForObject(queryToVerifyPatronAvailability, Integer.class, patronId, registrationNumber);
-            if (assignmentCount != null && assignmentCount > 0) return false;
-            
-            String queryToUpdateBoat = "UPDATE Embarcacion SET patronId = ? WHERE registrationNumber = ?";
-            int rowsAffected = jdbcTemplate.update(queryToUpdateBoat, patronId, registrationNumber);
-            
-            return rowsAffected > 0;
-            
-        } catch (DataAccessException e) {
-            return false;
-        }
+            String sql = sqlQueries.getProperty("patron.assignBoat", "UPDATE Embarcacion SET patronId = ? WHERE registrationNumber = ?");
+            return jdbcTemplate.update(sql, patronId, registrationNumber) > 0;
+        } catch (Exception e) { return false; }
     }
 
     public boolean unassignPatronFromBoat(String registrationNumber) {
         try {
-            String queryToVerifyBoatExists = "SELECT COUNT(*) FROM Embarcacion WHERE registrationNumber = ?";
-            Integer boatExistenceCount = jdbcTemplate.queryForObject(queryToVerifyBoatExists, Integer.class, registrationNumber);
-            if (boatExistenceCount == null || boatExistenceCount == 0) return false;
-            
-            String queryToFindCurrentPatron = "SELECT patronId FROM Embarcacion WHERE registrationNumber = ?";
-            String currentPatronId = jdbcTemplate.queryForObject(queryToFindCurrentPatron, String.class, registrationNumber);
-            if (currentPatronId == null || currentPatronId.equals("NULL")) return false;
-            
-            String queryToRemovePatron = "UPDATE Embarcacion SET patronId = NULL WHERE registrationNumber = ?";
-            int rowsAffected = jdbcTemplate.update(queryToRemovePatron, registrationNumber);
-            
-            return rowsAffected > 0;
-            
-        } catch (DataAccessException e) {
-            return false;
-        }
-    }
-
-    public boolean updatePatron(Patron patron) {
-        try {
-            String query = sqlQueries.getProperty("patron.update");
-            int rowsAffected = jdbcTemplate.update(query,
-                    patron.getName(),
-                    patron.getSurname(),
-                    patron.getBirthDate(),
-                    patron.getTitleIssueDate(),
-                    patron.getPatronId()); // Adaptado
-            return rowsAffected > 0;
-        } catch (DataAccessException e) {
-            return false;
-        }
-    }
-
-    public boolean deletePatron(String patronId) {
-        try {
-            String query = sqlQueries.getProperty("patron.delete");
-            int rowsAffected = jdbcTemplate.update(query, patronId);
-            return rowsAffected > 0;
-        } catch (DataAccessException e) {
-            return false;
-        }
-    }
-
-    public boolean hasAssignedBoats(String patronId) {
-        try {
-            String query = sqlQueries.getProperty("patron.countEmbarcaciones");
-            Integer assignedBoatsCount = jdbcTemplate.queryForObject(query, Integer.class, patronId); // REFACTORIZACIÓN
-            return assignedBoatsCount != null && assignedBoatsCount > 0;
-        } catch (DataAccessException e) {
-            return false; 
-        }
+            String sql = sqlQueries.getProperty("patron.unassignBoat", "UPDATE Embarcacion SET patronId = NULL WHERE registrationNumber = ?");
+            return jdbcTemplate.update(sql, registrationNumber) > 0;
+        } catch (Exception e) { return false; }
     }
 }

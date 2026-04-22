@@ -4,9 +4,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-
 import es.uco.pw.demo.model.domain.Inscripcion;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -17,166 +15,77 @@ public class InscripcionRepository extends AbstractRepository {
 
     public InscripcionRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.setSQLQueriesFileName(sqlQueriesFileName);
+        this.setSQLQueriesFileName("./src/main/resources/db/sql.properties");
     }
 
-    public List<Inscripcion> findAllInscripciones() {
-        try {
-            String query = sqlQueries.getProperty("inscripcion.findAll");
-            if (query != null) {
-                List<Inscripcion> fetchedInscripciones = jdbcTemplate.query(query, new RowMapper<Inscripcion>() {
-                    @Override
-                    public Inscripcion mapRow(ResultSet rs, int rowNumber) throws SQLException {
-                        return new Inscripcion(
-                                rs.getInt("id"),
-                                rs.getDate("date").toLocalDate(),
-                                rs.getInt("totalAmount"),
-                                rs.getString("userId"),
-                                rs.getInt("registeredAdults"),
-                                rs.getInt("registeredKids"));
-                    };
-                });
-                return fetchedInscripciones;
-            }
-            return null;
-        } catch (DataAccessException e) {
-            return null;
-        }
-    }
-
-    public List<Inscripcion> findIndividualInscripciones() {
-        try {
-            String query = sqlQueries.getProperty("inscripcion.findIndividual");
-            if (query != null) {
-                return jdbcTemplate.query(query, new RowMapper<Inscripcion>() {
-                    @Override
-                    public Inscripcion mapRow(ResultSet rs, int rowNumber) throws SQLException {
-                        return new Inscripcion(
-                                rs.getInt("id"),
-                                rs.getDate("date").toLocalDate(),
-                                rs.getInt("totalAmount"),
-                                rs.getString("userId"),
-                                rs.getInt("registeredAdults"),
-                                rs.getInt("registeredKids"));
-                    }
-                });
-            }
-            return null;
-        } catch (DataAccessException e) {
-            return null;
-        }
-    }
-
-    public List<Inscripcion> findFamiliarInscripciones() {
-        try {
-            String query = sqlQueries.getProperty("inscripcion.findFamiliar");
-            if (query != null) {
-                return jdbcTemplate.query(query, new RowMapper<Inscripcion>() {
-                    @Override
-                    public Inscripcion mapRow(ResultSet rs, int rowNumber) throws SQLException {
-                        return new Inscripcion(
-                                rs.getInt("id"),
-                                rs.getDate("date").toLocalDate(),
-                                rs.getInt("totalAmount"),
-                                rs.getString("userId"),
-                                rs.getInt("registeredAdults"),
-                                rs.getInt("registeredKids"));
-                    }
-                });
-            }
-            return null;
-        } catch (DataAccessException e) {
-            return null;
-        }
-    }
-
+    // Regla 20: Método envoltorio para las excepciones
     public Inscripcion findById(int id) {
-        try {
-            String query = sqlQueries.getProperty("inscripcion.findById");
-            return jdbcTemplate.query(query, this::extractInscripcion, id);
-        } catch (DataAccessException e) {
-            return null;
-        }
+        try { return executeFindById(id); } 
+        catch (Exception e) { return null; }
     }
 
-    public Inscripcion findByUserId(String userId) {
-        try {
-            String query = sqlQueries.getProperty("inscripcion.findByUserId");
-            return jdbcTemplate.query(query, this::extractInscripcion, userId);
-        } catch (DataAccessException e) {
-            return null;
+    // Regla 20: Método de lógica pura
+    private Inscripcion executeFindById(int id) {
+        String query = sqlQueries.getProperty("inscripcion.findById", "SELECT * FROM Inscripcion WHERE id = ?");
+        Inscripcion inscripcion = jdbcTemplate.query(query, this::extractInscripcion, id);
+        
+        // Aplico Regla 19: Excepción si falla la búsqueda real.
+        if (inscripcion == null) {
+            throw new IllegalArgumentException("Inscripción no encontrada"); 
         }
+        return inscripcion;
     }
 
-    // REFACTORIZACIÓN: Nombre claro para evitar ambigüedades con el RowMapper
-    private Inscripcion extractInscripcion(ResultSet row) throws SQLException {
+    public boolean addInscripcion(Inscripcion inscripcion) {
+        try {
+            String query = sqlQueries.getProperty("inscripcion.insert", "INSERT INTO Inscripcion (date, totalAmount, userId, registeredAdults, registeredKids) VALUES (?, ?, ?, ?, ?)");
+            int rowsAffected = jdbcTemplate.update(query,
+                    inscripcion.getRegistrationDate(), inscripcion.getTotalAmount(),
+                    inscripcion.getUserId(), inscripcion.getRegisteredAdults(),
+                    inscripcion.getRegisteredKids());
+            return rowsAffected > 0;
+        } catch (Exception e) { return false; }
+    }
+
+    private Inscripcion extractInscripcion(java.sql.ResultSet row) throws java.sql.SQLException {
         if (row.next()) { 
             int id = row.getInt("id");
-            LocalDate registrationDate = row.getDate("date").toLocalDate();
+            java.time.LocalDate registrationDate = row.getDate("date").toLocalDate();
             int totalAmount = row.getInt("totalAmount");
             String userId = row.getString("userId");
-            int registeredAdults= row.getInt("registeredAdults");
-            int registeredKids= row.getInt("registeredKids");
-
+            int registeredAdults = row.getInt("registeredAdults");
+            int registeredKids = row.getInt("registeredKids");
             return new Inscripcion(id, registrationDate, totalAmount, userId, registeredAdults, registeredKids);
         }
         return null;
     }
 
-    public boolean addInscripcion(Inscripcion inscripcion) {
-        try {
-            String query = sqlQueries.getProperty("inscripcion.insert");
-            if (query != null) {
-                int rowsAffected = jdbcTemplate.update(query,
-                        inscripcion.getRegistrationDate(), 
-                        inscripcion.getTotalAmount(),
-                        inscripcion.getUserId(),
-                        inscripcion.getRegisteredAdults(),
-                        inscripcion.getRegisteredKids());
+    private final RowMapper<Inscripcion> inscripcionRowMapper = (rs, rowNum) -> {
+        return new Inscripcion(
+            rs.getInt("id"), rs.getDate("date").toLocalDate(), rs.getInt("totalAmount"),
+            rs.getString("userId"), rs.getInt("registeredAdults"), rs.getInt("registeredKids")
+        );
+    };
 
-                return rowsAffected > 0;
-            }
-            return false;
-        } catch (DataAccessException e) {
-            return false;
-        }
+    public Inscripcion findByUserId(String userId) {
+        try {
+            String query = sqlQueries.getProperty("inscripcion.findByUserId", "SELECT * FROM Inscripcion WHERE userId = ?");
+            List<Inscripcion> lista = jdbcTemplate.query(query, inscripcionRowMapper, userId);
+            return lista.isEmpty() ? null : lista.get(0);
+        } catch (Exception e) { return null; }
     }
 
-    public boolean existsByUserId(String userId) {
+    public List<Inscripcion> findAllInscripciones() {
         try {
-            String query = sqlQueries.getProperty("inscripcion.existsByUserId");
-            Integer existenceCount = jdbcTemplate.queryForObject(query, Integer.class, userId); 
-            return existenceCount != null && existenceCount > 0;
-        } catch (DataAccessException e) {
-            return false;
-        }
+            String query = sqlQueries.getProperty("inscripcion.findAll", "SELECT * FROM Inscripcion");
+            return jdbcTemplate.query(query, inscripcionRowMapper); 
+        } catch (Exception e) { return null; }
     }
 
-    public boolean existsById(int id) {
+    public void update(Inscripcion inscripcion) {
         try {
-            String query = sqlQueries.getProperty("inscripcion.existsById");
-            Integer existenceCount = jdbcTemplate.queryForObject(query, Integer.class, id);
-            return existenceCount != null && existenceCount > 0;
-        } catch (DataAccessException e) {
-            return false;
-        }
-    }
-
-    public boolean update(Inscripcion inscripcion) {
-        try {
-            String query = sqlQueries.getProperty("inscripcion.update");
-            if (query != null) {
-                int rowsAffected = jdbcTemplate.update(query,
-                        inscripcion.getTotalAmount(),
-                        inscripcion.getRegisteredAdults(),
-                        inscripcion.getRegisteredKids(),
-                        inscripcion.getId());
-                return rowsAffected > 0;
-            }
-            return false;
-        } catch (DataAccessException e) {
-            return false;
-        }
+            String query = sqlQueries.getProperty("inscripcion.update", "UPDATE Inscripcion SET totalAmount=?, registeredAdults=?, registeredKids=? WHERE id=?");
+            jdbcTemplate.update(query, inscripcion.getTotalAmount(), inscripcion.getRegisteredAdults(), inscripcion.getRegisteredKids(), inscripcion.getId());
+        } catch (Exception e) { }
     }
 }

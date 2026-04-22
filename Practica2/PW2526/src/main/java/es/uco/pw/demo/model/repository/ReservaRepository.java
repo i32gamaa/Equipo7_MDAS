@@ -2,7 +2,6 @@ package es.uco.pw.demo.model.repository;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -10,7 +9,6 @@ import es.uco.pw.demo.model.domain.Reserva;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -21,198 +19,123 @@ public class ReservaRepository extends AbstractRepository {
 
     public ReservaRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.setSQLQueriesFileName(sqlQueriesFileName);
+        this.setSQLQueriesFileName("./src/main/resources/db/sql.properties");
     }
 
-    public List<Reserva> findAllReservas() {
-        try {
-            String query = sqlQueries.getProperty("reserva.findAll");
-            if (query == null) return null;
-
-            List<Reserva> fetchedReservas = jdbcTemplate.query(query, new RowMapper<Reserva>() {
-                @Override
-                public Reserva mapRow(ResultSet rs, int rowNumber) throws SQLException {
-                    return new Reserva(
-                            rs.getInt("id"),
-                            rs.getString("purpose"),
-                            rs.getDate("date").toLocalDate(),
-                            rs.getInt("numSeats"),
-                            rs.getString("userId"),
-                            rs.getString("registrationNumber"));
-                }
-            });
-            return fetchedReservas;
-
-        } catch (DataAccessException e) {
-            return null;
-        }
-    }
-
+    // Regla 20: Método público que solo maneja el Try/Catch.
     public Reserva findById(int id) {
-        try {
-            String query = sqlQueries.getProperty("reserva.findById");
-            return jdbcTemplate.query(query, this::extractReserva, id);
-        } catch (DataAccessException e) {
-            return null;
-        }
+        try { return executeFindById(id); } 
+        catch (Exception e) { return null; }
     }
 
-    public List<Reserva> findByDate(LocalDate date) {
-        try {
-            String query = sqlQueries.getProperty("reserva.findByAfterDate");
-            return jdbcTemplate.query(
-                    query,
-                    new RowMapper<Reserva>() {
-                        @Override
-                        public Reserva mapRow(ResultSet rs, int rowNumber) throws SQLException {
-                            return new Reserva(
-                                    rs.getInt("id"),
-                                    rs.getString("purpose"),
-                                    rs.getDate("date").toLocalDate(),
-                                    rs.getInt("numSeats"),
-                                    rs.getString("userId"),
-                                    rs.getString("registrationNumber"));
-                        }
-                    },
-                    java.sql.Date.valueOf(date) 
-            );
-        } catch (DataAccessException e) {
-            return null;
+    // Regla 20: Lógica aislada en el método privado.
+    private Reserva executeFindById(int id) {
+        String query = sqlQueries.getProperty("reserva.findById", "SELECT * FROM Reserva WHERE id = ?");
+        Reserva reserva = jdbcTemplate.query(query, this::extractReserva, id);
+        
+        // Regla 19: Excepción en lugar de null.
+        if (reserva == null) {
+            throw new IllegalArgumentException("Reserva not found"); 
         }
+        return reserva;
     }
 
-    public Reserva findByThisDate(LocalDate date) {
-        try {
-            String query = sqlQueries.getProperty("reserva.findByThisDate");
-            return jdbcTemplate.query(query, this::extractReserva, date);
-        } catch (DataAccessException e) {
-            return null;
-        }
-    }
-
-    // REFACTORIZACIÓN: Nombre claro para evitar ambigüedades con el RowMapper
-    private Reserva extractReserva(ResultSet row) throws SQLException {
-        if (row.next()) {
-            int id = row.getInt("id");
-            String purpose = row.getString("purpose");
-            LocalDate reservationDate = row.getDate("date").toLocalDate();
-            int numberOfSeats = row.getInt("numSeats");
-            String userId = row.getString("userId");
-            String registrationNumber = row.getString("registrationNumber");
-
-            return new Reserva(id, purpose, reservationDate, numberOfSeats, userId, registrationNumber);
-        }
-        return null;
-    }
-
+    // Regla 20
     public int addReserva(Reserva reserva) {
-        try {
-            String query = sqlQueries.getProperty("reserva.insert");
-            if (query == null) return -1;
-
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-
-            int rowsAffected = jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-                ps.setString(1, reserva.getUserId());
-                ps.setString(2, reserva.getRegistrationNumber());
-                ps.setObject(3, reserva.getReservationDate()); 
-                ps.setInt(4, reserva.getNumberOfSeats()); 
-                ps.setString(5, reserva.getPurpose());
-                ps.setDouble(6, reserva.getTotalAmount());
-                return ps;
-            }, keyHolder);
-
-            if (rowsAffected > 0) {
-                Number generatedId = keyHolder.getKey();
-                if (generatedId != null) {
-                    int reservaId = generatedId.intValue();
-                    reserva.setId(reservaId);
-                    return reservaId;
-                }
-            }
-            return -1;
-
-        } catch (DataAccessException e) {
-            return -1;
-        }
+        try { return executeAddReserva(reserva); } 
+        catch (Exception e) { return -1; }
     }
 
-    public boolean patronAssigned(String registrationNumber) {
-        try {
-            String query = sqlQueries.getProperty("reserva.patronAssigned");
-            String assignedPatronId = jdbcTemplate.queryForObject(query, String.class, registrationNumber); 
-            return assignedPatronId != null;
-        } catch (DataAccessException e) {
-            return false;
-        }
-    }
+    // Reglas 15 y 20
+    private int executeAddReserva(Reserva reserva) {
+        String query = sqlQueries.getProperty("reserva.insert", "INSERT INTO Reserva (userId, registrationNumber, date, numSeats, purpose, totalAmount) VALUES (?, ?, ?, ?, ?, ?)");
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        int rowsAffected = jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, reserva.getUserId());
+            ps.setString(2, reserva.getRegistrationNumber());
+            ps.setObject(3, reserva.getReservationDate());
+            ps.setInt(4, reserva.getNumberOfSeats());
+            ps.setString(5, reserva.getPurpose());
+            ps.setDouble(6, reserva.getTotalAmount());
+            return ps;
+        }, keyHolder);
 
-    public boolean hasCapacity(String registrationNumber, int numSeatsRequested) {
-        try {
-            String query = sqlQueries.getProperty("reserva.hasCapacity");
-            int availableCapacity = jdbcTemplate.queryForObject(query, Integer.class, registrationNumber); 
-            return availableCapacity > numSeatsRequested;
-        } catch (DataAccessException e) {
-            return false;
+        // Regla 19
+        if (rowsAffected == 0 || keyHolder.getKey() == null) {
+            throw new RuntimeException("Insertion failed");
         }
+        return keyHolder.getKey().intValue();
     }
 
     public boolean isAvailable(String registrationNumber, LocalDate date) {
         try {
-            String query = sqlQueries.getProperty("reserva.isAvailable");
+            String query = sqlQueries.getProperty("reserva.isAvailable", "SELECT COUNT(*) FROM Reserva WHERE registrationNumber = ? AND date = ?");
             Integer overlappingReservationsCount = jdbcTemplate.queryForObject(query, Integer.class, registrationNumber, date); 
             return overlappingReservationsCount == null || overlappingReservationsCount == 0;
-        } catch (DataAccessException e) {
-            return false;
+        } catch (Exception e) { return false; }
+    }
+
+    public void updateReserva(Reserva reserva) {
+        try {
+            String query = sqlQueries.getProperty("reserva.update", "UPDATE Reserva SET purpose=?, date=?, numSeats=?, userId=?, registrationNumber=?, totalAmount=? WHERE id=?");
+            int rowsAffected = jdbcTemplate.update(query, reserva.getPurpose(), reserva.getReservationDate(), 
+                    reserva.getNumberOfSeats(), reserva.getUserId(), reserva.getRegistrationNumber(),reserva.getTotalAmount(), reserva.getId());
+            
+            // Regla 19
+            if (rowsAffected == 0) throw new IllegalArgumentException("Reserva not found for update");
+        } catch (DataAccessException exception) {
+            throw new RuntimeException("Database error updating Reserva", exception); // Regla 19
         }
     }
 
-    public boolean isAdult(String userId) {
-        try {
-            String query = sqlQueries.getProperty("reserva.isAdult");
-            Boolean userIsAdult = jdbcTemplate.queryForObject(query, Boolean.class, userId);
-            return userIsAdult != null ? userIsAdult : false;
-        } catch (DataAccessException e) {
-            return false;
+    private Reserva extractReserva(ResultSet row) throws SQLException {
+        if (row.next()) {
+            return new Reserva(
+                row.getInt("id"), row.getString("purpose"), row.getDate("date").toLocalDate(),
+                row.getInt("numSeats"), row.getString("userId"), row.getString("registrationNumber")
+            );
         }
+        return null;
+    }
+    
+    public boolean patronAssigned(String registrationNumber) {
+        try {
+            String sql = sqlQueries.getProperty("reserva.patronAssigned", "SELECT COUNT(*) FROM Embarcacion WHERE registrationNumber = ? AND patronId IS NOT NULL");
+            return jdbcTemplate.queryForObject(sql, Integer.class, registrationNumber) > 0;
+        } catch (Exception e) { return false; }
+    }
+
+    public boolean hasCapacity(String registrationNumber, int plazas) {
+        try {
+            String sql = sqlQueries.getProperty("reserva.hasCapacity", "SELECT numSeats FROM Embarcacion WHERE registrationNumber = ?");
+            Integer capacidad = jdbcTemplate.queryForObject(sql, Integer.class, registrationNumber);
+            return capacidad != null && capacidad >= plazas;
+        } catch (Exception e) { return false; }
     }
 
     public boolean isAvailableInAlquiler(String registrationNumber, LocalDate date) {
         try {
-            String query = sqlQueries.getProperty("reserva.isAvailableInAlquiler");
-            Integer overlappingAlquileresCount = jdbcTemplate.queryForObject(query, Integer.class, registrationNumber, date); 
-            return overlappingAlquileresCount == null || overlappingAlquileresCount == 0;
-        } catch (DataAccessException e) {
-            return false;
-        }
+            String sql = sqlQueries.getProperty("reserva.isAvailableInAlquiler", "SELECT COUNT(*) FROM Alquiler WHERE registrationNumber = ? AND startDate <= ? AND (endDate IS NULL OR endDate >= ?)");
+            return jdbcTemplate.queryForObject(sql, Integer.class, registrationNumber, date, date) == 0;
+        } catch (Exception e) { return false; }
     }
 
-    public boolean updateReserva(Reserva reserva) {
+    public boolean isAdult(String userId) {
         try {
-            String query = sqlQueries.getProperty("reserva.update");
-            if (query != null) {
-                int rowsAffected = jdbcTemplate.update(query, reserva.getPurpose(), reserva.getReservationDate(), 
-                        reserva.getNumberOfSeats(), reserva.getUserId(), reserva.getRegistrationNumber(),reserva.getTotalAmount(), reserva.getId());
-                return rowsAffected > 0;
-            }
-            return false;
-        } catch (DataAccessException exception) {
-            return false;
-        }
+            String sql = sqlQueries.getProperty("reserva.isAdult", "SELECT isAdult FROM Socio WHERE id = ?");
+            Boolean adult = jdbcTemplate.queryForObject(sql, Boolean.class, userId);
+            return adult != null && adult;
+        } catch (Exception e) { return false; }
     }
-    
-    public boolean deleteReserva(int id) {
+
+    public List<Reserva> findAllReservas() {
         try {
-            String query = sqlQueries.getProperty("reserva.delete");
-            if (query != null) {
-                int rowsAffected = jdbcTemplate.update(query, id);
-                return rowsAffected > 0;
-            }
-            return false;
-        } catch (DataAccessException exception) {
-            return false;
-        }
+            String sql = sqlQueries.getProperty("reserva.findAll", "SELECT * FROM Reserva");
+            return jdbcTemplate.query(sql, (rs, rowNum) -> new Reserva(
+                rs.getInt("id"), rs.getString("purpose"), rs.getDate("date").toLocalDate(),
+                rs.getInt("numSeats"), rs.getString("userId"), rs.getString("registrationNumber")
+            ));
+        } catch (Exception e) { return null; }
     }
 }
