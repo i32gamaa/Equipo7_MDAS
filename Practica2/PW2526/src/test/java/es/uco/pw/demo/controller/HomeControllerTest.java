@@ -16,14 +16,14 @@ public class HomeControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    // REGLA CLEAN CODE APLICADA: Los nombres de los tests deben explicar la accion y el resultado esperado.
+    // Los nombres de los tests deben explicar la accion y el resultado esperado.
     // Evitamos el prefijo "test" generico (testHomePage). Usamos un nombre descriptivo en formato "debeHacerAlgo".
     @Test
     public void debeCargarVistaHomeConMensajeDeBienvenida() throws Exception {
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("home"))
-                .andExpect(content().string( // Asumiendo que la página de inicio contiene un mensaje de bienvenida en español
+                .andExpect(content().string(
                         containsString("Bienvenido a"))); 
     }
 }
