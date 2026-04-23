@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Añadir Socio No Titular</title>
+    <link rel="stylesheet" href="stylehome.css">
+</head>
+<body>
+    <main class="overlay">
+        <h1>Añadir Socio No Titular</h1>
+        <p class="subtitle">La cuota de la inscripción aumentará 250€ por adulto y 100€ por menor añadido.</p>
+
+        <form th:action="@{/addSocio}" th:object="${newSocio}" method="post">
+            <div class="form-group"><label>DNI</label><input type="text" th:field="*{id}" required></div>
+            <div class="form-group"><label>Nombre</label><input type="text" th:field="*{name}" required></div>
+            <div class="form-group"><label>Apellidos</label><input type="text" th:field="*{surname}" required></div>
+            <div class="form-group"><label>Dirección</label><input type="text" th:field="*{address}" required></div>
+            <div class="form-group"><label>Fecha Nacimiento</label><input type="date" th:field="*{birthdate}" required></div>
+            <div class="form-group">
+                <label>Título de Patrón</label>
+                <select th:field="*{isBoatDriver}" required>
+                    <option th:value="true">Sí</option>
+                    <option th:value="false">No</option>
+                </select>
+            </div>
+            <div class="form-group"><label>ID Inscripción</label><input type="number" th:field="*{inscriptionId}" required></div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </form>
+
+        <div class="btn-group">
+            <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
+        </div>
+    </main>
+</body>
+</html>

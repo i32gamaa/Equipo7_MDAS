@@ -23,7 +23,7 @@ public class HomeControllerTest {
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("home"))
-                .andExpect(content().string(
-                        containsString("Welcome to...")));
+                .andExpect(content().string( // Asumiendo que la página de inicio contiene un mensaje de bienvenida en español
+                        containsString("Bienvenido a"))); 
     }
 }

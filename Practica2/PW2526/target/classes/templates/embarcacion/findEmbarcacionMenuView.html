@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <title>Buscar Embarcación</title>
+    <link rel="stylesheet" href="stylehome.css">
+</head>
+
+<body>
+    <main class="overlay">
+        <h1>Buscar Embarcación</h1>
+        <p>Selecciona el tipo de búsqueda:</p>
+
+        <div class="action-grid">
+            <!-- Búsqueda por Matrícula -->
+            <div class="action-card">
+                <i class="fas fa-search"></i>
+                <h5>Por Matrícula</h5>
+                <p style="color: white;">Busca una embarcación específica por su número de registro</p>
+                <a href="/findEmbarcacionByRegistration" class="btn btn-primary">Buscar</a>
+            </div>
+            
+            <!-- Búsqueda por Tipo -->
+            <div class="action-card">
+                <i class="fas fa-list"></i>
+                <h5>Por Tipo</h5>
+                <p style="color: white;">Encuentra todas las embarcaciones de un tipo específico</p>
+                <a href="/findEmbarcacionByType" class="btn btn-primary">Buscar</a>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <a href="/" class="btn btn-secondary">Volver al Inicio</a>
+        </div>
+    </main>
+</body>
+
+</html>

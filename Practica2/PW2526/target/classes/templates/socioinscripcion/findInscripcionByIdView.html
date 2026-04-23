@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Buscar Inscripción</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="stylehome.css">
+  <link rel="icon" href="images/logo.png" type="image/png">
+</head>
+<body>
+    <main class="overlay">
+      <h1>Buscar Inscripción por ID</h1>
+
+      <div th:if="${error}" class="message error" th:text="${error}"></div>
+
+      <form th:action="@{/findInscripcionById}" method="post">
+        <div class="form-group">
+          <label for="id">ID de la Inscripción:</label>
+          <input type="number" id="id" name="id" th:value="${param.id}" placeholder="Introduce el ID" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Buscar Inscripción</button>
+      </form>
+
+      <div class="btn-group">
+        <a th:href="@{/listInscripciones}" class="btn btn-secondary">Ver Todas las Inscripciones</a>
+        <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
+      </div>
+  </main>
+</body>
+</html>
