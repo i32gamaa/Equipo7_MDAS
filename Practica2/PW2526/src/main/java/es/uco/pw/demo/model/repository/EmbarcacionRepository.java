@@ -116,8 +116,8 @@ public class EmbarcacionRepository extends AbstractRepository {
     }
 
     private boolean executeIsEmbarcacionAvailable(String matricula, LocalDate inicio, LocalDate fin) {
-        String sql = sqlQueries.getProperty("embarcacion.checkAvailability", "SELECT COUNT(*) FROM Alquiler WHERE registrationNumber = ? AND ((startDate <= ? AND endDate >= ?) OR (startDate <= ? AND endDate >= ?))");
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, matricula, java.sql.Date.valueOf(fin), java.sql.Date.valueOf(inicio), java.sql.Date.valueOf(inicio), java.sql.Date.valueOf(fin));
+        String sql = sqlQueries.getProperty("embarcacion.checkAvailability", "SELECT COUNT(*) FROM Alquiler WHERE registrationNumber = ? AND startDate <= ? AND endDate >= ?");
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, matricula, java.sql.Date.valueOf(fin), java.sql.Date.valueOf(inicio));
         return count != null && count == 0;
     }
 
@@ -127,7 +127,7 @@ public class EmbarcacionRepository extends AbstractRepository {
     }
 
     private List<Embarcacion> executeFindAvailableByDateRange(LocalDate inicio, LocalDate fin) {
-        String sql = sqlQueries.getProperty("embarcacion.findAvailableByDates", "SELECT * FROM Embarcacion WHERE registrationNumber NOT IN (SELECT registrationNumber FROM Alquiler WHERE (startDate <= ? AND endDate >= ?) OR (startDate <= ? AND endDate >= ?))");
-        return jdbcTemplate.query(sql, embarcacionWithPatronMapper, java.sql.Date.valueOf(fin), java.sql.Date.valueOf(inicio), java.sql.Date.valueOf(inicio), java.sql.Date.valueOf(fin));
+        String sql = sqlQueries.getProperty("embarcacion.findAvailableByDates", "SELECT * FROM Embarcacion WHERE registrationNumber NOT IN (SELECT registrationNumber FROM Alquiler WHERE startDate <= ? AND endDate >= ?)");
+        return jdbcTemplate.query(sql, embarcacionWithPatronMapper, java.sql.Date.valueOf(fin), java.sql.Date.valueOf(inicio));
     }
 }
