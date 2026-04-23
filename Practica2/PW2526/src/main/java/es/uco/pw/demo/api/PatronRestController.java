@@ -26,7 +26,7 @@ public class PatronRestController {
         try {
             return patronRepository.findById(id); 
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Patrón no encontrado", e); // REGLA 19
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Patrón no encontrado", e); // Regla 19
         }
     }
 
@@ -35,10 +35,8 @@ public class PatronRestController {
         try {
             Patron existingPatron = patronRepository.findById(id); 
             
-            if (patronUpdates.getName() != null) existingPatron.setName(patronUpdates.getName());
-            if (patronUpdates.getSurname() != null) existingPatron.setSurname(patronUpdates.getSurname());
-            if (patronUpdates.getBirthDate() != null) existingPatron.setBirthDate(patronUpdates.getBirthDate());
-            if (patronUpdates.getTitleIssueDate() != null) existingPatron.setTitleIssueDate(patronUpdates.getTitleIssueDate());
+            // REGLA S3: Do One Thing. Extracción de mapeo.
+            mapearActualizaciones(existingPatron, patronUpdates);
 
             patronRepository.updatePatron(existingPatron);
             return existingPatron;
@@ -48,5 +46,13 @@ public class PatronRestController {
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor", e);
         }
+    }
+
+    // REGLA S3: Extraigo el bloque condicional a su propia función (Nivel de abstracción aislado)
+    private void mapearActualizaciones(Patron existing, Patron updates) {
+        if (updates.getName() != null) existing.setName(updates.getName());
+        if (updates.getSurname() != null) existing.setSurname(updates.getSurname());
+        if (updates.getBirthDate() != null) existing.setBirthDate(updates.getBirthDate());
+        if (updates.getTitleIssueDate() != null) existing.setTitleIssueDate(updates.getTitleIssueDate());
     }
 }

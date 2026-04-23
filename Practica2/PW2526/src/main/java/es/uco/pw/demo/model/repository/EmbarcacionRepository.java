@@ -110,24 +110,32 @@ public class EmbarcacionRepository extends AbstractRepository {
         return jdbcTemplate.query(sql, embarcacionWithPatronMapper, tipo.toString());
     }
 
-    public boolean isEmbarcacionAvailable(String matricula, LocalDate inicio, LocalDate fin) {
-        try { return executeIsEmbarcacionAvailable(matricula, inicio, fin); } 
-        catch (Exception e) { return false; }
-    }
+    // REGLA S3 (DRY - Don't Repeat Yourself): He creado esta función privada para no estar 
+        // repitiendo java.sql.Date.valueOf() en cada consulta de fechas, limpiando la lectura de SQL.
+        private java.sql.Date toSqlDate(LocalDate date) {
+            return java.sql.Date.valueOf(date);
+        }
 
-    private boolean executeIsEmbarcacionAvailable(String matricula, LocalDate inicio, LocalDate fin) {
-        String sql = sqlQueries.getProperty("embarcacion.checkAvailability", "SELECT COUNT(*) FROM Alquiler WHERE registrationNumber = ? AND startDate <= ? AND endDate >= ?");
-        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, matricula, java.sql.Date.valueOf(fin), java.sql.Date.valueOf(inicio));
-        return count != null && count == 0;
-    }
+        public boolean isEmbarcacionAvailable(String matricula, LocalDate inicio, LocalDate fin) {
+            try { return executeIsEmbarcacionAvailable(matricula, inicio, fin); } 
+            catch (Exception e) { return false; }
+        }
 
-    public List<Embarcacion> findAvailableByDateRange(LocalDate inicio, LocalDate fin) {
-        try { return executeFindAvailableByDateRange(inicio, fin); } 
-        catch (Exception e) { return null; }
-    }
+        private boolean executeIsEmbarcacionAvailable(String matricula, LocalDate inicio, LocalDate fin) {
+            String sql = sqlQueries.getProperty("embarcacion.checkAvailability", "SELECT COUNT(*) FROM Alquiler WHERE registrationNumber = ? AND ((startDate <= ? AND endDate >= ?) OR (startDate <= ? AND endDate >= ?))");
+            // Uso la función extractora para cumplir DRY
+            Integer count = jdbcTemplate.queryForObject(sql, Integer.class, matricula, toSqlDate(fin), toSqlDate(inicio), toSqlDate(inicio), toSqlDate(fin));
+            return count != null && count == 0;
+        }
 
-    private List<Embarcacion> executeFindAvailableByDateRange(LocalDate inicio, LocalDate fin) {
-        String sql = sqlQueries.getProperty("embarcacion.findAvailableByDates", "SELECT * FROM Embarcacion WHERE registrationNumber NOT IN (SELECT registrationNumber FROM Alquiler WHERE startDate <= ? AND endDate >= ?)");
-        return jdbcTemplate.query(sql, embarcacionWithPatronMapper, java.sql.Date.valueOf(fin), java.sql.Date.valueOf(inicio));
+        public List<Embarcacion> findAvailableByDateRange(LocalDate inicio, LocalDate fin) {
+            try { return executeFindAvailableByDateRange(inicio, fin); } 
+            catch (Exception e) { return null; }
+        }
+
+        private List<Embarcacion> executeFindAvailableByDateRange(LocalDate inicio, LocalDate fin) {
+            String sql = sqlQueries.getProperty("embarcacion.findAvailableByDates", "SELECT * FROM Embarcacion WHERE registrationNumber NOT IN (SELECT registrationNumber FROM Alquiler WHERE (startDate <= ? AND endDate >= ?) OR (startDate <= ? AND endDate >= ?))");
+            // Uso la función extractora (DRY)
+            return jdbcTemplate.query(sql, embarcacionWithPatronMapper, toSqlDate(fin), toSqlDate(inicio), toSqlDate(inicio), toSqlDate(fin));
+        }
     }
-}

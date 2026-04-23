@@ -62,9 +62,18 @@ public class Reserva {
     public void setReservationDate(LocalDate reservationDate) { this.reservationDate = reservationDate; }
 
     public int getNumberOfSeats() { return numberOfSeats; }
+    
+    // REGLA S3 (Do One Thing y evitar efectos secundarios): En lugar de hacer la cuenta matemática 
+    // dentro del propio setter (lo cual es inesperado para quien llama al setter), 
+    // lo extraigo a una función privada semántica.
     public void setNumberOfSeats(int numberOfSeats) {
         this.numberOfSeats = numberOfSeats;
-        this.totalAmount=numberOfSeats*40;
+        actualizarImportePorPlazas(numberOfSeats);
+    }
+
+    // REGLA S3: Función puramente matemática (Un solo nivel de abstracción)
+    private void actualizarImportePorPlazas(int plazas) {
+        this.totalAmount = plazas * 40;
     }
 
     public int getTotalAmount() { return totalAmount; }

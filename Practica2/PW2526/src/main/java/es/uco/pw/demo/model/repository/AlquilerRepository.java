@@ -16,18 +16,31 @@ public class AlquilerRepository extends AbstractRepository {
         this.setSQLQueriesFileName("./src/main/resources/db/sql.properties");
     }
 
-    // Aplico Regla 15: En lugar de recibir "LocalDate startDate, LocalDate endDate, int numSeats"
-    // le paso el objeto Alquiler directamente, lo cual es mucho más limpio.
+    // Regla 15 (Semana 2): Paso el objeto entero.
+    // REGLA S3 (Nivel de Abstracción y Do One Thing): He extraído la lógica matemática a métodos privados 
+    // para que esta función pública solo "orqueste" el cálculo y se lea como una historia.
     public double calculateAmount(Alquiler alquiler) {
-        // Regla 19: Excepción pura en lugar de código de error si faltan datos
-        if (alquiler.getStartDate() == null || alquiler.getEndDate() == null) {
-            throw new IllegalArgumentException("Las fechas del alquiler no pueden ser nulas"); 
-        }
-        long rentedDays = ChronoUnit.DAYS.between(alquiler.getStartDate(), alquiler.getEndDate());
-        if (rentedDays <= 0) rentedDays = 1; 
+        validarFechas(alquiler.getStartDate(), alquiler.getEndDate());
         
-        double basePrice = rentedDays * 50.0; 
-        double seatMultiplier = 1 + (alquiler.getNumberOfSeats() - 1) * 0.1; 
+        long diasAlquilados = calcularDiasDeAlquiler(alquiler.getStartDate(), alquiler.getEndDate());
+        return calcularPrecioFinal(diasAlquilados, alquiler.getNumberOfSeats());
+    }
+
+    // REGLA S3: Funciones privadas que hacen UNA sola cosa.
+    private void validarFechas(LocalDate start, LocalDate end) {
+        if (start == null || end == null) {
+            throw new IllegalArgumentException("Las fechas del alquiler no pueden ser nulas"); // Regla 19
+        }
+    }
+
+    private long calcularDiasDeAlquiler(LocalDate start, LocalDate end) {
+        long rentedDays = ChronoUnit.DAYS.between(start, end);
+        return rentedDays <= 0 ? 1 : rentedDays; 
+    }
+
+    private double calcularPrecioFinal(long dias, int plazas) {
+        double basePrice = dias * 50.0; 
+        double seatMultiplier = 1 + (plazas - 1) * 0.1; 
         return basePrice * seatMultiplier;
     }
 
@@ -40,12 +53,9 @@ public class AlquilerRepository extends AbstractRepository {
     private void executeDeleteById(int id) {
         String query = sqlQueries.getProperty("alquiler.delete", "DELETE FROM Alquiler WHERE id = ?");
         int rowsAffected = jdbcTemplate.update(query, id);
-        
-        // Regla 19
         if (rowsAffected == 0) throw new IllegalArgumentException("El alquiler a eliminar no existe");
     }
 
-    // Regla 20
     public Alquiler findById(int id) {
         try { return executeFindById(id); } 
         catch (Exception e) { return null; }
@@ -63,7 +73,6 @@ public class AlquilerRepository extends AbstractRepository {
                 rs.getString("userid")
         ), id);
         
-        // Regla 19
         if (fetchedAlquileres.isEmpty() || fetchedAlquileres.get(0) == null) {
             throw new IllegalArgumentException("Alquiler no encontrado"); 
         }
