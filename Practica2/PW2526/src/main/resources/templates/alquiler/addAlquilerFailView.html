@@ -21,7 +21,6 @@
             <span th:text="${mensajeError}">Error message</span>
         </div>
 
-        <!-- Mostrar información de la embarcación si está disponible -->
         <div th:if="${embarcacion != null}" class="detail-section">
             <div class="detail-label">EMBARCACIÓN SELECCIONADA</div>
             <div class="detail-value">
@@ -32,7 +31,6 @@
             </div>
         </div>
 
-        <!-- Mostrar datos del formulario para corrección -->
         <div th:if="${alquilerForm != null}" class="detail-section">
             <div class="detail-label">DATOS INTRODUCIDOS</div>
             <div class="detail-value">

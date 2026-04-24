@@ -108,19 +108,19 @@
     </div>
 
     <script>
+        // REFACTORIZACIÓN:
         document.addEventListener('DOMContentLoaded', function () {
-            // Mostrar fecha actual
+            
             const now = new Date();
             document.getElementById('currentDate').textContent = 
                 now.toLocaleDateString('es-ES') + ' ' + now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
-            // Calcular duración y estado
             const startDateText = document.getElementById('startDateValue').textContent;
             const endDateText = document.getElementById('endDateValue').textContent;
 
             if (startDateText && endDateText) {
                 try {
-                    // Parsear fechas (asumiendo formato YYYY-MM-DD)
+                    // Advertencia sobre el formato esperado (se mantiene por ser útil y no obvio)
                     const startDateParts = startDateText.split('-');
                     const endDateParts = endDateText.split('-');
                     
@@ -140,11 +140,9 @@
                         const diffTime = Math.abs(endDate - startDate);
                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                         
-                        // Actualizar duración
                         document.getElementById('durationBadge').textContent = diffDays + ' días';
                         document.getElementById('daysText').textContent = diffDays + ' días';
                         
-                        // Determinar estado
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
                         
@@ -175,7 +173,6 @@
                 document.getElementById('durationBadge').textContent = 'Fechas no disponibles';
             }
 
-            // Efecto de animación para el ticket
             setTimeout(() => {
                 document.querySelector('.ticket').style.transform = 'scale(1.02)';
                 setTimeout(() => {
