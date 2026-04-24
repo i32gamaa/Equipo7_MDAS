@@ -45,16 +45,10 @@ public class ReservaRestController {
     public Reserva updateReservaDate(@PathVariable int id, @RequestBody Reserva requestReserva) {
         try {
             Reserva existingReserva = reservaRepository.findById(id);
-            String embarcacionAsignada = existingReserva.getRegistrationNumber();
-
-            if (requestReserva.getReservationDate() != null) { 
-                boolean isBoatAvailable = reservaRepository.isAvailable(embarcacionAsignada, requestReserva.getReservationDate());
-                if (isBoatAvailable) {
-                    existingReserva.setReservationDate(requestReserva.getReservationDate());
-                } else {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "La embarcación no está disponible en esa fecha");
-                }
-            }
+            
+            // REGLA S3: Do One Thing. Extraemos la lógica de validación de disponibilidad a un método privado.
+            // El controlador ahora solo busca, aplica y guarda.
+            aplicarNuevaFechaSiEstaDisponible(existingReserva, requestReserva.getReservationDate());
             
             reservaRepository.updateReserva(existingReserva);
             return existingReserva;
@@ -64,5 +58,16 @@ public class ReservaRestController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error actualizando reserva", e);
         }
+    }
+
+    // REGLA S3: Nivel de Abstracción. Aislamos la regla de negocio (comprobar si el barco está libre).
+    private void aplicarNuevaFechaSiEstaDisponible(Reserva existingReserva, LocalDate nuevaFecha) {
+        if (nuevaFecha == null) return;
+        
+        boolean isBoatAvailable = reservaRepository.isAvailable(existingReserva.getRegistrationNumber(), nuevaFecha);
+        if (!isBoatAvailable) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "La embarcación no está disponible en esa fecha");
+        }
+        existingReserva.setReservationDate(nuevaFecha);
     }
 }

@@ -41,17 +41,25 @@ public class SocioRepository extends AbstractRepository {
         catch (Exception e) { return false; }
     }
 
-    // Reglas 15 (se pasa el objeto) y 20 (lógica aislada)
     private void executeAddSocio(Socio socio) {
         String query = sqlQueries.getProperty("socio.insert2", "INSERT INTO Socio (id, name, surname, address, birthdate, inscriptionDate, isHolderInscription, isBoatDriver, isAdult, inscriptionId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        int rowsAffected = jdbcTemplate.update(query, socio.getSocioId(), socio.getName(), socio.getSurname(), 
-                socio.getAddress(), socio.getBirthdate(), socio.getInscriptionDate(), socio.isHolderInscription(), 
-                socio.isBoatDriver(), socio.isAdult(), socio.getInscriptionId());
+        
+        // REGLA S3: Nivel de abstracción. Extraigo el array de parámetros para no ensuciar la llamada a update()
+        Object[] parametrosSocio = extraerParametrosSocio(socio);
+        int rowsAffected = jdbcTemplate.update(query, parametrosSocio);
                 
-        // Regla 19: Excepciones
         if (rowsAffected == 0) {
             throw new RuntimeException("No se insertó ninguna fila para el socio"); 
         }
+    }
+
+    // REGLA S3: Hacer una sola cosa (Extraer los campos del objeto a un Array para SQL)
+    private Object[] extraerParametrosSocio(Socio socio) {
+        return new Object[]{
+            socio.getSocioId(), socio.getName(), socio.getSurname(), 
+            socio.getAddress(), socio.getBirthdate(), socio.getInscriptionDate(), 
+            socio.isHolderInscription(), socio.isBoatDriver(), socio.isAdult(), socio.getInscriptionId()
+        };
     }
 
     // Regla 20

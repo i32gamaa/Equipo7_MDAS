@@ -39,14 +39,26 @@ public class InscripcionRepository extends AbstractRepository {
     public boolean addInscripcion(Inscripcion inscripcion) {
         try {
             String query = sqlQueries.getProperty("inscripcion.insert", "INSERT INTO Inscripcion (date, totalAmount, userId, registeredAdults, registeredKids) VALUES (?, ?, ?, ?, ?)");
-            int rowsAffected = jdbcTemplate.update(query,
-                    inscripcion.getRegistrationDate(), inscripcion.getTotalAmount(),
-                    inscripcion.getUserId(), inscripcion.getRegisteredAdults(),
-                    inscripcion.getRegisteredKids());
+            
+            // REGLA S3: Separar la extracción de datos de la ejecución SQL
+            Object[] parametros = extraerParametrosInscripcion(inscripcion);
+            int rowsAffected = jdbcTemplate.update(query, parametros);
+            
             return rowsAffected > 0;
         } catch (Exception e) { return false; }
     }
 
+    // REGLA S3: Hacer una sola cosa
+    private Object[] extraerParametrosInscripcion(Inscripcion inscripcion) {
+        return new Object[]{
+            inscripcion.getRegistrationDate(), 
+            inscripcion.getTotalAmount(),
+            inscripcion.getUserId(), 
+            inscripcion.getRegisteredAdults(),
+            inscripcion.getRegisteredKids()
+        };
+    }
+    
     private Inscripcion extractInscripcion(java.sql.ResultSet row) throws java.sql.SQLException {
         if (row.next()) { 
             int id = row.getInt("id");

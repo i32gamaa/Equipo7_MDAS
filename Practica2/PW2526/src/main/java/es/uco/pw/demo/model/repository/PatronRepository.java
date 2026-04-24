@@ -39,29 +39,46 @@ public class PatronRepository extends AbstractRepository {
         catch (Exception e) { return false; }
     }
 
-    // Regla 15: Recibe el objeto Patron entero. Regla 20: Lógica aislada.
+    // REGLA S3: Extraer mapeo de parámetros (Nivel de abstracción)
     private void executeAddPatron(Patron patron) {
-        String query = sqlQueries.getProperty("patron.insert", "INSERT INTO Patron (id, name, surname, birthdate, titleIssueDate) VALUES (?, ?, ?, ?, ?)");
-        int rowsAffected = jdbcTemplate.update(query, patron.getPatronId(), patron.getName(),
-                patron.getSurname(), patron.getBirthDate(), patron.getTitleIssueDate());
-                
-        // Regla 19: Excepción si no se inserta nada.
+        String query = sqlQueries.getProperty("patron.insert");
+        Object[] parametros = extraerParametrosPatron(patron); // Llamada limpia
+        
+        int rowsAffected = jdbcTemplate.update(query, parametros);
+
         if (rowsAffected == 0) throw new RuntimeException("No se pudo insertar el patrón");
     }
 
-    // Regla 20: Extracción try-catch.
+    // REGLA 20: Extraer Try/Catch
     public void updatePatron(Patron patron) {
-        try { executeUpdatePatron(patron); } 
-        catch (DataAccessException e) { throw new RuntimeException("Fallo al actualizar el Patrón", e); } // Regla 19
+        try {
+            executeUpdatePatron(patron);
+        } catch (org.springframework.dao.DataAccessException e) {
+            throw new RuntimeException("Fallo al actualizar el Patrón", e); // REGLA 19
+        }
     }
 
+    // REGLA S3: Separar la ejecución SQL del mapeo de datos
     private void executeUpdatePatron(Patron patron) {
-        String query = sqlQueries.getProperty("patron.update", "UPDATE Patron SET name=?, surname=?, birthdate=?, titleIssueDate=? WHERE id=?");
-        int rowsAffected = jdbcTemplate.update(query, patron.getName(), patron.getSurname(),
-                patron.getBirthDate(), patron.getTitleIssueDate(), patron.getPatronId());
+        String query = sqlQueries.getProperty("patron.update");
+        // Reutilizamos la función porque los parámetros (menos el ID) son parecidos, 
+        // o creamos los parámetros específicos para el UPDATE:
+        Object[] parametrosUpdate = new Object[]{
+            patron.getName(), patron.getSurname(), patron.getBirthDate(), 
+            patron.getTitleIssueDate(), patron.getPatronId()
+        };
         
-        // Regla 19: Excepción
+        int rowsAffected = jdbcTemplate.update(query, parametrosUpdate);
+                
         if (rowsAffected == 0) throw new IllegalArgumentException("El patrón a actualizar no existe");
+    }
+
+    // REGLA S3: Hacer una sola cosa (Mapear el objeto a un array de base de datos)
+    private Object[] extraerParametrosPatron(Patron patron) {
+        return new Object[]{
+            patron.getPatronId(), patron.getName(), patron.getSurname(), 
+            patron.getBirthDate(), patron.getTitleIssueDate()
+        };
     }
 
     private RowMapper<Patron> patronRowMapper() {

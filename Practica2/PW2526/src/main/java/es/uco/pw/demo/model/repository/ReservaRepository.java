@@ -46,26 +46,31 @@ public class ReservaRepository extends AbstractRepository {
         catch (Exception e) { return -1; }
     }
 
-    // Reglas 15 y 20
     private int executeAddReserva(Reserva reserva) {
         String query = sqlQueries.getProperty("reserva.insert", "INSERT INTO Reserva (userId, registrationNumber, date, numSeats, purpose, totalAmount) VALUES (?, ?, ?, ?, ?, ?)");
         KeyHolder keyHolder = new GeneratedKeyHolder();
+        
         int rowsAffected = jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, reserva.getUserId());
-            ps.setString(2, reserva.getRegistrationNumber());
-            ps.setObject(3, reserva.getReservationDate());
-            ps.setInt(4, reserva.getNumberOfSeats());
-            ps.setString(5, reserva.getPurpose());
-            ps.setDouble(6, reserva.getTotalAmount());
+            // REGLA S3: Extraer el mapeo de parámetros a una función privada para limpiar la llamada principal.
+            mapearParametrosReserva(ps, reserva);
             return ps;
         }, keyHolder);
 
-        // Regla 19
         if (rowsAffected == 0 || keyHolder.getKey() == null) {
             throw new RuntimeException("Insertion failed");
         }
         return keyHolder.getKey().intValue();
+    }
+
+    // REGLA S3: Hacer una sola cosa (Mapear el objeto Reserva al PreparedStatement de SQL)
+    private void mapearParametrosReserva(PreparedStatement ps, Reserva reserva) throws SQLException {
+        ps.setString(1, reserva.getUserId());
+        ps.setString(2, reserva.getRegistrationNumber());
+        ps.setObject(3, reserva.getReservationDate());
+        ps.setInt(4, reserva.getNumberOfSeats());
+        ps.setString(5, reserva.getPurpose());
+        ps.setDouble(6, reserva.getTotalAmount());
     }
 
     public boolean isAvailable(String registrationNumber, LocalDate date) {
