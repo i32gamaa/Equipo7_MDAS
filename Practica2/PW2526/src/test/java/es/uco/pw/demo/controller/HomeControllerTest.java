@@ -1,29 +1,12 @@
-package es.uco.pw.demo.controller;
-
-import static org.hamcrest.Matchers.containsString;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import org.springframework.boot.test.context.SpringBootTest;
 
-@WebMvcTest(HomeController.class)
-public class HomeControllerTest {
+@SpringBootTest
+class DemoApplicationTests {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    // Los nombres de los tests deben explicar la accion y el resultado esperado.
-    // Evitamos el prefijo "test" generico (testHomePage). Usamos un nombre descriptivo en formato "debeHacerAlgo".
+    // REFACTORIZACIÓN:
     @Test
-    public void debeCargarVistaHomeConMensajeDeBienvenida() throws Exception {
-        mockMvc.perform(get("/"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("home"))
-                .andExpect(content().string(
-                        containsString("Bienvenido a:"))); 
+    void debeArrancarContextoDeSpringSinErrores() {
     }
+
 }

@@ -8,7 +8,6 @@ class DemoApplicationTests {
 
     @Test
     void debeArrancarContextoDeSpringSinErrores() {
-        // Método que verifica que el contexto de Spring se carga correctamente.
     }
 
 }

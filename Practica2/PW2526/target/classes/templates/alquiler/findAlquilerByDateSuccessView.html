@@ -13,13 +13,13 @@
         <h1>✅ Embarcaciones Disponibles</h1>
         <p class="subtitle">Del <span th:text="${startDate}"></span> al <span th:text="${endDate}"></span></p>
 
-        <!-- Contador de resultados -->
+        ' -->
+        ', ya que las clases CSS y la propia estructura del HTML lo explican. -->
         <div class="success-message">
             <strong>Embarcaciones disponibles:</strong> 
             <span th:text="${embarcaciones.size()}"></span> embarcación(es) no alquilada(s) en este período
         </div>
 
-        <!-- Lista de embarcaciones disponibles -->
         <div class="details" th:if="${embarcaciones != null and not embarcaciones.empty}">
             <h3>Embarcaciones Encontradas</h3>
             <table class="styled-table">
@@ -46,13 +46,11 @@
             </table>
         </div>
 
-        <!-- Mensaje si no hay embarcaciones disponibles -->
         <div th:if="${embarcaciones == null || embarcaciones.empty}" class="no-data">
             <h3>No hay embarcaciones disponibles</h3>
             <p>Todas las embarcaciones están alquiladas en el período seleccionado.</p>
         </div>
 
-        <!-- Botones de acción -->
         <div class="btn-group">
             <a th:href="@{/findAlquilerByDate}" class="btn btn-primary">🔍 Nueva Búsqueda</a>
             <a th:href="@{/addAlquiler}" class="btn btn-outline-light">Nuevo Alquiler</a>

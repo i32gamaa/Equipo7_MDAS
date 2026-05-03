@@ -7,6 +7,7 @@
     <title>Alquilar Embarcación</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="stylehome.css">
+    
     <style>
         .error-periodo {
             background: rgba(255, 0, 0, 0.1);
@@ -17,18 +18,15 @@
             text-align: center;
             display: none;
         }
-        
         .error-periodo h5 {
             color: #ff6b6b;
             margin-bottom: 8px;
             font-family: 'italianaregular';
         }
-        
         .error-periodo p {
             margin: 5px 0;
             color: #ff8e8e;
         }
-        
         .error-periodo small {
             color: #ffabab;
             font-style: italic;
@@ -43,7 +41,6 @@
             text-align: center;
             display: none;
         }
-        
         .calculation-info h5 {
             color: #00bfff;
             margin-bottom: 8px;
@@ -56,35 +53,33 @@
     <div class="overlay">
         <h5 class="white">Alquilar Embarcación</h5>
 
+        ' -->
+        ', ya que las etiquetas <label> y el tipo de los inputs ya lo explican. -->
         <form th:action="@{/addAlquiler}" method="post" th:object="${alquilerForm}" id="alquilerForm">
-            <!-- Matrícula de la Embarcación -->
+            
             <div class="form-group">
                 <label for="registrationNumber">Matrícula</label>
                 <input type="text" id="registrationNumber" th:field="*{registrationNumber}" 
                        th:readonly="${embarcacion != null}" required>
             </div>
 
-            <!-- ID del Socio -->
             <div class="form-group">
                 <label for="userId">ID del Socio</label>
                 <input type="text" id="userId" th:field="*{userId}" required>
             </div>
 
-            <!-- Fecha de Inicio -->
             <div class="form-group">
                 <label for="startDate">Fecha de Inicio</label>
                 <input type="date" id="startDate" th:field="*{startDate}" 
                        th:value="${alquilerForm.startDate != null} ? ${#temporals.format(alquilerForm.startDate, 'yyyy-MM-dd')} : ${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" required>
             </div>
 
-            <!-- Fecha de Fin -->
             <div class="form-group">
                 <label for="endDate">Fecha de Fin</label>
                 <input type="date" id="endDate" th:field="*{endDate}" 
                        th:value="${alquilerForm.endDate != null} ? ${#temporals.format(alquilerForm.endDate, 'yyyy-MM-dd')} : ''" required>
             </div>
 
-            <!-- Número de Plazas con tooltip -->
             <div class="form-group position-relative">
                 <label for="numSeats">
                     Número de Plazas
@@ -94,24 +89,20 @@
                 <div class="tooltip-text" id="tooltipText">Precio por plaza por día = 20€</div>
             </div>
 
-            <!-- Campo oculto para el importe -->
             <input type="hidden" id="amount" name="amount" th:field="*{amount}">
 
-            <!-- Mensaje de error de período -->
             <div id="errorPeriodo" class="error-periodo" style="grid-column: span 2;">
                 <h5>❌ Periodo No Permitido</h5>
                 <p id="errorText"></p>
                 <small>Por favor, ajuste las fechas</small>
             </div>
 
-            <!-- Información de cálculo cuando es válido -->
             <div id="calculationInfo" class="calculation-info" style="grid-column: span 2;">
                 <h5>✅ Período Válido</h5>
                 <p><strong>Días de alquiler:</strong> <span id="diasAlquiler">0</span> días</p>
                 <p><strong>Precio estimado:</strong> <span id="precioEstimado">0</span>€</p>
             </div>
 
-            <!-- Botones -->
             <div class="d-flex justify-content-center gap-3 mt-3" style="grid-column: span 2;">
                 <a th:href="@{/}" class="btn btn-outline-light">Cancelar</a>
                 <button type="submit" class="btn btn-primary" id="submitBtn">Crear Alquiler</button>
@@ -120,12 +111,11 @@
     </div>
 
     <script>
-        // Fecha mínima = hoy
+        // REFACTORIZACIÓN:
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('startDate').setAttribute('min', today);
         document.getElementById('endDate').setAttribute('min', today);
 
-        // Elementos del DOM
         const errorPeriodo = document.getElementById('errorPeriodo');
         const errorText = document.getElementById('errorText');
         const calculationInfo = document.getElementById('calculationInfo');
@@ -141,12 +131,10 @@
             const endDate = new Date(document.getElementById('endDate').value);
             const numSeats = parseInt(document.getElementById('numSeats').value) || 0;
 
-            // Ocultar ambos mensajes inicialmente
             errorPeriodo.style.display = 'none';
             calculationInfo.style.display = 'none';
             submitBtn.disabled = false;
 
-            // Solo validar si ambas fechas están seleccionadas
             if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
                 return;
             }
@@ -155,10 +143,8 @@
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
             const startMonth = startDate.getMonth() + 1;
 
-            // Calcular precio estimado
             const precio = diffDays * numSeats * 20;
 
-            // Octubre a Abril (10-4): máximo 3 días
             if ((startMonth >= 10 || startMonth <= 4) && diffDays > 3) {
                 errorPeriodo.style.display = 'block';
                 errorText.innerHTML = `<strong>Entre octubre y abril el máximo es de 3 días</strong><br>Días seleccionados: ${diffDays}`;
@@ -166,7 +152,6 @@
                 return;
             }
             
-            // Mayo a Septiembre (5-9): 1-2 semanas (7-14 días)
             if (startMonth >= 5 && startMonth <= 9) {
                 if (diffDays < 7) {
                     errorPeriodo.style.display = 'block';
@@ -182,16 +167,13 @@
                 }
             }
 
-            // Si pasa todas las validaciones, mostrar información del cálculo
             calculationInfo.style.display = 'block';
             diasAlquilerSpan.textContent = diffDays;
             precioEstimadoSpan.textContent = precio;
             
-            // Actualizar campo oculto del importe
             document.getElementById('amount').value = precio;
         }
 
-        // Event listeners para validación
         document.getElementById('startDate').addEventListener('change', function() {
             const startDate = this.value;
             document.getElementById('endDate').min = startDate;
@@ -200,33 +182,27 @@
                 document.getElementById('endDate').value = startDate;
             }
             
-            // Marcar que la fecha de inicio está seleccionada
             startDateSelected = true;
             
-            // Solo validar si ya se seleccionó la fecha fin
             if (endDateSelected) {
                 validateTemporalRestrictions();
             }
         });
 
         document.getElementById('endDate').addEventListener('change', function() {
-            // Marcar que la fecha de fin está seleccionada
             endDateSelected = true;
             
-            // Solo validar si ya se seleccionó la fecha inicio
             if (startDateSelected) {
                 validateTemporalRestrictions();
             }
         });
 
         document.getElementById('numSeats').addEventListener('input', function() {
-            // Solo validar si ambas fechas están seleccionadas
             if (startDateSelected && endDateSelected) {
                 validateTemporalRestrictions();
             }
         });
 
-        // Tooltip dinámico
         document.addEventListener('DOMContentLoaded', function () {
             const infoIcon = document.getElementById('infoIcon');
             const tooltipText = document.getElementById('tooltipText');
@@ -239,7 +215,6 @@
             document.addEventListener('click', () => tooltipText.style.display = 'none');
             tooltipText.addEventListener('click', e => e.stopPropagation());
 
-            // Verificar si hay datos pre-cargados al cargar la página
             const startDateValue = document.getElementById('startDate').value;
             const endDateValue = document.getElementById('endDate').value;
             
@@ -250,7 +225,6 @@
             }
         });
 
-        // Validación final antes del envío
         document.getElementById('alquilerForm').addEventListener('submit', function(e) {
             const startDate = new Date(document.getElementById('startDate').value);
             const endDate = new Date(document.getElementById('endDate').value);
@@ -269,7 +243,6 @@
                 return;
             }
 
-            // Si el botón está deshabilitado, prevenir envío
             if (submitBtn.disabled) {
                 e.preventDefault();
                 alert('❌ Por favor, corrija los errores en el formulario antes de enviar');
