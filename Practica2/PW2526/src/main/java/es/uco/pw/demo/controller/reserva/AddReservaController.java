@@ -12,6 +12,10 @@ import es.uco.pw.demo.model.repository.ReservaRepository;
 @Controller
 public class AddReservaController {
 
+    // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Replace Magic Number with Symbolic Constant]
+    // Evitamos el uso del "-1" suelto en el código para identificar fallos de base de datos.
+    private static final int ERROR_GUARDADO_BD = -1;
+
     private final ReservaRepository reservaRepository;
 
     public AddReservaController(ReservaRepository reservaRepository) {
@@ -34,10 +38,12 @@ public class AddReservaController {
             return vistaError;
         }
 
-        int resultadoId = reservaRepository.addReserva(reservaSolicitada);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        // Eliminamos la variable temporal 'resultadoId' y pasamos el resultado directamente al evaluador.
+        String vistaResultado = determinarVistaResultado(reservaRepository.addReserva(reservaSolicitada));
         estadoSesion.setComplete();
         
-        return determinarVistaResultado(resultadoId);
+        return vistaResultado;
     }
 
     // ====================================================================================================
@@ -53,6 +59,8 @@ public class AddReservaController {
 
     // [CLEAN CODE - SEMANA 3: Extrae validaciones complejas. Sigue la regla de ocultar detalles técnicos del mapeo principal]
     private String validarRequisitosReserva(Reserva reserva) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Guard Clauses]
+        // Retornos anticipados en lugar de if/else anidados para mantener un flujo de lectura plano.
         if (!reservaRepository.patronAssigned(reserva.getRegistrationNumber())) {
             return "reserva/addReservaFailNOPATRONView";
         } 
@@ -70,12 +78,14 @@ public class AddReservaController {
 
     // [CLEAN CODE - SEMANA 3: Función de conveniencia para agrupar lógica de disponibilidad relacionada]
     private boolean estaDisponibleParaFecha(Reserva reserva) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Consolidate Conditional Expression]
         return reservaRepository.isAvailable(reserva.getRegistrationNumber(), reserva.getReservationDate()) &&
                reservaRepository.isAvailableInAlquiler(reserva.getRegistrationNumber(), reserva.getReservationDate());
     }
 
     // [CLEAN CODE - SEMANA 3: Separa la lógica de decisión de navegación del proceso de guardado]
     private String determinarVistaResultado(int resultadoId) {
-        return (resultadoId != -1) ? "reserva/addReservaSuccessView" : "reserva/addReservaFailView";
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Replace Magic Number]
+        return (resultadoId != ERROR_GUARDADO_BD) ? "reserva/addReservaSuccessView" : "reserva/addReservaFailView";
     }
 }

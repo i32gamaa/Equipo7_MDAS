@@ -18,6 +18,10 @@ import java.time.Period;
 @Controller
 public class AddInscripcionController {
 
+    // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Replace Magic Number with Symbolic Constant]
+    private static final int EDAD_MAYORIA = 18;
+    private static final int CUOTA_BASE_INSCRIPCION = 300;
+
     private final SocioRepository socioRepository;
     private final InscripcionRepository inscripcionRepository;
     private final PatronRepository patronRepository;
@@ -38,6 +42,7 @@ public class AddInscripcionController {
     @PostMapping("/addInscripcion")
     public String procesarNuevaInscripcion(@ModelAttribute("newSocio") Socio socioTitular, SessionStatus estadoSesion) {
 
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Guard Clauses]
         if (comprobarDuplicadosEnSistema(socioTitular.getSocioId())) {
             return "socioinscripcion/addInscripcionDuplicateIdView"; 
         }
@@ -46,10 +51,11 @@ public class AddInscripcionController {
             return "socioinscripcion/addInscripcionFailNotAdultView";
         }
 
-        boolean exitoFlujo = ejecutarProcesoCreacionInscripcion(socioTitular);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        String vistaResultado = determinarVistaResultado(ejecutarProcesoCreacionInscripcion(socioTitular));
         estadoSesion.setComplete();
         
-        return determinarVistaResultado(exitoFlujo);
+        return vistaResultado;
     }
 
     // ====================================================================================================
@@ -63,11 +69,13 @@ public class AddInscripcionController {
     }
 
     private boolean comprobarDuplicadosEnSistema(String id) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Consolidate Conditional Expression]
         return socioRepository.findById(id) != null || patronRepository.findById(id) != null;
     }
 
     private boolean validarMayoriaEdad(Socio socio) {
-        boolean esAdulto = Period.between(socio.getBirthdate(), LocalDate.now()).getYears() >= 18;
+        // [REFACTORIZACIÓN MANUAL - Uso de constante]
+        boolean esAdulto = Period.between(socio.getBirthdate(), LocalDate.now()).getYears() >= EDAD_MAYORIA;
         socio.setAdult(esAdulto);
         socio.setHolderInscription(true);
         socio.setInscriptionDate(LocalDate.now());
@@ -76,8 +84,8 @@ public class AddInscripcionController {
 
     // [CLEAN CODE - SEMANA 3: Encapsula el proceso secuencial de creación de entidades relacionadas]
     private boolean ejecutarProcesoCreacionInscripcion(Socio socio) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Guard Clauses]
         if (!socioRepository.addSocioAdult(socio)) return false;
-        
         if (!crearInscripcionAsociada(socio)) return false;
 
         return vincularSocioConNuevaInscripcion(socio);
@@ -86,7 +94,8 @@ public class AddInscripcionController {
     private boolean crearInscripcionAsociada(Socio titular) {
         Inscripcion inscripcion = new Inscripcion();
         inscripcion.setRegistrationDate(LocalDate.now());
-        inscripcion.setTotalAmount(300);
+        // [REFACTORIZACIÓN MANUAL - Uso de constante]
+        inscripcion.setTotalAmount(CUOTA_BASE_INSCRIPCION);
         inscripcion.setUserId(titular.getSocioId());
         inscripcion.setRegisteredAdults(1);
         inscripcion.setRegisteredKids(0);

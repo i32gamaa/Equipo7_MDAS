@@ -25,12 +25,13 @@ public class FindPatronByIdController {
     @PostMapping("/findPatronById")
     public ModelAndView procesarBusquedaPorId(@RequestParam("idNumber") String patronId) {
         
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Guard Clauses]
         if (esEntradaInvalida(patronId)) {
             return construirVistaErrorValidacion();
         }
 
-        Patron patronEncontrado = patronRepository.findById(patronId);
-        return construirVistaResultado(patronEncontrado, patronId);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaResultado(patronRepository.findById(patronId), patronId);
     }
 
     // ====================================================================================================

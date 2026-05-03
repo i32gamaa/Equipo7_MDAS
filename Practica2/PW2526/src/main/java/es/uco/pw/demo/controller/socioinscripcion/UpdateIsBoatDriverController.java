@@ -26,8 +26,8 @@ public class UpdateIsBoatDriverController {
     @PostMapping("/updateIsBoatDriver")
     public ModelAndView procesarActualizacionPatron(@RequestParam("id") String dniBuscado) {
         Socio socio = socioRepository.findById(dniBuscado);
-        boolean actualizado = intentarOtorgarLicencia(socio);
-        return construirVistaResultado(socio, actualizado);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaResultado(socio, intentarOtorgarLicencia(socio));
     }
 
     // ====================================================================================================
@@ -36,12 +36,13 @@ public class UpdateIsBoatDriverController {
 
     // [CLEAN CODE - SEMANA 3: Do One Thing. Encapsula la lógica de negocio y persistencia]
     private boolean intentarOtorgarLicencia(Socio socio) {
-        if (socio != null && !socio.isBoatDriver()) {
-            socio.setBoatDriver(true);
-            socioRepository.updateIsBoatDriver(socio.getSocioId(), true);
-            return true;
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Guard Clauses]
+        if (socio == null || socio.isBoatDriver()) {
+            return false;
         }
-        return false;
+        socio.setBoatDriver(true);
+        socioRepository.updateIsBoatDriver(socio.getSocioId(), true);
+        return true;
     }
 
     // [CLEAN CODE - SEMANA 3: Encapsula la lógica de selección de vista de éxito/error]

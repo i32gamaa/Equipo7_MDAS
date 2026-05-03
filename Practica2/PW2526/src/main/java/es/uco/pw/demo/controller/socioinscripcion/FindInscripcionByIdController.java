@@ -25,8 +25,8 @@ public class FindInscripcionByIdController {
     // [CLEAN CODE - SEMANA 3: Estructura de historia: buscar -> responder]
     @PostMapping("/findInscripcionById")
     public ModelAndView procesarBusquedaPorId(@RequestParam("id") int idBuscado) {
-        Inscripcion inscripcionEncontrada = inscripcionRepository.findById(idBuscado);
-        return construirVistaResultado(inscripcionEncontrada);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaResultado(inscripcionRepository.findById(idBuscado));
     }
 
     // [CLEAN CODE - SEMANA 3: Do One Thing. Encapsula la lógica de vista]

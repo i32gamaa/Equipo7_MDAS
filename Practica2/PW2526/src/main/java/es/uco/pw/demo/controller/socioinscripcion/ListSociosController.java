@@ -19,8 +19,8 @@ public class ListSociosController {
     // [CLEAN CODE - SEMANA 3: Nivel único de abstracción]
     @GetMapping("/listSocios")
     public ModelAndView mostrarTodosLosSocios() {
-        List<Socio> listaSocios = socioRepository.findAllSocios();
-        return construirVistaListado(listaSocios);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaListado(socioRepository.findAllSocios());
     }
 
     private ModelAndView construirVistaListado(List<Socio> socios) {

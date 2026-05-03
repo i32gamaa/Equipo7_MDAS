@@ -21,8 +21,8 @@ public class ListPatronesController {
     // [CLEAN CODE - SEMANA 3: Do One Thing. Recupera los datos y delega el montaje visual a un privado]
     @GetMapping("/listPatrones")
     public ModelAndView mostrarTodosLosPatrones() {
-        List<Patron> listaPatrones = patronRepository.findAllPatrones();
-        return construirVistaListado(listaPatrones);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaListado(patronRepository.findAllPatrones());
     }
 
     // ====================================================================================================

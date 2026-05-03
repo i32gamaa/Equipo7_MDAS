@@ -19,8 +19,8 @@ public class ListInscripcionesController {
     // [CLEAN CODE - SEMANA 3: Do One Thing. Delega la carga de datos visuales]
     @GetMapping("/listInscripciones")
     public ModelAndView mostrarTodasLasInscripciones() {
-        List<Inscripcion> listaInscripciones = inscripcionRepository.findAllInscripciones();
-        return construirVistaListado(listaInscripciones);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaListado(inscripcionRepository.findAllInscripciones());
     }
 
     private ModelAndView construirVistaListado(List<Inscripcion> inscripciones) {

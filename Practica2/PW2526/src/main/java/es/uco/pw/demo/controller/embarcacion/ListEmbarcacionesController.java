@@ -19,8 +19,8 @@ public class ListEmbarcacionesController {
     // [CLEAN CODE - SEMANA 3: Función pura y simple. Delega la carga de datos a privados]
     @GetMapping("/listEmbarcacion")
     public ModelAndView mostrarTodasLasEmbarcaciones() {
-        List<Embarcacion> catalogo = embarcacionRepository.findAllEmbarcaciones();
-        return construirVistaCatalogo(catalogo);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaCatalogo(embarcacionRepository.findAllEmbarcaciones());
     }
 
     // [CLEAN CODE - SEMANA 3: Extracción de carga de ModelAndView para seguir DRY]

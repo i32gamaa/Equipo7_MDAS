@@ -28,15 +28,15 @@ public class AssignPatronToBoatController {
     // [CLEAN CODE - SEMANA 3: Do One Thing. Solicita la asignación y delega la respuesta]
     @PostMapping("/assignPatronToBoat")
     public String procesarAsignacionPatron(@RequestParam String registrationNumber, @RequestParam String patronId) {
-        boolean exito = patronRepository.assignPatronToBoat(patronId, registrationNumber);
-        return determinarVistaAsignacion(exito);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return determinarVistaAsignacion(patronRepository.assignPatronToBoat(patronId, registrationNumber));
     }
 
     // [CLEAN CODE - SEMANA 3: Do One Thing. Solicita la desasignación y delega la respuesta]
     @PostMapping("/unassignPatronFromBoat")
     public String procesarDesasignacionPatron(@RequestParam String registrationNumber) {
-        boolean exito = patronRepository.unassignPatronFromBoat(registrationNumber);
-        return determinarVistaDesasignacion(exito);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return determinarVistaDesasignacion(patronRepository.unassignPatronFromBoat(registrationNumber));
     }
 
     // ====================================================================================================

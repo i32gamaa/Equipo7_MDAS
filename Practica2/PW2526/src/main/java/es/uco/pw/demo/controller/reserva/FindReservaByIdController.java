@@ -25,8 +25,9 @@ public class FindReservaByIdController {
     // [CLEAN CODE - SEMANA 3: Un solo nivel de abstracción. El flujo es: buscar -> construir respuesta]
     @PostMapping("/findReservaById")
     public ModelAndView procesarBusquedaPorId(@RequestParam("id") int idBuscado) {
-        Reserva reservaEncontrada = reservaRepository.findById(idBuscado);
-        return construirVistaResultado(reservaEncontrada);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        // En lugar de guardar 'Reserva reservaEncontrada = ...', lo inyectamos directo al constructor.
+        return construirVistaResultado(reservaRepository.findById(idBuscado));
     }
 
     // ====================================================================================================

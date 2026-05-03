@@ -16,6 +16,9 @@ import java.time.Period;
 @Controller
 public class AddPatronController {
 
+    // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Replace Magic Number with Symbolic Constant]
+    private static final int MAYORIA_EDAD = 18;
+
     private PatronRepository patronRepository;
     private SocioRepository socioRepository;
 
@@ -41,10 +44,11 @@ public class AddPatronController {
             return vistaError;
         }
 
-        boolean exitoRegistro = patronRepository.addPatron(patronSolicitado);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        String vistaResultado = determinarVistaResultado(patronRepository.addPatron(patronSolicitado));
         estadoSesion.setComplete();
         
-        return determinarVistaResultado(exitoRegistro);
+        return vistaResultado;
     }
 
     // ====================================================================================================
@@ -63,11 +67,9 @@ public class AddPatronController {
         if (!esMayorDeEdad(patron.getBirthDate())) {
             return "patron/addPatronFailNOADULTView";
         }
-        if (patronRepository.findById(patron.getPatronId()) != null) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Consolidate Conditional Expression]
+        if (patronRepository.findById(patron.getPatronId()) != null || socioRepository.findById(patron.getPatronId()) != null) {
             return "patron/addPatronDuplicateIdView"; 
-        }
-        if (socioRepository.findById(patron.getPatronId()) != null) {
-            return "patron/addPatronDuplicateIdView";
         }
         return null;
     }
@@ -79,9 +81,11 @@ public class AddPatronController {
 
     // [CLEAN CODE - SEMANA 3: Función pura, pequeña y de una sola responsabilidad]
     private boolean esMayorDeEdad(LocalDate fechaNacimiento) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Guard Clauses]
         if (fechaNacimiento == null) {
             return false;
         }
-        return Period.between(fechaNacimiento, LocalDate.now()).getYears() >= 18;
+        // [REFACTORIZACIÓN MANUAL - Uso de la constante extraída]
+        return Period.between(fechaNacimiento, LocalDate.now()).getYears() >= MAYORIA_EDAD;
     }
 }

@@ -23,8 +23,8 @@ public class FindEmbarcacionByRegistrartionController {
     // [CLEAN CODE - SEMANA 3: Se lee como una historia. Delega la lógica de búsqueda y carga de vista]
     @PostMapping("/findEmbarcacionByRegistration")
     public ModelAndView procesarBusquedaPorMatricula(@RequestParam("registrationNumber") String matricula) {
-        Embarcacion embarcacionEncontrada = embarcacionRepository.findByRegistration(matricula);
-        return construirVistaResultado(embarcacionEncontrada);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaResultado(embarcacionRepository.findByRegistration(matricula));
     }
 
     // [CLEAN CODE - SEMANA 3: Extracción de carga de ModelAndView]

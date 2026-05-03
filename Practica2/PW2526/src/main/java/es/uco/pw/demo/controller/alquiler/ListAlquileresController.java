@@ -21,8 +21,8 @@ public class ListAlquileresController {
     // [CLEAN CODE - SEMANA 3: Do One Thing. Recupera los datos y delega la construcción de la vista a un método privado]
     @GetMapping("/listAlquileres")
     public ModelAndView mostrarAlquileresActivosYFuturos() {
-        List<Alquiler> alquileresVigentes = alquilerRepository.findCurrentAndFutureAlquileres();
-        return construirVistaListado(alquileresVigentes);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaListado(alquilerRepository.findCurrentAndFutureAlquileres());
     }
 
     // [CLEAN CODE - SEMANA 3: Extracción de carga de ModelAndView]

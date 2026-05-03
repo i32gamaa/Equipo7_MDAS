@@ -25,8 +25,8 @@ public class FindSocioByIdController {
     // [CLEAN CODE - SEMANA 3: Un solo nivel de abstracción]
     @PostMapping("/findSocioById")
     public ModelAndView procesarBusquedaPorId(@RequestParam("id") String dniBuscado) {
-        Socio socioEncontrado = socioRepository.findById(dniBuscado);
-        return construirVistaResultado(socioEncontrado);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaResultado(socioRepository.findById(dniBuscado));
     }
 
     // [CLEAN CODE - SEMANA 3: Extracción de lógica de construcción de respuesta]

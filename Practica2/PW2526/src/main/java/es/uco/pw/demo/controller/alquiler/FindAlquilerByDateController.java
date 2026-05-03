@@ -34,6 +34,7 @@ public class FindAlquilerByDateController {
             LocalDate fechaInicioParsed = LocalDate.parse(fechaInicioTexto);
             LocalDate fechaFinParsed = LocalDate.parse(fechaFinTexto);
             
+            // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Replace Nested Conditional with Guard Clauses]
             String mensajeErrorValidacion = validarRangoFechas(fechaInicioParsed, fechaFinParsed);
             if (mensajeErrorValidacion != null) {
                 return construirVistaFallo(mensajeErrorValidacion);
@@ -52,6 +53,7 @@ public class FindAlquilerByDateController {
 
     // [CLEAN CODE - SEMANA 3: Extracción de validaciones de fechas]
     private String validarRangoFechas(LocalDate inicio, LocalDate fin) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Consolidate Conditional Expression]
         if (inicio.isAfter(fin)) return "La fecha de inicio no puede ser posterior a la fecha de fin";
         if (inicio.isBefore(LocalDate.now())) return "La fecha de inicio no puede ser anterior a la fecha actual";
         return null;
@@ -67,9 +69,9 @@ public class FindAlquilerByDateController {
             modelAndView.addObject("startDate", inicio);
             modelAndView.addObject("endDate", fin);
             return modelAndView;
-        } else {
-            return construirVistaFallo("No se encontraron embarcaciones disponibles para el rango de fechas seleccionado");
-        }
+        } 
+        
+        return construirVistaFallo("No se encontraron embarcaciones disponibles para el rango de fechas seleccionado");
     }
 
     // [CLEAN CODE - SEMANA 3: DRY (Don't Repeat Yourself). Un único método para construir vistas de error]

@@ -32,6 +32,7 @@ public class AddEmbarcacionController {
         
         normalizarDatosEntrada(nuevaEmbarcacion);
         
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Guard Clauses]
         if (comprobarNombreDuplicado(nuevaEmbarcacion.getName())) {
             return "embarcacion/addEmbarcacionFailView";
         }
@@ -56,7 +57,8 @@ public class AddEmbarcacionController {
 
     // [CLEAN CODE - SEMANA 3: Encapsula lógica de bajo nivel sobre los datos]
     private void normalizarDatosEntrada(Embarcacion embarcacion) {
-        if (embarcacion.getPatronId() == null || embarcacion.getPatronId().isEmpty()) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Consolidate Conditional Expression]
+        if (embarcacion.getPatronId() == null || embarcacion.getPatronId().trim().isEmpty()) {
             embarcacion.setPatronId(null);
         }
     }
@@ -69,8 +71,8 @@ public class AddEmbarcacionController {
     // [CLEAN CODE - SEMANA 3: Do One Thing. Este método ya existía pero se mantiene por su buen diseño]
     private boolean comprobarNombreDuplicado(String nombreAComprobar) {
         try {
-            List<Embarcacion> inventario = embarcacionRepository.findAllEmbarcaciones();
-            return inventario != null && inventario.stream()
+            // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+            return embarcacionRepository.findAllEmbarcaciones().stream()
                     .anyMatch(e -> e.getName() != null && e.getName().equalsIgnoreCase(nombreAComprobar));
         } catch (Exception e) {
             return true; 

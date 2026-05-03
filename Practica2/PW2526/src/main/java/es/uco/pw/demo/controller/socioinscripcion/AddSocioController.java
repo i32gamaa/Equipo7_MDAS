@@ -18,6 +18,11 @@ import java.time.Period;
 @Controller
 public class AddSocioController {
 
+    // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Replace Magic Number with Symbolic Constant]
+    private static final int EDAD_MAYORIA = 18;
+    private static final int CUOTA_EXTRA_ADULTO = 250;
+    private static final int CUOTA_EXTRA_INFANTIL = 100;
+
     private final SocioRepository socioRepository;
     private final InscripcionRepository inscripcionRepository;
     private final PatronRepository patronRepository;
@@ -39,6 +44,7 @@ public class AddSocioController {
     @PostMapping("/addSocio")
     public String procesarNuevoSocio(@ModelAttribute("newSocio") Socio socioSolicitado, SessionStatus estadoSesion) {
         
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Guard Clauses]
         if (comprobarSocioOPatronExistente(socioSolicitado.getSocioId())) {
             return "socioinscripcion/addSocioDuplicateIdView"; 
         }
@@ -46,10 +52,11 @@ public class AddSocioController {
         prepararDatosPerfilSocio(socioSolicitado);
         actualizarEstadoInscripcionFamiliar(socioSolicitado);
 
-        boolean registroCompletado = socioRepository.addSocio(socioSolicitado);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        String vistaResultado = determinarVistaResultado(socioRepository.addSocio(socioSolicitado));
         estadoSesion.setComplete();
         
-        return determinarVistaResultado(registroCompletado);
+        return vistaResultado;
     }
 
     // ====================================================================================================
@@ -65,12 +72,14 @@ public class AddSocioController {
 
     // [CLEAN CODE - SEMANA 3: Do One Thing. Encapsula la lógica de búsqueda de duplicados]
     private boolean comprobarSocioOPatronExistente(String id) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Consolidate Conditional Expression]
         return socioRepository.findById(id) != null || patronRepository.findById(id) != null;
     }
 
     // [CLEAN CODE - SEMANA 3: Extrae la lógica de bajo nivel sobre el estado del objeto Socio]
     private void prepararDatosPerfilSocio(Socio socio) {
-        boolean esAdulto = Period.between(socio.getBirthdate(), LocalDate.now()).getYears() >= 18;
+        // [REFACTORIZACIÓN MANUAL - Uso de constante]
+        boolean esAdulto = Period.between(socio.getBirthdate(), LocalDate.now()).getYears() >= EDAD_MAYORIA;
         socio.setAdult(esAdulto);
         socio.setInscriptionDate(LocalDate.now());
         if (!esAdulto) {
@@ -89,7 +98,8 @@ public class AddSocioController {
 
     // [CLEAN CODE - SEMANA 3: Sub-función para cumplir con un único nivel de abstracción en el proceso de inscripción]
     private void aplicarRecargosYActualizarMiembros(Inscripcion inscripcion, boolean esAdulto) {
-        int cuotaExtra = esAdulto ? 250 : 100;
+        // [REFACTORIZACIÓN MANUAL - Uso de constantes]
+        int cuotaExtra = esAdulto ? CUOTA_EXTRA_ADULTO : CUOTA_EXTRA_INFANTIL;
         inscripcion.setTotalAmount(inscripcion.getTotalAmount() + cuotaExtra);
         if (esAdulto) {
             inscripcion.setRegisteredAdults(inscripcion.getRegisteredAdults() + 1);

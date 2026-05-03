@@ -25,8 +25,8 @@ public class FindEmbarcacionByTypeController {
     // [CLEAN CODE - SEMANA 3: Nivel único de abstracción. Delega la complejidad técnica]
     @PostMapping("/findEmbarcacionByType")
     public ModelAndView procesarBusquedaPorTipo(@RequestParam("type") EmbarcacionType tipoSeleccionado) {
-        List<Embarcacion> embarcacionesEncontradas = embarcacionRepository.findByType(tipoSeleccionado);
-        return construirVistaListadoPorTipo(embarcacionesEncontradas, tipoSeleccionado);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaListadoPorTipo(embarcacionRepository.findByType(tipoSeleccionado), tipoSeleccionado);
     }
 
     // [CLEAN CODE - SEMANA 3: Extracción de ModelAndView para mantener métodos pequeños]

@@ -19,8 +19,9 @@ public class ListReservasController {
     // [CLEAN CODE - SEMANA 3: Do One Thing. Obtiene los datos y delega la responsabilidad visual]
     @GetMapping("/listReservas")
     public ModelAndView mostrarTodasLasReservas() {
-        List<Reserva> listaReservas = reservaRepository.findAllReservas();
-        return construirVistaListado(listaReservas);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        // Eliminamos la asignación temporal para devolver la lista directamente a la vista.
+        return construirVistaListado(reservaRepository.findAllReservas());
     }
 
     // ====================================================================================================
