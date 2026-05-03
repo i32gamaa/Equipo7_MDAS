@@ -11,7 +11,6 @@ import java.util.List;
 public class ListPatronesController {
 
     private final PatronRepository patronRepository;
-    private ModelAndView modelAndView = new ModelAndView();
 
     public ListPatronesController(PatronRepository patronRepository) {
         this.patronRepository = patronRepository;
@@ -19,13 +18,21 @@ public class ListPatronesController {
         this.patronRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
+    // [CLEAN CODE - SEMANA 3: Do One Thing. Recupera los datos y delega el montaje visual a un privado]
     @GetMapping("/listPatrones")
     public ModelAndView mostrarTodosLosPatrones() {
-        this.modelAndView.setViewName("patron/listPatronesView");
-        
-        List<Patron> patronesRegistrados = patronRepository.findAllPatrones();
-        
-        this.modelAndView.addObject("patrones", patronesRegistrados);
-        return modelAndView;
+        List<Patron> listaPatrones = patronRepository.findAllPatrones();
+        return construirVistaListado(listaPatrones);
+    }
+
+    // ====================================================================================================
+    // [CLEAN CODE - SEMANA 3: Extracción de carga de datos]
+    // ====================================================================================================
+
+    // [CLEAN CODE - SEMANA 3: Extrae la carga del ModelAndView]
+    private ModelAndView construirVistaListado(List<Patron> patrones) {
+        ModelAndView mav = new ModelAndView("patron/listPatronesView");
+        mav.addObject("patrones", patrones);
+        return mav;
     }
 }

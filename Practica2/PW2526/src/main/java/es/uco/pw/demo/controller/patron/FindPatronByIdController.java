@@ -10,40 +10,55 @@ import org.springframework.web.servlet.ModelAndView;
 public class FindPatronByIdController {
     
     private final PatronRepository patronRepository;
-    private ModelAndView modelAndView = new ModelAndView();
 
     public FindPatronByIdController(PatronRepository patronRepository) {
         this.patronRepository = patronRepository;
     }
 
+    // [CLEAN CODE - SEMANA 3: Delega la inicialización del ModelAndView]
     @GetMapping("/findPatronById")
     public ModelAndView mostrarFormularioBusqueda() {
-        modelAndView.setViewName("patron/findPatronByIdView");
-        return modelAndView;
+        return new ModelAndView("patron/findPatronByIdView");
     }
 
+    // [CLEAN CODE - SEMANA 3: Se lee como una historia (Validar entrada -> Buscar -> Mostrar resultado)]
     @PostMapping("/findPatronById")
-    public ModelAndView procesarBusquedaPorId(@RequestParam("idNumber") String dniBuscado) {
-        System.out.println("[FindPatronByIdController] Searching for patron with ID: " + dniBuscado);
-
-        if (dniBuscado == null || dniBuscado.trim().isEmpty()) {
-            modelAndView.setViewName("patron/findPatronByIdFailView");
-            modelAndView.addObject("errorMessage", "El DNI no puede estar vacío");
-            return modelAndView;
+    public ModelAndView procesarBusquedaPorId(@RequestParam("idNumber") String patronId) {
+        
+        if (esEntradaInvalida(patronId)) {
+            return construirVistaErrorValidacion();
         }
 
-        Patron patronEncontrado = patronRepository.findById(dniBuscado);
+        Patron patronEncontrado = patronRepository.findById(patronId);
+        return construirVistaResultado(patronEncontrado, patronId);
+    }
 
-        if (patronEncontrado != null) {
-            System.out.println("[FindPatronByIdController] Found patron: " + patronEncontrado);
-            modelAndView.setViewName("patron/findPatronByIdSuccessView");
-            modelAndView.addObject("patron", patronEncontrado);
+    // ====================================================================================================
+    // [CLEAN CODE - SEMANA 3: Extracción de lógica a métodos privados]
+    // ====================================================================================================
+
+    // [CLEAN CODE - SEMANA 3: Extracción de lógica de validación de RequestParam]
+    private boolean esEntradaInvalida(String entrada) {
+        return entrada == null || entrada.trim().isEmpty();
+    }
+
+    // [CLEAN CODE - SEMANA 3: Extracción de carga de ModelAndView (Error)]
+    private ModelAndView construirVistaErrorValidacion() {
+        ModelAndView mav = new ModelAndView("patron/findPatronByIdFailView");
+        mav.addObject("errorMessage", "El DNI no puede estar vacío");
+        return mav;
+    }
+
+    // [CLEAN CODE - SEMANA 3: Extracción de carga de ModelAndView (Resultado)]
+    private ModelAndView construirVistaResultado(Patron patron, String idBuscado) {
+        ModelAndView mav = new ModelAndView();
+        if (patron != null) {
+            mav.setViewName("patron/findPatronByIdSuccessView");
+            mav.addObject("patron", patron);
         } else {
-            System.out.println("[FindPatronByIdController] Patron not found with ID: " + dniBuscado);
-            modelAndView.setViewName("patron/findPatronByIdFailView");
-            modelAndView.addObject("errorMessage", "No se encontró ningún patrón con DNI: " + dniBuscado);
+            mav.setViewName("patron/findPatronByIdFailView");
+            mav.addObject("errorMessage", "No se encontró ningún patrón con DNI: " + idBuscado);
         }
-
-        return modelAndView;
+        return mav;
     }
 }

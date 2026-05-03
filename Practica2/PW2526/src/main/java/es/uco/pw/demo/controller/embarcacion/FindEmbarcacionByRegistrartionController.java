@@ -2,7 +2,6 @@ package es.uco.pw.demo.controller.embarcacion;
 
 import es.uco.pw.demo.model.domain.Embarcacion;
 import es.uco.pw.demo.model.repository.EmbarcacionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -10,36 +9,38 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class FindEmbarcacionByRegistrartionController {
     
-    private EmbarcacionRepository embarcacionRepository;
-    private ModelAndView modelAndView = new ModelAndView();
+    private final EmbarcacionRepository embarcacionRepository;
 
     public FindEmbarcacionByRegistrartionController(EmbarcacionRepository embarcacionRepository) {
         this.embarcacionRepository = embarcacionRepository;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.embarcacionRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
     @GetMapping("/findEmbarcacionByRegistration")
     public ModelAndView mostrarFormularioBusquedaPorMatricula() {
-        modelAndView.setViewName("embarcacion/findEmbarcacionByRegistrationView");
-        modelAndView.addObject("embarcacionId", "12345678A");
-        return modelAndView;
+        return construirVistaBusqueda();
     }
 
+    // [CLEAN CODE - SEMANA 3: Se lee como una historia. Delega la lógica de búsqueda y carga de vista]
     @PostMapping("/findEmbarcacionByRegistration")
-    public ModelAndView procesarBusquedaPorMatricula(@RequestParam("registrationNumber") String matriculaBuscada) {
-        System.out.println("[FindEmbarcacionByRegistrationController] Matricula recibida: " + matriculaBuscada);
+    public ModelAndView procesarBusquedaPorMatricula(@RequestParam("registrationNumber") String matricula) {
+        Embarcacion embarcacionEncontrada = embarcacionRepository.findByRegistration(matricula);
+        return construirVistaResultado(embarcacionEncontrada);
+    }
 
-        Embarcacion embarcacionEncontrada = embarcacionRepository.findByRegistration(matriculaBuscada);
+    // [CLEAN CODE - SEMANA 3: Extracción de carga de ModelAndView]
+    private ModelAndView construirVistaBusqueda() {
+        ModelAndView mav = new ModelAndView("embarcacion/findEmbarcacionByRegistrationView");
+        mav.addObject("embarcacionId", "12345678A");
+        return mav;
+    }
 
-        if (embarcacionEncontrada != null) {
-            System.out.println("[FindEmbarcacionByRegistrationController] Embarcacion encontrada: matricula=" + embarcacionEncontrada.getRegistrationNumber());
-            modelAndView.setViewName("embarcacion/findEmbarcacionByRegistrationSuccessView");
-            modelAndView.addObject("embarcacion", embarcacionEncontrada);
-        } else {
-            modelAndView.setViewName("embarcacion/findEmbarcacionByRegistrationFailView");
+    // [CLEAN CODE - SEMANA 3: Do One Thing. Construye la vista basándose en el resultado del negocio]
+    private ModelAndView construirVistaResultado(Embarcacion embarcacion) {
+        if (embarcacion != null) {
+            ModelAndView mav = new ModelAndView("embarcacion/findEmbarcacionByRegistrationSuccessView");
+            mav.addObject("embarcacion", embarcacion);
+            return mav;
         }
-
-        return modelAndView;
+        return new ModelAndView("embarcacion/findEmbarcacionByRegistrationFailView");
     }
 }

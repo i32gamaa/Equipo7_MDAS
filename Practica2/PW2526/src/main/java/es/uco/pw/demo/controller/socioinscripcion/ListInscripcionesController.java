@@ -11,19 +11,21 @@ import java.util.List;
 public class ListInscripcionesController {
 
     private final InscripcionRepository inscripcionRepository;
-    private ModelAndView modelAndView = new ModelAndView();
 
     public ListInscripcionesController(InscripcionRepository inscripcionRepository) {
         this.inscripcionRepository = inscripcionRepository;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.inscripcionRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
+    // [CLEAN CODE - SEMANA 3: Do One Thing. Delega la carga de datos visuales]
     @GetMapping("/listInscripciones")
     public ModelAndView mostrarTodasLasInscripciones() {
-        this.modelAndView.setViewName("socioinscripcion/listInscripcionesView");
-        List<Inscripcion> inscripcionesRegistradas = inscripcionRepository.findAllInscripciones();
-        this.modelAndView.addObject("inscripciones", inscripcionesRegistradas);
-        return modelAndView;
+        List<Inscripcion> listaInscripciones = inscripcionRepository.findAllInscripciones();
+        return construirVistaListado(listaInscripciones);
+    }
+
+    private ModelAndView construirVistaListado(List<Inscripcion> inscripciones) {
+        ModelAndView mav = new ModelAndView("socioinscripcion/listInscripcionesView");
+        mav.addObject("inscripciones", inscripciones);
+        return mav;
     }
 }

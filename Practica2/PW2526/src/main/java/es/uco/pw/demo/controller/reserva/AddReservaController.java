@@ -12,65 +12,70 @@ import es.uco.pw.demo.model.repository.ReservaRepository;
 @Controller
 public class AddReservaController {
 
-    private ReservaRepository reservaRepository;
-    private ModelAndView modelAndView = new ModelAndView();
+    private final ReservaRepository reservaRepository;
 
     public AddReservaController(ReservaRepository reservaRepository) {
         this.reservaRepository = reservaRepository;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.reservaRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
+    // [CLEAN CODE - SEMANA 3: Un solo nivel de abstracción. Delega la creación de la vista a una función privada]
     @GetMapping("/addReserva")
     public ModelAndView mostrarFormularioRegistro() {
-        this.modelAndView.setViewName("reserva/addReservaView");
-        this.modelAndView.addObject("newReserva", new Reserva());
-        return modelAndView;
+        return construirVistaFormulario();
     }
 
+    // [CLEAN CODE - SEMANA 3: Función principal que se lee como una historia. 
+    // Separa claramente la validación de negocio, la persistencia y la respuesta visual]
     @PostMapping("/addReserva")
     public String procesarNuevaReserva(@ModelAttribute("newReserva") Reserva reservaSolicitada, SessionStatus estadoSesion) {
-        System.out.println("[AddReservaController] Info recibida: userId=" + reservaSolicitada.getUserId() +
-                " matricula=" + reservaSolicitada.getRegistrationNumber() +
-                " fecha=" + reservaSolicitada.getReservationDate() +
-                " plazas=" + reservaSolicitada.getNumberOfSeats() +
-                " proposito=" + reservaSolicitada.getPurpose() +
-                " totalAmount=" + reservaSolicitada.getTotalAmount());
+        
+        String vistaError = validarRequisitosReserva(reservaSolicitada);
+        if (vistaError != null) {
+            return vistaError;
+        }
 
-        boolean tienePatron = reservaRepository.patronAssigned(reservaSolicitada.getRegistrationNumber());
-        boolean tieneCapacidad = reservaRepository.hasCapacity(reservaSolicitada.getRegistrationNumber(),
-                reservaSolicitada.getNumberOfSeats());
-        boolean estaDisponible = reservaRepository.isAvailable(reservaSolicitada.getRegistrationNumber(), reservaSolicitada.getReservationDate());
-        boolean disponibleAlquiler = reservaRepository.isAvailableInAlquiler(reservaSolicitada.getRegistrationNumber(),
-                reservaSolicitada.getReservationDate());
-        boolean esAdulto = reservaRepository.isAdult(reservaSolicitada.getUserId());
+        int resultadoId = reservaRepository.addReserva(reservaSolicitada);
+        estadoSesion.setComplete();
+        
+        return determinarVistaResultado(resultadoId);
+    }
 
-        if (!tienePatron) {
+    // ====================================================================================================
+    // MÉTODOS PRIVADOS EXTRAÍDOS (Stepdown Rule)
+    // ====================================================================================================
+
+    // [CLEAN CODE - SEMANA 3: Do One Thing. Encapsula la inicialización del ModelAndView del formulario]
+    private ModelAndView construirVistaFormulario() {
+        ModelAndView mav = new ModelAndView("reserva/addReservaView");
+        mav.addObject("newReserva", new Reserva());
+        return mav;
+    }
+
+    // [CLEAN CODE - SEMANA 3: Extrae validaciones complejas. Sigue la regla de ocultar detalles técnicos del mapeo principal]
+    private String validarRequisitosReserva(Reserva reserva) {
+        if (!reservaRepository.patronAssigned(reserva.getRegistrationNumber())) {
             return "reserva/addReservaFailNOPATRONView";
         } 
-        
-        if (!tieneCapacidad) {
+        if (!reservaRepository.hasCapacity(reserva.getRegistrationNumber(), reserva.getNumberOfSeats())) {
             return "reserva/addReservaFailNOCAPACITYView";
         } 
-        
-        if (!estaDisponible || !disponibleAlquiler) {
+        if (!estaDisponibleParaFecha(reserva)) {
             return "reserva/addReservaFailNOAVAILABLEView";
         } 
-        
-        if (!esAdulto) {
+        if (!reservaRepository.isAdult(reserva.getUserId())) {
             return "reserva/addReservaFailNOADULTView";
         }
+        return null;
+    }
 
-        int filasAfectadas = reservaRepository.addReserva(reservaSolicitada);
-        String vistaDestino;
+    // [CLEAN CODE - SEMANA 3: Función de conveniencia para agrupar lógica de disponibilidad relacionada]
+    private boolean estaDisponibleParaFecha(Reserva reserva) {
+        return reservaRepository.isAvailable(reserva.getRegistrationNumber(), reserva.getReservationDate()) &&
+               reservaRepository.isAvailableInAlquiler(reserva.getRegistrationNumber(), reserva.getReservationDate());
+    }
 
-        if (filasAfectadas != -1) {
-            vistaDestino = "reserva/addReservaSuccessView";
-        } else {
-            vistaDestino = "reserva/addReservaFailView";
-        }
-
-        estadoSesion.setComplete();
-        return vistaDestino;
+    // [CLEAN CODE - SEMANA 3: Separa la lógica de decisión de navegación del proceso de guardado]
+    private String determinarVistaResultado(int resultadoId) {
+        return (resultadoId != -1) ? "reserva/addReservaSuccessView" : "reserva/addReservaFailView";
     }
 }

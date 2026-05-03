@@ -11,21 +11,26 @@ import java.util.List;
 public class ListReservasController {
 
     private final ReservaRepository reservaRepository;
-    private ModelAndView modelAndView = new ModelAndView();
 
     public ListReservasController(ReservaRepository reservaRepository) {
         this.reservaRepository = reservaRepository;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.reservaRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
+    // [CLEAN CODE - SEMANA 3: Do One Thing. Obtiene los datos y delega la responsabilidad visual]
     @GetMapping("/listReservas")
     public ModelAndView mostrarTodasLasReservas() {
-        this.modelAndView.setViewName("reserva/listReservasView");
-        
-        List<Reserva> reservasRegistradas = reservaRepository.findAllReservas();
-        
-        this.modelAndView.addObject("reservas", reservasRegistradas);
-        return modelAndView;
+        List<Reserva> listaReservas = reservaRepository.findAllReservas();
+        return construirVistaListado(listaReservas);
+    }
+
+    // ====================================================================================================
+    // MÉTODOS PRIVADOS EXTRAÍDOS
+    // ====================================================================================================
+
+    // [CLEAN CODE - SEMANA 3: Extracción de la carga del ModelAndView para mantener el mapeo limpio]
+    private ModelAndView construirVistaListado(List<Reserva> reservas) {
+        ModelAndView mav = new ModelAndView("reserva/listReservasView");
+        mav.addObject("reservas", reservas);
+        return mav;
     }
 }

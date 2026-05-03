@@ -24,103 +24,116 @@ public class AddAlquilerController {
     private final AlquilerRepository alquilerRepository;
     private final SocioRepository socioRepository;
     private final EmbarcacionRepository embarcacionRepository;
-    private ModelAndView modelAndView = new ModelAndView();
 
     public AddAlquilerController(AlquilerRepository alquilerRepository, SocioRepository socioRepository, EmbarcacionRepository embarcacionRepository) {
         this.alquilerRepository = alquilerRepository;
         this.socioRepository = socioRepository;
         this.embarcacionRepository = embarcacionRepository;
-        System.out.println("=== AddAlquilerController INICIALIZADO ===");
     }
 
+    // [CLEAN CODE - SEMANA 3: Un solo nivel de abstracción. El método se lee como una historia indicando QUÉ hace, ocultando el CÓMO]
     @GetMapping("/addAlquiler")
     public ModelAndView mostrarFormularioAlquiler(@RequestParam(value = "registrationNumber", required = false) String matricula,
                                          @RequestParam(value = "startDate", required = false) String fechaInicioTexto,
                                          @RequestParam(value = "endDate", required = false) String fechaFinTexto) {
         
-        this.modelAndView = new ModelAndView();
-        this.modelAndView.setViewName("alquiler/addAlquilerView");
+        Alquiler alquilerSolicitado = inicializarAlquilerConParametros(matricula, fechaInicioTexto, fechaFinTexto);
+        return construirVistaFormulario(alquilerSolicitado, matricula);
+    }
+
+    // [CLEAN CODE - SEMANA 3: Un solo nivel de abstracción y Do One Thing. Procesa el alquiler en pasos lógicos claros]
+    @PostMapping("/addAlquiler")
+    public ModelAndView procesarNuevoAlquiler(@ModelAttribute("newAlquiler") Alquiler alquilerSolicitado, SessionStatus estadoSesion) {
         
-        Alquiler alquilerSolicitado = new Alquiler();
+        String mensajeErrorValidacion = validarReglasAlquiler(alquilerSolicitado);
+        if (mensajeErrorValidacion != null) {
+            estadoSesion.setComplete();
+            return construirVistaErrorValidacion(mensajeErrorValidacion, alquilerSolicitado);
+        }
+
+        asignarImporteCalculado(alquilerSolicitado);
+        int filasInsertadasDb = alquilerRepository.addAlquiler(alquilerSolicitado);
+        estadoSesion.setComplete();
+
+        if (filasInsertadasDb != -1) {
+            return construirVistaExito(alquilerSolicitado);
+        } else {
+            return construirVistaErrorBaseDatos(alquilerSolicitado);
+        }
+    }
+
+    // ====================================================================================================
+    // [CLEAN CODE - SEMANA 3: Extracción de lógica compleja a métodos privados (Stepdown Rule)]
+    // ====================================================================================================
+
+    private Alquiler inicializarAlquilerConParametros(String matricula, String fechaInicioTexto, String fechaFinTexto) {
+        Alquiler alquiler = new Alquiler();
+        if (matricula != null && !matricula.isEmpty()) alquiler.setRegistrationNumber(matricula);
+        if (fechaInicioTexto != null && !fechaInicioTexto.isEmpty()) {
+            try { alquiler.setStartDate(LocalDate.parse(fechaInicioTexto)); } catch (Exception ignored) {}
+        }
+        if (fechaFinTexto != null && !fechaFinTexto.isEmpty()) {
+            try { alquiler.setEndDate(LocalDate.parse(fechaFinTexto)); } catch (Exception ignored) {}
+        }
+        return alquiler;
+    }
+
+    private ModelAndView construirVistaFormulario(Alquiler alquiler, String matricula) {
+        ModelAndView modelAndView = new ModelAndView("alquiler/addAlquilerView");
+        modelAndView.addObject("newAlquiler", alquiler);
+        modelAndView.addObject("infoMessage", obtenerRestriccionesTemporales());
         
         if (matricula != null && !matricula.isEmpty()) {
-            alquilerSolicitado.setRegistrationNumber(matricula);
             Embarcacion embarcacionEncontrada = embarcacionRepository.findByRegistration(matricula);
             if (embarcacionEncontrada != null) {
-                this.modelAndView.addObject("embarcacion", embarcacionEncontrada);
+                modelAndView.addObject("embarcacion", embarcacionEncontrada);
             }
         }
-        
-        if (fechaInicioTexto != null && !fechaInicioTexto.isEmpty()) {
-            try {
-                LocalDate fechaInicio = LocalDate.parse(fechaInicioTexto);
-                alquilerSolicitado.setStartDate(fechaInicio);
-            } catch (Exception e) {
-                System.err.println("Error parsing startDate");
-            }
-        }
-        
-        if (fechaFinTexto != null && !fechaFinTexto.isEmpty()) {
-            try {
-                LocalDate fechaFin = LocalDate.parse(fechaFinTexto);
-                alquilerSolicitado.setEndDate(fechaFin);
-            } catch (Exception e) {
-                System.err.println("Error parsing endDate");
-            }
-        }
-        
-        this.modelAndView.addObject("newAlquiler", alquilerSolicitado); 
-        String mensajeInformativoRestricciones = obtenerRestriccionesTemporales();
-        this.modelAndView.addObject("infoMessage", mensajeInformativoRestricciones);
-        
         return modelAndView;
     }
 
-    @PostMapping("/addAlquiler")
-    public ModelAndView procesarNuevoAlquiler(@ModelAttribute("newAlquiler") Alquiler alquilerSolicitado, SessionStatus estadoSesion) {
-        this.modelAndView = new ModelAndView();
-
-        String mensajeErrorValidacion = validarReglasAlquiler(alquilerSolicitado);
-        if (mensajeErrorValidacion != null) {
-            this.modelAndView.setViewName("alquiler/addAlquilerFailView");
-            this.modelAndView.addObject("error", mensajeErrorValidacion);
-            this.modelAndView.addObject("newAlquiler", alquilerSolicitado);
-            
-            if (alquilerSolicitado.getRegistrationNumber() != null) {
-                Embarcacion embarcacionEncontrada = embarcacionRepository.findByRegistration(alquilerSolicitado.getRegistrationNumber());
-                if (embarcacionEncontrada != null) {
-                    this.modelAndView.addObject("embarcacion", embarcacionEncontrada);
-                }
+    private ModelAndView construirVistaErrorValidacion(String error, Alquiler alquiler) {
+        ModelAndView modelAndView = new ModelAndView("alquiler/addAlquilerFailView");
+        modelAndView.addObject("error", error);
+        modelAndView.addObject("newAlquiler", alquiler);
+        
+        if (alquiler.getRegistrationNumber() != null) {
+            Embarcacion embarcacionEncontrada = embarcacionRepository.findByRegistration(alquiler.getRegistrationNumber());
+            if (embarcacionEncontrada != null) {
+                modelAndView.addObject("embarcacion", embarcacionEncontrada);
             }
-            
-            estadoSesion.setComplete();
-            return modelAndView;
         }
-
-        double importeTotalCalculado = calcularImporteTotal(alquilerSolicitado.getStartDate(), alquilerSolicitado.getEndDate(), alquilerSolicitado.getNumberOfSeats());
-        alquilerSolicitado.setAmount(importeTotalCalculado);
-
-        int filasInsertadasDb = alquilerRepository.addAlquiler(alquilerSolicitado);
-
-        if (filasInsertadasDb != -1) {
-            this.modelAndView.setViewName("alquiler/addAlquilerSuccessView");
-            this.modelAndView.addObject("alquiler", alquilerSolicitado);
-            
-            Socio socio = socioRepository.findById(alquilerSolicitado.getUserId());
-            Embarcacion embarcacionEncontrada = embarcacionRepository.findByRegistration(alquilerSolicitado.getRegistrationNumber());
-            long diasAlquiler = ChronoUnit.DAYS.between(alquilerSolicitado.getStartDate(), alquilerSolicitado.getEndDate()) + 1;
-            
-            this.modelAndView.addObject("socio", socio);
-            this.modelAndView.addObject("embarcacion", embarcacionEncontrada);
-            this.modelAndView.addObject("days", diasAlquiler);
-        } else {
-            this.modelAndView.setViewName("alquiler/addAlquilerFailView");
-            this.modelAndView.addObject("error", "Error al guardar en la base de datos.");
-            this.modelAndView.addObject("newAlquiler", alquilerSolicitado);
-        }
-
-        estadoSesion.setComplete();
         return modelAndView;
+    }
+
+    private ModelAndView construirVistaExito(Alquiler alquiler) {
+        ModelAndView modelAndView = new ModelAndView("alquiler/addAlquilerSuccessView");
+        Socio socio = socioRepository.findById(alquiler.getUserId());
+        Embarcacion embarcacion = embarcacionRepository.findByRegistration(alquiler.getRegistrationNumber());
+        long diasAlquiler = ChronoUnit.DAYS.between(alquiler.getStartDate(), alquiler.getEndDate()) + 1;
+        
+        modelAndView.addObject("alquiler", alquiler);
+        modelAndView.addObject("socio", socio);
+        modelAndView.addObject("embarcacion", embarcacion);
+        modelAndView.addObject("days", diasAlquiler);
+        return modelAndView;
+    }
+
+    private ModelAndView construirVistaErrorBaseDatos(Alquiler alquiler) {
+        ModelAndView modelAndView = new ModelAndView("alquiler/addAlquilerFailView");
+        modelAndView.addObject("error", "Error al guardar en la base de datos.");
+        modelAndView.addObject("newAlquiler", alquiler);
+        return modelAndView;
+    }
+
+    private void asignarImporteCalculado(Alquiler alquiler) {
+        try {
+            long days = ChronoUnit.DAYS.between(alquiler.getStartDate(), alquiler.getEndDate());
+            if (days <= 0) days = 1; 
+            alquiler.setAmount(days * alquiler.getNumberOfSeats() * 20.0);
+        } catch (Exception e) {
+            alquiler.setAmount(100.0); 
+        }
     }
 
     private String validarReglasAlquiler(Alquiler alquiler) {
@@ -202,16 +215,6 @@ public class AddAlquilerController {
             return embarcacion != null && embarcacion.getNumberOfSeats() >= requiredSeats;
         } catch (Exception e) {
             return false;
-        }
-    }
-
-    private double calcularImporteTotal(LocalDate startDate, LocalDate endDate, int numSeats) {
-        try {
-            long days = ChronoUnit.DAYS.between(startDate, endDate);
-            if (days <= 0) days = 1; 
-            return days * numSeats * 20.0;
-        } catch (Exception e) {
-            return 100.0; 
         }
     }
 
