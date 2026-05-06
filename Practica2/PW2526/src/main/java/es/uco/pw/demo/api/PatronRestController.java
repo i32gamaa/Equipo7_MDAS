@@ -1,9 +1,6 @@
 package es.uco.pw.demo.api;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -44,14 +41,17 @@ public class PatronRestController {
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El patrón a actualizar no existe", e);
         } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno", e);
         }
     }
 
     // REGLA S3: Extraigo el bloque condicional a su propia función (Nivel de abstracción aislado)
     private void mapearActualizaciones(Patron existing, Patron updates) {
+        // SEMANA 4: Mover estamentos. Se agrupan visualmente los campos de texto por un lado 
+        // y los de fecha por otro, mejorando la cohesión temporal y espacial de las variables.
         if (updates.getName() != null) existing.setName(updates.getName());
         if (updates.getSurname() != null) existing.setSurname(updates.getSurname());
+        
         if (updates.getBirthDate() != null) existing.setBirthDate(updates.getBirthDate());
         if (updates.getTitleIssueDate() != null) existing.setTitleIssueDate(updates.getTitleIssueDate());
     }

@@ -47,7 +47,6 @@ public class ReservaRestController {
             Reserva existingReserva = reservaRepository.findById(id);
             
             // REGLA S3: Do One Thing. Extraemos la lógica de validación de disponibilidad a un método privado.
-            // El controlador ahora solo busca, aplica y guarda.
             aplicarNuevaFechaSiEstaDisponible(existingReserva, requestReserva.getReservationDate());
             
             reservaRepository.updateReserva(existingReserva);
@@ -60,8 +59,10 @@ public class ReservaRestController {
         }
     }
 
-    // REGLA S3: Nivel de Abstracción. Aislamos la regla de negocio (comprobar si el barco está libre).
+    // REGLA S3: Nivel de Abstracción. Aislamos la regla de negocio.
     private void aplicarNuevaFechaSiEstaDisponible(Reserva existingReserva, LocalDate nuevaFecha) {
+        // SEMANA 4: Reemplazar condicional por cláusula guarda.
+        // Si la fecha es nula, hacemos un "return" temprano y evitamos anidar código innecesariamente.
         if (nuevaFecha == null) return;
         
         boolean isBoatAvailable = reservaRepository.isAvailable(existingReserva.getRegistrationNumber(), nuevaFecha);

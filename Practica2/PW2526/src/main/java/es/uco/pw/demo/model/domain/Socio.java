@@ -1,19 +1,17 @@
 /**
  * Clase {@code Socio}:
  * Representa a una persona inscrita en la empresa. 
- * 
- * <p>Esta clase modela los datos personales y de inscripción de un socio,
+ * * <p>Esta clase modela los datos personales y de inscripción de un socio,
  * incluyendo información básica como nombre, dirección, fecha de nacimiento,
- * y detalles sobre su relación con la empresa (por ejemplo, si es titular de la inscripción
- * o si posee licencia de patrón de embarcación).</p>
- * 
- * @author  
- * @version 1.0
+ * y detalles sobre su relación con la empresa.</p>
+ * * @author  
+ * @version 1.1
  * @since 2025-10-03
  */
 package es.uco.pw.demo.model.domain;
 
 import java.time.LocalDate;
+import java.time.Period;
 
 public class Socio {
 
@@ -26,7 +24,10 @@ public class Socio {
     private LocalDate inscriptionDate;
     private boolean isHolderInscription;
     private boolean isBoatDriver;
-    private boolean isAdult;
+    
+    // SEMANA 4: Reemplazar variable por consulta. Eliminamos el atributo físico 'isAdult' 
+    // para evitar datos duplicados o desactualizados.
+    
     private int inscriptionId;
 
     public Socio(String socioId, String name, String surname, String address, LocalDate birthdate, boolean isBoatDriver) {
@@ -38,7 +39,7 @@ public class Socio {
         this.inscriptionDate = LocalDate.now();
         this.isHolderInscription = true;
         this.isBoatDriver = isBoatDriver;
-        this.isAdult = true;
+        // SEMANA 4: Ya no inicializamos el booleano isAdult aquí.
     }
 
     public Socio() {
@@ -62,17 +63,33 @@ public class Socio {
     public LocalDate getInscriptionDate() { return inscriptionDate; }
     public void setInscriptionDate(LocalDate inscriptionDate) { this.inscriptionDate = inscriptionDate; }
 
-    // REFACTORIZACIÓN: Se renombra el getter siguiendo la convención de Java para booleanos (isX en lugar de getIsX).
+    // REFACTORIZACIÓN: Se renombra el getter siguiendo la convención de Java para booleanos (isX).
     public boolean isHolderInscription() { return isHolderInscription; }
     public void setHolderInscription(boolean holderInscription) { this.isHolderInscription = holderInscription; }
 
-    // REFACTORIZACIÓN: Se renombra el getter.
     public boolean isBoatDriver() { return isBoatDriver; }
     public void setBoatDriver(boolean boatDriver) { this.isBoatDriver = boatDriver; }
 
-    // REFACTORIZACIÓN: Se renombra el getter.
-    public boolean isAdult() { return isAdult; }
-    public void setAdult(boolean adult) { this.isAdult = adult; }
+    // SEMANA 4: Reemplazar variable por consulta. La mayoría de edad se calcula al vuelo 
+    // comparando la fecha de nacimiento con la fecha actual.
+    public boolean isAdult() { 
+        if (this.birthdate == null) return false;
+        return Period.between(this.birthdate, LocalDate.now()).getYears() >= 18;
+    }
+
+    // ==============================================================================
+    // PARCHE SEMANA 4: Precaución - Propiedad del código (Mantenimiento de Interfaz)
+    // ==============================================================================
+    /**
+     * @deprecated Este método ya no es necesario porque el estado de adulto se 
+     * calcula dinámicamente. Se mantiene para evitar errores de compilación en 
+     * controladores de terceros.
+     */
+    @Deprecated
+    public void setAdult(boolean adult) {
+        // No realiza ninguna acción. El valor se calcula en isAdult().
+    }
+    // ==============================================================================
 
     public int getInscriptionId() { return inscriptionId; }
     public void setInscriptionId(int inscriptionId) { this.inscriptionId = inscriptionId; }
@@ -87,7 +104,7 @@ public class Socio {
                 ", Fecha de nacimiento=" + birthdate +
                 ", Titular de inscripción=" + isHolderInscription +
                 ", Patrón de embarcación=" + isBoatDriver +
-                ", Es adulto=" + isAdult +
+                ", Es adulto=" + isAdult() + // SEMANA 4: Llamamos al método de cálculo
                 ", ID Inscripción=" + inscriptionId +
                 '}';
     }

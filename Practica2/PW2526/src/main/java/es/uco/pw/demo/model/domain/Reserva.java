@@ -1,14 +1,7 @@
 /**
  * Clase {@code Reserva}:
  * Representa la reserva de un barco para una actividad dentro del club.
- * 
- * <p>Una reserva está asociada a un socio, una embarcación y una fecha concreta.
- * Además, incluye información sobre el propósito de la reserva, el número de plazas
- * ocupadas y el importe total asociado.</p>
- * 
- * <p>Esta clase forma parte del dominio del sistema de gestión del club,
- * permitiendo administrar las reservas de embarcaciones realizadas por los socios.</p>
- * 
+ * ...
  * @author  
  * @version 1.0
  * @since 2025-10-03
@@ -39,7 +32,8 @@ public class Reserva {
         this.numberOfSeats = numberOfSeats;
         this.userId = userId;
         this.registrationNumber = registrationNumber;
-        this.totalAmount = numberOfSeats * 40;
+        // SEMANA 4: Reemplazar código por función. Reutilizamos la función semántica en vez de repetir cálculos. [cite: 13, 441]
+        actualizarImportePorPlazas(numberOfSeats);
     }
 
     // REFACTORIZACIÓN (Regla 1): Se cambia el parámetro 'registrationNumString' por 'registrationNumber' para mantener la consistencia con el atributo de la clase.
@@ -49,7 +43,8 @@ public class Reserva {
         this.numberOfSeats = numberOfSeats;
         this.userId = userId;
         this.registrationNumber = registrationNumber;
-        this.totalAmount=numberOfSeats*40;
+        // SEMANA 4: Reemplazar código por función. [cite: 13, 669]
+        actualizarImportePorPlazas(numberOfSeats);
     }
 
     public Integer getId() { return id; }
@@ -65,13 +60,13 @@ public class Reserva {
     
     // REGLA S3 (Do One Thing y evitar efectos secundarios): En lugar de hacer la cuenta matemática 
     // dentro del propio setter (lo cual es inesperado para quien llama al setter), 
-    // lo extraigo a una función privada semántica.
+    // lo extraigo a una función privada semántica. [cite: 13, 231]
     public void setNumberOfSeats(int numberOfSeats) {
         this.numberOfSeats = numberOfSeats;
         actualizarImportePorPlazas(numberOfSeats);
     }
 
-    // REGLA S3: Función puramente matemática (Un solo nivel de abstracción)
+    // REGLA S3: Función puramente matemática (Un solo nivel de abstracción) [cite: 13, 164]
     private void actualizarImportePorPlazas(int plazas) {
         this.totalAmount = plazas * 40;
     }

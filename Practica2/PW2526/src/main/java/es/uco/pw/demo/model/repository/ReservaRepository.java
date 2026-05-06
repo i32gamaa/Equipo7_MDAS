@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.time.LocalDate;
+import java.time.Period; // SEMANA 4: Import necesario para el cálculo
 
 @Repository
 public class ReservaRepository extends AbstractRepository {
@@ -84,14 +85,23 @@ public class ReservaRepository extends AbstractRepository {
     public void updateReserva(Reserva reserva) {
         try {
             String query = sqlQueries.getProperty("reserva.update", "UPDATE Reserva SET purpose=?, date=?, numSeats=?, userId=?, registrationNumber=?, totalAmount=? WHERE id=?");
-            int rowsAffected = jdbcTemplate.update(query, reserva.getPurpose(), reserva.getReservationDate(), 
-                    reserva.getNumberOfSeats(), reserva.getUserId(), reserva.getRegistrationNumber(),reserva.getTotalAmount(), reserva.getId());
+            // SEMANA 4: Extraer Función para el mapeo de datos.
+            Object[] params = extraerParametrosUpdateReserva(reserva);
+            int rowsAffected = jdbcTemplate.update(query, params);
             
             // Regla 19
             if (rowsAffected == 0) throw new IllegalArgumentException("Reserva not found for update");
         } catch (DataAccessException exception) {
             throw new RuntimeException("Database error updating Reserva", exception); // Regla 19
         }
+    }
+
+    // SEMANA 4: Extraer Función
+    private Object[] extraerParametrosUpdateReserva(Reserva reserva) {
+        return new Object[]{
+            reserva.getPurpose(), reserva.getReservationDate(), reserva.getNumberOfSeats(), 
+            reserva.getUserId(), reserva.getRegistrationNumber(), reserva.getTotalAmount(), reserva.getId()
+        };
     }
 
     private Reserva extractReserva(ResultSet row) throws SQLException {
@@ -126,11 +136,15 @@ public class ReservaRepository extends AbstractRepository {
         } catch (Exception e) { return false; }
     }
 
+    // SEMANA 4: Reemplazar variable por consulta. La edad ya no depende de la columna isAdult (que puede estar desactualizada), 
+    // sino que calculamos el dato real a partir de la fecha de nacimiento para estar sincronizados con el Dominio.
     public boolean isAdult(String userId) {
         try {
-            String sql = sqlQueries.getProperty("reserva.isAdult", "SELECT isAdult FROM Socio WHERE id = ?");
-            Boolean adult = jdbcTemplate.queryForObject(sql, Boolean.class, userId);
-            return adult != null && adult;
+            String sql = sqlQueries.getProperty("reserva.getBirthdate", "SELECT birthdate FROM Socio WHERE id = ?");
+            java.sql.Date sqlDate = jdbcTemplate.queryForObject(sql, java.sql.Date.class, userId);
+            if (sqlDate == null) return false;
+            LocalDate birthdate = sqlDate.toLocalDate();
+            return Period.between(birthdate, LocalDate.now()).getYears() >= 18;
         } catch (Exception e) { return false; }
     }
 

@@ -1,14 +1,7 @@
 /**
  * Clase {@code Embarcacion}:
  * Representa una embarcación perteneciente al club náutico.
- * 
- * <p>Cada embarcación está identificada de forma única mediante su matrícula
- * y cuenta con información técnica (longitud, anchura, altura, número de plazas)
- * además del tipo de embarcación y el patrón asignado para su manejo.</p>
- * 
- * <p>Esta clase forma parte del modelo de dominio del sistema, permitiendo 
- * gestionar las embarcaciones del club y su disponibilidad.</p>
- * 
+ * ...
  * @author  
  * @version 1.0
  * @since 2025-10-03
@@ -22,10 +15,10 @@ public class Embarcacion {
     private String name;
     // REFACTORIZACIÓN (Regla 1 y 5): Se cambia 'numSeats' por 'numberOfSeats' para usar un nombre completo y descriptivo.
     private int numberOfSeats;
-    private double length;
-    private double width;
-    private double height;
     private String patronId;
+    
+    // SEMANA 4: Extraer Clase. Sustituimos las primitivas sueltas por el nuevo objeto agrupado. [cite: 13, 581]
+    private Dimensiones dimensiones;
 
     public Embarcacion(String registrationNumber, EmbarcacionType type, String name, int numberOfSeats,
                        double length, double width, double height) {
@@ -33,10 +26,9 @@ public class Embarcacion {
         this.type = type;
         this.name = name;
         this.numberOfSeats = numberOfSeats;
-        this.length = length;
-        this.width = width;
-        this.height = height;
         this.patronId = null;
+        // SEMANA 4: Instanciamos el objeto de dimensiones encapsulado. [cite: 13, 581]
+        this.dimensiones = new Dimensiones(length, width, height);
     }
 
     public Embarcacion() {
@@ -54,14 +46,15 @@ public class Embarcacion {
     public int getNumberOfSeats() { return numberOfSeats; }
     public void setNumberOfSeats(int numberOfSeats) { this.numberOfSeats = numberOfSeats; }
 
-    public double getLength() { return length; }
-    public void setLength(double length) { this.length = length; }
+    // SEMANA 4: Ocultar Delegación. Mantenemos la interfaz pública pero delegamos la gestión a Dimensiones. [cite: 13, 631]
+    public double getLength() { return dimensiones != null ? dimensiones.getLength() : 0; }
+    public void setLength(double length) { if(this.dimensiones != null) this.dimensiones.setLength(length); }
 
-    public double getWidth() { return width; }
-    public void setWidth(double width) { this.width = width; }
+    public double getWidth() { return dimensiones != null ? dimensiones.getWidth() : 0; }
+    public void setWidth(double width) { if(this.dimensiones != null) this.dimensiones.setWidth(width); }
 
-    public double getHeight() { return height; }
-    public void setHeight(double height) { this.height = height; }
+    public double getHeight() { return dimensiones != null ? dimensiones.getHeight() : 0; }
+    public void setHeight(double height) { if(this.dimensiones != null) this.dimensiones.setHeight(height); }
 
     public String getPatronId() { return patronId; }
     public void setPatronId(String patronId) { this.patronId = patronId; }
@@ -73,9 +66,9 @@ public class Embarcacion {
                 ", type='" + type + '\'' +
                 ", name='" + name + '\'' +
                 ", numberOfSeats=" + numberOfSeats +
-                ", length=" + length +
-                ", width=" + width +
-                ", height=" + height +
+                ", length=" + getLength() +
+                ", width=" + getWidth() +
+                ", height=" + getHeight() +
                 ", patronId='" + patronId + '\'' +
                 '}';
     }

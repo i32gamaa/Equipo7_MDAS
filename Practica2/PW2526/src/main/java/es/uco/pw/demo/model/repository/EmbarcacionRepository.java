@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import es.uco.pw.demo.model.domain.Embarcacion;
 import es.uco.pw.demo.model.domain.EmbarcacionType;
+import es.uco.pw.demo.model.domain.Periodo; // SEMANA 4: Importamos el nuevo objeto
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -78,16 +79,22 @@ public class EmbarcacionRepository extends AbstractRepository {
     // Reglas 15 (Paso el objeto Embarcacion entero) y 20 (Lógica SQL aislada).
     private void executeAddEmbarcacion(Embarcacion embarcacion) {
         String sql = sqlQueries.getProperty("embarcacion.insert", "INSERT INTO Embarcacion (registrationNumber, type, name, numSeats, patronId, length, width, height) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        int rowsAffected = jdbcTemplate.update(sql,
-                embarcacion.getRegistrationNumber(), embarcacion.getType().toString(),
-                embarcacion.getName(), embarcacion.getNumberOfSeats(),
-                embarcacion.getPatronId(), embarcacion.getLength(),
-                embarcacion.getWidth(), embarcacion.getHeight());
+        // SEMANA 4: Extraer Función
+        Object[] params = extraerParametrosEmbarcacion(embarcacion);
+        int rowsAffected = jdbcTemplate.update(sql, params);
                 
         // Regla 19: Uso de excepciones descriptivas.
         if (rowsAffected == 0) {
             throw new RuntimeException("No se pudo insertar la embarcación"); 
         }
+    }
+
+    // SEMANA 4: Extraer Función
+    private Object[] extraerParametrosEmbarcacion(Embarcacion e) {
+        return new Object[]{
+            e.getRegistrationNumber(), e.getType().toString(), e.getName(), e.getNumberOfSeats(),
+            e.getPatronId(), e.getLength(), e.getWidth(), e.getHeight()
+        };
     }
 
     public List<Embarcacion> findAllEmbarcaciones() {
@@ -110,32 +117,39 @@ public class EmbarcacionRepository extends AbstractRepository {
         return jdbcTemplate.query(sql, embarcacionWithPatronMapper, tipo.toString());
     }
 
-    // REGLA S3 (DRY - Don't Repeat Yourself): He creado esta función privada para no estar 
-        // repitiendo java.sql.Date.valueOf() en cada consulta de fechas, limpiando la lectura de SQL.
-        private java.sql.Date toSqlDate(LocalDate date) {
-            return java.sql.Date.valueOf(date);
-        }
-
-        public boolean isEmbarcacionAvailable(String matricula, LocalDate inicio, LocalDate fin) {
-            try { return executeIsEmbarcacionAvailable(matricula, inicio, fin); } 
-            catch (Exception e) { return false; }
-        }
-
-        private boolean executeIsEmbarcacionAvailable(String matricula, LocalDate inicio, LocalDate fin) {
-            String sql = sqlQueries.getProperty("embarcacion.checkAvailability", "SELECT COUNT(*) FROM Alquiler WHERE registrationNumber = ? AND ((startDate <= ? AND endDate >= ?) OR (startDate <= ? AND endDate >= ?))");
-            // Uso la función extractora para cumplir DRY
-            Integer count = jdbcTemplate.queryForObject(sql, Integer.class, matricula, toSqlDate(fin), toSqlDate(inicio), toSqlDate(inicio), toSqlDate(fin));
-            return count != null && count == 0;
-        }
-
-        public List<Embarcacion> findAvailableByDateRange(LocalDate inicio, LocalDate fin) {
-            try { return executeFindAvailableByDateRange(inicio, fin); } 
-            catch (Exception e) { return null; }
-        }
-
-        private List<Embarcacion> executeFindAvailableByDateRange(LocalDate inicio, LocalDate fin) {
-            String sql = sqlQueries.getProperty("embarcacion.findAvailableByDates", "SELECT * FROM Embarcacion WHERE registrationNumber NOT IN (SELECT registrationNumber FROM Alquiler WHERE (startDate <= ? AND endDate >= ?) OR (startDate <= ? AND endDate >= ?))");
-            // Uso la función extractora (DRY)
-            return jdbcTemplate.query(sql, embarcacionWithPatronMapper, toSqlDate(fin), toSqlDate(inicio), toSqlDate(inicio), toSqlDate(fin));
-        }
+    // REGLA S3 (DRY - Don't Repeat Yourself): He creado esta función privada para no estar repitiendo.
+    private java.sql.Date toSqlDate(LocalDate date) {
+        return java.sql.Date.valueOf(date);
     }
+
+    public boolean isEmbarcacionAvailable(String matricula, LocalDate inicio, LocalDate fin) {
+        try { 
+            // SEMANA 4: Introducir Objeto Parámetro. Envolvemos las fechas en el objeto de Dominio.
+            return executeIsEmbarcacionAvailable(matricula, new Periodo(inicio, fin)); 
+        } catch (Exception e) { return false; }
+    }
+
+    // SEMANA 4: Introducir Objeto Parámetro. Usamos Periodo en la lógica interna.
+    private boolean executeIsEmbarcacionAvailable(String matricula, Periodo periodo) {
+        String sql = sqlQueries.getProperty("embarcacion.checkAvailability", "SELECT COUNT(*) FROM Alquiler WHERE registrationNumber = ? AND ((startDate <= ? AND endDate >= ?) OR (startDate <= ? AND endDate >= ?))");
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, matricula, 
+            toSqlDate(periodo.getEndDate()), toSqlDate(periodo.getStartDate()), 
+            toSqlDate(periodo.getStartDate()), toSqlDate(periodo.getEndDate()));
+        return count != null && count == 0;
+    }
+
+    public List<Embarcacion> findAvailableByDateRange(LocalDate inicio, LocalDate fin) {
+        try { 
+            // SEMANA 4: Introducir Objeto Parámetro
+            return executeFindAvailableByDateRange(new Periodo(inicio, fin)); 
+        } catch (Exception e) { return null; }
+    }
+
+    // SEMANA 4: Introducir Objeto Parámetro
+    private List<Embarcacion> executeFindAvailableByDateRange(Periodo periodo) {
+        String sql = sqlQueries.getProperty("embarcacion.findAvailableByDates", "SELECT * FROM Embarcacion WHERE registrationNumber NOT IN (SELECT registrationNumber FROM Alquiler WHERE (startDate <= ? AND endDate >= ?) OR (startDate <= ? AND endDate >= ?))");
+        return jdbcTemplate.query(sql, embarcacionWithPatronMapper, 
+            toSqlDate(periodo.getEndDate()), toSqlDate(periodo.getStartDate()), 
+            toSqlDate(periodo.getStartDate()), toSqlDate(periodo.getEndDate()));
+    }
+}
