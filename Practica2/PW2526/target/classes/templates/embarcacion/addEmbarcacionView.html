@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <title>Añadir Embarcación</title>
+    <link rel="stylesheet" href="stylehome.css">
+</head>
+
+<body>
+    <main class="overlay">
+        <h1>Añadir Nueva Embarcación</h1>
+
+        <form th:action="@{/addEmbarcacion}" th:object="${embarcacion}" method="post">
+            
+            <!-- Matrícula y Tipo -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="registrationNumber" class="form-label">Número de Registro</label>
+                    <input type="text" id="registrationNumber" th:field="*{registrationNumber}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="type" class="form-label">Tipo</label>
+                    <select id="type" th:field="*{type}" required>
+                        <option th:each="t : ${types}" th:value="${t}" th:text="${t}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Nombre -->
+            <div class="form-group" style="grid-column: span 2;">
+                <label for="name" class="form-label">Nombre</label>
+                <input type="text" id="name" th:field="*{name}" required>
+            </div>
+
+            <!-- Dimensiones -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="numSeats" class="form-label">Número de Asientos</label>
+                    <input type="number" id="numSeats" th:field="*{numSeats}" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="length" class="form-label">Eslora (m)</label>
+                    <input type="number" step="0.01" id="length" th:field="*{length}" min="0" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="width" class="form-label">Manga (m)</label>
+                    <input type="number" step="0.01" id="width" th:field="*{width}" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="height" class="form-label">Puntal (m)</label>
+                    <input type="number" step="0.01" id="height" th:field="*{height}" min="0" required>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="form-buttons" style="grid-column: span 2;">
+                <button type="submit" class="btn btn-primary">Guardar Embarcación</button>
+                <a th:href="@{/}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </main>
+</body>
+
+</html>

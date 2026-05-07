@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Reservas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="stylehome.css">
+    <link rel="icon" href="images/logo.png" type="image/png">
+</head>
+
+<body>
+    <main class="overlay">
+        <h1>Listado de Reservas</h1>
+
+        <div th:if="${error}" class="message error" th:text="${error}"></div>
+        <div th:if="${message}" class="message info" th:text="${message}"></div>
+
+        <section th:if="${reservas} and ${not reservas.empty}">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha de Reserva</th>
+                        <th>Importe €</th>
+                        <th>ID Socio</th>
+                        <th>Plazas</th>
+                        <th>Propósito</th>
+                    </tr>
+                </thead>
+                <tbody class="text-contraste">
+                    <tr th:each="reserva : ${reservas}">
+                        <td th:text="${reserva.id}" data-label="ID"></td>
+                        <td th:text="${reserva.date}" data-label="Fecha de Reserva"></td>
+                        <td th:text="${reserva.totalAmount}" data-label="Importe"></td>
+                        <td th:text="${reserva.userId}" data-label="ID Socio"></td>
+                        <td th:text="${reserva.numSeats}" data-label="Plazas"></td>
+                        <td th:text="${reserva.purpose}" data-label="Propósito"></td>
+
+
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <div th:if="${reservas == null or reservas.empty}" class="no-data">
+            No hay reservas registradas en el sistema.
+        </div>
+
+        <div class="btn-group">
+            <a th:href="@{/addReserva}" class="btn btn-primary">Añadir Nueva Reserva</a>
+            <a th:href="@{/}" class="btn btn-secondary"> Volver al Inicio</a>
+        </div>
+    </main>
+</body>
+
+</html>

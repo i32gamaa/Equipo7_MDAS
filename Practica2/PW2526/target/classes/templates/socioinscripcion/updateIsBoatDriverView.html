@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Buscar Socio por ID</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="stylehome.css">
+    <link rel="icon" href="images/logo.png" type="image/png">
+</head>
+
+<body>
+    <main class="overlay">
+        <h1>Actualizar título de patrón de embarcación de un socio</h1>
+
+        <div th:if="${error}" class="error" th:text="${error}"></div>
+
+        <form th:action="@{/updateIsBoatDriver}" method="post">
+            <div class="form-group">
+                <label for="id">ID del Socio (DNI):</label>
+                <input type="text" id="id" name="id" th:value="${param.id}" placeholder="Introduce el DNI del socio"
+                    required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Actualizar Socio</button>
+        </form>
+
+        <div class="btn-group">
+            <a th:href="@{/listSocios}" class="btn btn-secondary">Ver Todos los Socios</a>
+            <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
+        </div>
+    </main>
+</body>
+
+</html>
