@@ -6,11 +6,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeController {
     
+    // [CLEAN CODE - SEMANA 3: Función pura con un solo propósito: dirigir a la raíz]
     @GetMapping("/")
     public String mostrarPaginaInicio() {
         return "home";
     }
 
+    // [CLEAN CODE - SEMANA 3: Aplicación de nombres descriptivos (Semana 1) y nivel único de abstracción]
     @GetMapping("/homeAlquiler")
     public String mostrarMenuAlquiler() {
         return "alquiler/homeAlquiler"; 

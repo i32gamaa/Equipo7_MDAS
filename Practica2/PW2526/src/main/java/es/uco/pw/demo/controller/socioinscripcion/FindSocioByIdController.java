@@ -11,12 +11,10 @@ import es.uco.pw.demo.model.repository.SocioRepository;
 @Controller
 public class FindSocioByIdController {
 
-    private SocioRepository socioRepository;
+    private final SocioRepository socioRepository;
 
     public FindSocioByIdController(SocioRepository socioRepository) {
         this.socioRepository = socioRepository;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.socioRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
     @GetMapping("/findSocioById")
@@ -24,18 +22,20 @@ public class FindSocioByIdController {
         return new ModelAndView("socioinscripcion/findSocioByIdView");
     }
 
+    // [CLEAN CODE - SEMANA 3: Un solo nivel de abstracción]
     @PostMapping("/findSocioById")
     public ModelAndView procesarBusquedaPorId(@RequestParam("id") String dniBuscado) {
-        Socio socioEncontrado = socioRepository.findById(dniBuscado);
-        ModelAndView vistaResultados;
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaResultado(socioRepository.findById(dniBuscado));
+    }
 
-        if (socioEncontrado != null) {
-            vistaResultados = new ModelAndView("socioinscripcion/findSocioByIdSuccessView");
-            vistaResultados.addObject("socio", socioEncontrado);
-        } else {
-            vistaResultados = new ModelAndView("socioinscripcion/findSocioByIdFailView");
+    // [CLEAN CODE - SEMANA 3: Extracción de lógica de construcción de respuesta]
+    private ModelAndView construirVistaResultado(Socio socio) {
+        if (socio != null) {
+            ModelAndView mav = new ModelAndView("socioinscripcion/findSocioByIdSuccessView");
+            mav.addObject("socio", socio);
+            return mav;
         }
-
-        return vistaResultados;
+        return new ModelAndView("socioinscripcion/findSocioByIdFailView");
     }
 }

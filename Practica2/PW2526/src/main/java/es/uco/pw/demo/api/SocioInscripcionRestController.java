@@ -38,7 +38,6 @@ public class SocioInscripcionRestController {
             Socio existingSocio = socioRepository.findById(id); 
             
             // REGLA S3 (Do One Thing): He extraído la lógica de mapeo de campos a un método privado.
-            // Así el controlador solo orquesta (busca, aplica, guarda).
             aplicarNuevosCampos(existingSocio, requestSocio);
 
             socioRepository.updateSocio(existingSocio); 
@@ -51,19 +50,15 @@ public class SocioInscripcionRestController {
         }
     }
 
-    // REGLA S3 (Nivel de abstracción): Separamos la lógica de "seteo" y cálculo matemático 
-    // del flujo de respuesta HTTP.
+    // REGLA S3 (Nivel de abstracción): Separamos la lógica de "seteo" del flujo de respuesta HTTP.
     private void aplicarNuevosCampos(Socio existingSocio, Socio requestSocio) {
         if (requestSocio.getName() != null) existingSocio.setName(requestSocio.getName());
         if (requestSocio.getSurname() != null) existingSocio.setSurname(requestSocio.getSurname());
         if (requestSocio.getBirthdate() != null) {
             existingSocio.setBirthdate(requestSocio.getBirthdate());
-            existingSocio.setAdult(calcularSiEsAdulto(requestSocio.getBirthdate()));
+            // SEMANA 4: Eliminar código muerto / Mover función.
+            // Ya no llamamos a setAdult() ni calculamos la edad aquí, 
+            // ya que el objeto Socio lo hace solo internamente.
         }
-    }
-
-    // REGLA S3: Hacer una sola cosa (calcular edad)
-    private boolean calcularSiEsAdulto(LocalDate birthdate) {
-        return Period.between(birthdate, LocalDate.now()).getYears() >= 18;
     }
 }

@@ -97,7 +97,14 @@ public class InscripcionRepository extends AbstractRepository {
     public void update(Inscripcion inscripcion) {
         try {
             String query = sqlQueries.getProperty("inscripcion.update", "UPDATE Inscripcion SET totalAmount=?, registeredAdults=?, registeredKids=? WHERE id=?");
-            jdbcTemplate.update(query, inscripcion.getTotalAmount(), inscripcion.getRegisteredAdults(), inscripcion.getRegisteredKids(), inscripcion.getId());
+            // SEMANA 4: Extraer Función para aislar la lista de parámetros.
+            Object[] params = extraerParametrosUpdate(inscripcion);
+            jdbcTemplate.update(query, params);
         } catch (Exception e) { }
+    }
+
+    // SEMANA 4: Extraer Función
+    private Object[] extraerParametrosUpdate(Inscripcion inscripcion) {
+        return new Object[]{inscripcion.getTotalAmount(), inscripcion.getRegisteredAdults(), inscripcion.getRegisteredKids(), inscripcion.getId()};
     }
 }

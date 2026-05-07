@@ -16,9 +16,11 @@ import java.time.Period;
 @Controller
 public class AddPatronController {
 
+    // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Replace Magic Number with Symbolic Constant]
+    private static final int MAYORIA_EDAD = 18;
+
     private PatronRepository patronRepository;
     private SocioRepository socioRepository;
-    private ModelAndView modelAndView = new ModelAndView();
 
     public AddPatronController(PatronRepository patronRepository, SocioRepository socioRepository) {
         this.patronRepository = patronRepository;
@@ -27,46 +29,63 @@ public class AddPatronController {
         this.patronRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
+    // [CLEAN CODE - SEMANA 3: Un solo nivel de abstracción. Se delega la construcción de la vista]
     @GetMapping("/addPatron")
     public ModelAndView mostrarFormularioRegistro() {
-        this.modelAndView.setViewName("patron/addPatronView");
-        this.modelAndView.addObject("newPatron", new Patron());
+        return construirVistaFormulario();
+    }
+
+    // [CLEAN CODE - SEMANA 3: Do One Thing. El flujo principal se lee como una historia (Validar -> Guardar -> Responder)]
+    @PostMapping("/addPatron")
+    public String procesarNuevoPatron(@ModelAttribute("newPatron") Patron patronSolicitado, SessionStatus estadoSesion) {
+        
+        String vistaError = validarNuevoPatron(patronSolicitado);
+        if (vistaError != null) {
+            return vistaError;
+        }
+
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        String vistaResultado = determinarVistaResultado(patronRepository.addPatron(patronSolicitado));
+        estadoSesion.setComplete();
+        
+        return vistaResultado;
+    }
+
+    // ====================================================================================================
+    // [CLEAN CODE - SEMANA 3: Extracción a métodos privados (Stepdown Rule)]
+    // ====================================================================================================
+
+    // [CLEAN CODE - SEMANA 3: Extracción de carga del ModelAndView]
+    private ModelAndView construirVistaFormulario() {
+        ModelAndView modelAndView = new ModelAndView("patron/addPatronView");
+        modelAndView.addObject("newPatron", new Patron());
         return modelAndView;
     }
 
-    @PostMapping("/addPatron")
-    public String procesarNuevoPatron(@ModelAttribute("newPatron") Patron patronSolicitado, SessionStatus estadoSesion) {
-        if (!esMayorDeEdad(patronSolicitado.getBirthDate())) {
+    // [CLEAN CODE - SEMANA 3: Extracción de validaciones complejas de negocio]
+    private String validarNuevoPatron(Patron patron) {
+        if (!esMayorDeEdad(patron.getBirthDate())) {
             return "patron/addPatronFailNOADULTView";
         }
-
-        Patron patronExistente = patronRepository.findById(patronSolicitado.getPatronId());
-        if (patronExistente != null) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Consolidate Conditional Expression]
+        if (patronRepository.findById(patron.getPatronId()) != null || socioRepository.findById(patron.getPatronId()) != null) {
             return "patron/addPatronDuplicateIdView"; 
         }
-        
-        Socio socioExistente = socioRepository.findById(patronSolicitado.getPatronId());
-        if (socioExistente != null) {
-            return "patron/addPatronDuplicateIdView";
-        }
-
-        boolean registroCompletado = patronRepository.addPatron(patronSolicitado);
-        String vistaDestino;
-
-        if (registroCompletado) {
-            vistaDestino = "patron/addPatronSuccessView";
-        } else {
-            vistaDestino = "patron/addPatronFailView";
-        }
-
-        estadoSesion.setComplete();
-        return vistaDestino;
+        return null;
     }
 
+    // [CLEAN CODE - SEMANA 3: Delega la decisión de enrutamiento a un método específico]
+    private String determinarVistaResultado(boolean exito) {
+        return exito ? "patron/addPatronSuccessView" : "patron/addPatronFailView";
+    }
+
+    // [CLEAN CODE - SEMANA 3: Función pura, pequeña y de una sola responsabilidad]
     private boolean esMayorDeEdad(LocalDate fechaNacimiento) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Guard Clauses]
         if (fechaNacimiento == null) {
             return false;
         }
-        return Period.between(fechaNacimiento, LocalDate.now()).getYears() >= 18;
+        // [REFACTORIZACIÓN MANUAL - Uso de la constante extraída]
+        return Period.between(fechaNacimiento, LocalDate.now()).getYears() >= MAYORIA_EDAD;
     }
 }

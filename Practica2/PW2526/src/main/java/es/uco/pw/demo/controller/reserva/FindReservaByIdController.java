@@ -11,12 +11,10 @@ import es.uco.pw.demo.model.repository.ReservaRepository;
 @Controller
 public class FindReservaByIdController {
 
-    private ReservaRepository reservaRepository;
+    private final ReservaRepository reservaRepository;
 
     public FindReservaByIdController(ReservaRepository reservaRepository) {
         this.reservaRepository = reservaRepository;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.reservaRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
     @GetMapping("/findReservaById")
@@ -24,18 +22,25 @@ public class FindReservaByIdController {
         return new ModelAndView("reserva/findReservaByIdView");
     }
 
+    // [CLEAN CODE - SEMANA 3: Un solo nivel de abstracción. El flujo es: buscar -> construir respuesta]
     @PostMapping("/findReservaById")
     public ModelAndView procesarBusquedaPorId(@RequestParam("id") int idBuscado) {
-        Reserva reservaEncontrada = reservaRepository.findById(idBuscado);
-        ModelAndView vistaResultados;
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        // En lugar de guardar 'Reserva reservaEncontrada = ...', lo inyectamos directo al constructor.
+        return construirVistaResultado(reservaRepository.findById(idBuscado));
+    }
 
-        if (reservaEncontrada != null) {
-            vistaResultados = new ModelAndView("reserva/findReservaByIdSuccessView");
-            vistaResultados.addObject("reserva", reservaEncontrada);
-        } else {
-            vistaResultados = new ModelAndView("reserva/findReservaByIdFailView");
+    // ====================================================================================================
+    // MÉTODOS PRIVADOS EXTRAÍDOS
+    // ====================================================================================================
+
+    // [CLEAN CODE - SEMANA 3: Do One Thing. Se encarga exclusivamente de la lógica condicional de la vista]
+    private ModelAndView construirVistaResultado(Reserva reserva) {
+        if (reserva != null) {
+            ModelAndView mav = new ModelAndView("reserva/findReservaByIdSuccessView");
+            mav.addObject("reserva", reserva);
+            return mav;
         }
-
-        return vistaResultados;
+        return new ModelAndView("reserva/findReservaByIdFailView");
     }
 }

@@ -11,12 +11,10 @@ import es.uco.pw.demo.model.repository.SocioRepository;
 @Controller
 public class UpdateIsBoatDriverController {
 
-    private SocioRepository socioRepository;
+    private final SocioRepository socioRepository;
 
     public UpdateIsBoatDriverController(SocioRepository socioRepository) {
         this.socioRepository = socioRepository;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.socioRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
     @GetMapping("/updateIsBoatDriver")
@@ -24,26 +22,36 @@ public class UpdateIsBoatDriverController {
         return new ModelAndView("socioinscripcion/updateIsBoatDriverView");
     }
 
+    // [CLEAN CODE - SEMANA 3: Historia clara: buscar -> intentar actualizar -> responder]
     @PostMapping("/updateIsBoatDriver")
     public ModelAndView procesarActualizacionPatron(@RequestParam("id") String dniBuscado) {
-        Socio socioEncontrado = socioRepository.findById(dniBuscado);
-        ModelAndView vistaResultados;
+        Socio socio = socioRepository.findById(dniBuscado);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaResultado(socio, intentarOtorgarLicencia(socio));
+    }
 
-        if (socioEncontrado != null) {
-            if (!socioEncontrado.isBoatDriver()) {
-                socioEncontrado.setBoatDriver(true);
-                socioRepository.updateIsBoatDriver(socioEncontrado.getSocioId(), socioEncontrado.isBoatDriver());
-                
-                vistaResultados = new ModelAndView("socioinscripcion/updateIsBoatDriverSuccessView");
-                vistaResultados.addObject("socio", socioEncontrado);
-            } else {
-                vistaResultados = new ModelAndView("socioinscripcion/updateIsBoatDriverFailView");
-                vistaResultados.addObject("socio", socioEncontrado);
-            }
-        } else {
-            vistaResultados = new ModelAndView("socioinscripcion/updateIsBoatDriverFailView");
+    // ====================================================================================================
+    // MÉTODOS PRIVADOS EXTRAÍDOS
+    // ====================================================================================================
+
+    // [CLEAN CODE - SEMANA 3: Do One Thing. Encapsula la lógica de negocio y persistencia]
+    private boolean intentarOtorgarLicencia(Socio socio) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Guard Clauses]
+        if (socio == null || socio.isBoatDriver()) {
+            return false;
         }
+        socio.setBoatDriver(true);
+        socioRepository.updateIsBoatDriver(socio.getSocioId(), true);
+        return true;
+    }
 
-        return vistaResultados;
+    // [CLEAN CODE - SEMANA 3: Encapsula la lógica de selección de vista de éxito/error]
+    private ModelAndView construirVistaResultado(Socio socio, boolean actualizado) {
+        if (socio != null && actualizado) {
+            ModelAndView mav = new ModelAndView("socioinscripcion/updateIsBoatDriverSuccessView");
+            mav.addObject("socio", socio);
+            return mav;
+        }
+        return new ModelAndView("socioinscripcion/updateIsBoatDriverFailView");
     }
 }

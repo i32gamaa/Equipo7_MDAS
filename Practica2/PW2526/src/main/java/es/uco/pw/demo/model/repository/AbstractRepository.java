@@ -20,13 +20,12 @@ public class AbstractRepository {
         createProperties();
     }
 
+    // SEMANA 4: Variable en línea. Nos ahorramos declarar 'BufferedReader reader' en una línea separada.
     private void createProperties(){
         sqlQueries = new Properties();
         try {
-            BufferedReader reader;
             File sqlFile = new File(sqlQueriesFileName); // REFACTORIZACIÓN: f por sqlFile (Regla 6)
-            reader = new BufferedReader(new FileReader(sqlFile));
-            sqlQueries.load(reader);
+            sqlQueries.load(new BufferedReader(new FileReader(sqlFile)));
         } catch (IOException e) {
             System.err.println("Error creating properties object for SQL queries");
             e.printStackTrace();

@@ -11,19 +11,21 @@ import java.util.List;
 public class ListSociosController {
 
     private final SocioRepository socioRepository;
-    private ModelAndView modelAndView = new ModelAndView();
 
     public ListSociosController(SocioRepository socioRepository) {
         this.socioRepository = socioRepository;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.socioRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
+    // [CLEAN CODE - SEMANA 3: Nivel único de abstracción]
     @GetMapping("/listSocios")
     public ModelAndView mostrarTodosLosSocios() {
-        this.modelAndView.setViewName("socioinscripcion/listSociosView");
-        List<Socio> sociosRegistrados = socioRepository.findAllSocios();
-        this.modelAndView.addObject("socios", sociosRegistrados);
-        return modelAndView;
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaListado(socioRepository.findAllSocios());
+    }
+
+    private ModelAndView construirVistaListado(List<Socio> socios) {
+        ModelAndView mav = new ModelAndView("socioinscripcion/listSociosView");
+        mav.addObject("socios", socios);
+        return mav;
     }
 }

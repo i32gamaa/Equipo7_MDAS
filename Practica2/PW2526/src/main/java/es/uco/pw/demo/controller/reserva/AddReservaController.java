@@ -12,65 +12,80 @@ import es.uco.pw.demo.model.repository.ReservaRepository;
 @Controller
 public class AddReservaController {
 
-    private ReservaRepository reservaRepository;
-    private ModelAndView modelAndView = new ModelAndView();
+    // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Replace Magic Number with Symbolic Constant]
+    // Evitamos el uso del "-1" suelto en el código para identificar fallos de base de datos.
+    private static final int ERROR_GUARDADO_BD = -1;
+
+    private final ReservaRepository reservaRepository;
 
     public AddReservaController(ReservaRepository reservaRepository) {
         this.reservaRepository = reservaRepository;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.reservaRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
+    // [CLEAN CODE - SEMANA 3: Un solo nivel de abstracción. Delega la creación de la vista a una función privada]
     @GetMapping("/addReserva")
     public ModelAndView mostrarFormularioRegistro() {
-        this.modelAndView.setViewName("reserva/addReservaView");
-        this.modelAndView.addObject("newReserva", new Reserva());
-        return modelAndView;
+        return construirVistaFormulario();
     }
 
+    // [CLEAN CODE - SEMANA 3: Función principal que se lee como una historia. 
+    // Separa claramente la validación de negocio, la persistencia y la respuesta visual]
     @PostMapping("/addReserva")
     public String procesarNuevaReserva(@ModelAttribute("newReserva") Reserva reservaSolicitada, SessionStatus estadoSesion) {
-        System.out.println("[AddReservaController] Info recibida: userId=" + reservaSolicitada.getUserId() +
-                " matricula=" + reservaSolicitada.getRegistrationNumber() +
-                " fecha=" + reservaSolicitada.getReservationDate() +
-                " plazas=" + reservaSolicitada.getNumberOfSeats() +
-                " proposito=" + reservaSolicitada.getPurpose() +
-                " totalAmount=" + reservaSolicitada.getTotalAmount());
+        
+        String vistaError = validarRequisitosReserva(reservaSolicitada);
+        if (vistaError != null) {
+            return vistaError;
+        }
 
-        boolean tienePatron = reservaRepository.patronAssigned(reservaSolicitada.getRegistrationNumber());
-        boolean tieneCapacidad = reservaRepository.hasCapacity(reservaSolicitada.getRegistrationNumber(),
-                reservaSolicitada.getNumberOfSeats());
-        boolean estaDisponible = reservaRepository.isAvailable(reservaSolicitada.getRegistrationNumber(), reservaSolicitada.getReservationDate());
-        boolean disponibleAlquiler = reservaRepository.isAvailableInAlquiler(reservaSolicitada.getRegistrationNumber(),
-                reservaSolicitada.getReservationDate());
-        boolean esAdulto = reservaRepository.isAdult(reservaSolicitada.getUserId());
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        // Eliminamos la variable temporal 'resultadoId' y pasamos el resultado directamente al evaluador.
+        String vistaResultado = determinarVistaResultado(reservaRepository.addReserva(reservaSolicitada));
+        estadoSesion.setComplete();
+        
+        return vistaResultado;
+    }
 
-        if (!tienePatron) {
+    // ====================================================================================================
+    // MÉTODOS PRIVADOS EXTRAÍDOS (Stepdown Rule)
+    // ====================================================================================================
+
+    // [CLEAN CODE - SEMANA 3: Do One Thing. Encapsula la inicialización del ModelAndView del formulario]
+    private ModelAndView construirVistaFormulario() {
+        ModelAndView mav = new ModelAndView("reserva/addReservaView");
+        mav.addObject("newReserva", new Reserva());
+        return mav;
+    }
+
+    // [CLEAN CODE - SEMANA 3: Extrae validaciones complejas. Sigue la regla de ocultar detalles técnicos del mapeo principal]
+    private String validarRequisitosReserva(Reserva reserva) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Guard Clauses]
+        // Retornos anticipados en lugar de if/else anidados para mantener un flujo de lectura plano.
+        if (!reservaRepository.patronAssigned(reserva.getRegistrationNumber())) {
             return "reserva/addReservaFailNOPATRONView";
         } 
-        
-        if (!tieneCapacidad) {
+        if (!reservaRepository.hasCapacity(reserva.getRegistrationNumber(), reserva.getNumberOfSeats())) {
             return "reserva/addReservaFailNOCAPACITYView";
         } 
-        
-        if (!estaDisponible || !disponibleAlquiler) {
+        if (!estaDisponibleParaFecha(reserva)) {
             return "reserva/addReservaFailNOAVAILABLEView";
         } 
-        
-        if (!esAdulto) {
+        if (!reservaRepository.isAdult(reserva.getUserId())) {
             return "reserva/addReservaFailNOADULTView";
         }
+        return null;
+    }
 
-        int filasAfectadas = reservaRepository.addReserva(reservaSolicitada);
-        String vistaDestino;
+    // [CLEAN CODE - SEMANA 3: Función de conveniencia para agrupar lógica de disponibilidad relacionada]
+    private boolean estaDisponibleParaFecha(Reserva reserva) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Consolidate Conditional Expression]
+        return reservaRepository.isAvailable(reserva.getRegistrationNumber(), reserva.getReservationDate()) &&
+               reservaRepository.isAvailableInAlquiler(reserva.getRegistrationNumber(), reserva.getReservationDate());
+    }
 
-        if (filasAfectadas != -1) {
-            vistaDestino = "reserva/addReservaSuccessView";
-        } else {
-            vistaDestino = "reserva/addReservaFailView";
-        }
-
-        estadoSesion.setComplete();
-        return vistaDestino;
+    // [CLEAN CODE - SEMANA 3: Separa la lógica de decisión de navegación del proceso de guardado]
+    private String determinarVistaResultado(int resultadoId) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Replace Magic Number]
+        return (resultadoId != ERROR_GUARDADO_BD) ? "reserva/addReservaSuccessView" : "reserva/addReservaFailView";
     }
 }

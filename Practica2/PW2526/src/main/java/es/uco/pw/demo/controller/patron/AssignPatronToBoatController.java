@@ -13,50 +13,51 @@ public class AssignPatronToBoatController {
 
     private PatronRepository patronRepository;
     private EmbarcacionRepository embarcacionRepository;
-    private ModelAndView modelAndView = new ModelAndView();
 
     public AssignPatronToBoatController(PatronRepository patronRepository, EmbarcacionRepository embarcacionRepository) {
         this.patronRepository = patronRepository;
         this.embarcacionRepository = embarcacionRepository;
     }
 
+    // [CLEAN CODE - SEMANA 3: Nivel único de abstracción. Delega la complejidad de cargar listas]
     @GetMapping("/assignPatronToBoat")
     public ModelAndView mostrarFormularioAsignacion() {
-        this.modelAndView.setViewName("patron/assignPatronToBoatView");
-        this.modelAndView.addObject("embarcaciones", embarcacionRepository.findAllEmbarcaciones());
-        this.modelAndView.addObject("patrones", patronRepository.findAllPatrones());
-        return modelAndView;
+        return construirVistaAsignacion();
     }
 
+    // [CLEAN CODE - SEMANA 3: Do One Thing. Solicita la asignación y delega la respuesta]
     @PostMapping("/assignPatronToBoat")
     public String procesarAsignacionPatron(@RequestParam String registrationNumber, @RequestParam String patronId) {
-        System.out.println("[AssignPatronToBoatController] Asignando patrón " + patronId + " a embarcación " + registrationNumber);
-
-        boolean asignacionExitosa = patronRepository.assignPatronToBoat(patronId, registrationNumber);
-        String vistaDestino;
-
-        if (asignacionExitosa) {
-            vistaDestino = "patron/assignPatronToBoatSuccessView";
-        } else {
-            vistaDestino = "patron/assignPatronToBoatFailView";
-        }
-
-        return vistaDestino;
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return determinarVistaAsignacion(patronRepository.assignPatronToBoat(patronId, registrationNumber));
     }
 
+    // [CLEAN CODE - SEMANA 3: Do One Thing. Solicita la desasignación y delega la respuesta]
     @PostMapping("/unassignPatronFromBoat")
     public String procesarDesasignacionPatron(@RequestParam String registrationNumber) {
-        System.out.println("[AssignPatronToBoatController] Desasignando patrón de la embarcación " + registrationNumber);
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return determinarVistaDesasignacion(patronRepository.unassignPatronFromBoat(registrationNumber));
+    }
 
-        boolean desasignacionExitosa = patronRepository.unassignPatronFromBoat(registrationNumber);
-        String vistaDestino;
+    // ====================================================================================================
+    // [CLEAN CODE - SEMANA 3: Extracción a métodos privados]
+    // ====================================================================================================
 
-        if (desasignacionExitosa) {
-            vistaDestino = "patron/unassignPatronSuccessView";
-        } else {
-            vistaDestino = "patron/unassignPatronFailView";
-        }
+    // [CLEAN CODE - SEMANA 3: Extracción de carga de datos para el ModelAndView]
+    private ModelAndView construirVistaAsignacion() {
+        ModelAndView mav = new ModelAndView("patron/assignPatronToBoatView");
+        mav.addObject("embarcaciones", embarcacionRepository.findAllEmbarcaciones());
+        mav.addObject("patrones", patronRepository.findAllPatrones());
+        return mav;
+    }
 
-        return vistaDestino;
+    // [CLEAN CODE - SEMANA 3: DRY, gestión de vistas separada de la lógica]
+    private String determinarVistaAsignacion(boolean exito) {
+        return exito ? "patron/assignPatronToBoatSuccessView" : "patron/assignPatronToBoatFailView";
+    }
+
+    // [CLEAN CODE - SEMANA 3: DRY, gestión de vistas separada de la lógica]
+    private String determinarVistaDesasignacion(boolean exito) {
+        return exito ? "patron/unassignPatronSuccessView" : "patron/unassignPatronFailView";
     }
 }

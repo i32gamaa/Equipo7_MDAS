@@ -2,6 +2,7 @@ package es.uco.pw.demo.model.repository;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import es.uco.pw.demo.model.domain.Alquiler;
 import java.time.LocalDate;
@@ -56,14 +57,9 @@ public class AlquilerRepository extends AbstractRepository {
         if (rowsAffected == 0) throw new IllegalArgumentException("El alquiler a eliminar no existe");
     }
 
-    public Alquiler findById(int id) {
-        try { return executeFindById(id); } 
-        catch (Exception e) { return null; }
-    }
-
-    private Alquiler executeFindById(int id) {
-        String query = sqlQueries.getProperty("alquiler.findById", "SELECT * FROM Alquiler WHERE id = ?");
-        List<Alquiler> fetchedAlquileres = jdbcTemplate.query(query, (rs, rowNum) -> new Alquiler(
+    // SEMANA 4: Extraer Función. Sacamos el mapeo de Alquiler para no duplicar código en las búsquedas.
+    private RowMapper<Alquiler> alquilerRowMapper() {
+        return (rs, rowNum) -> new Alquiler(
                 rs.getDate("startDate").toLocalDate(),
                 rs.getDate("endDate") != null ? rs.getDate("endDate").toLocalDate() : null,
                 rs.getString("registrationNumber"),
@@ -71,7 +67,17 @@ public class AlquilerRepository extends AbstractRepository {
                 rs.getDouble("totalAmount"),
                 rs.getInt("id"),
                 rs.getString("userid")
-        ), id);
+        );
+    }
+
+    public Alquiler findById(int id) {
+        try { return executeFindById(id); } 
+        catch (Exception e) { return null; }
+    }
+
+    private Alquiler executeFindById(int id) {
+        String query = sqlQueries.getProperty("alquiler.findById", "SELECT * FROM Alquiler WHERE id = ?");
+        List<Alquiler> fetchedAlquileres = jdbcTemplate.query(query, alquilerRowMapper(), id);
         
         if (fetchedAlquileres.isEmpty() || fetchedAlquileres.get(0) == null) {
             throw new IllegalArgumentException("Alquiler no encontrado"); 
@@ -82,24 +88,25 @@ public class AlquilerRepository extends AbstractRepository {
     public int addAlquiler(Alquiler alquiler) {
         try {
             String query = sqlQueries.getProperty("alquiler.insert", "INSERT INTO Alquiler (startDate, endDate, registrationNumber, numSeats, totalAmount, userid) VALUES (?, ?, ?, ?, ?, ?)");
-            int rowsAffected = jdbcTemplate.update(query, alquiler.getStartDate(), alquiler.getEndDate(), 
-                    alquiler.getRegistrationNumber(), alquiler.getNumberOfSeats(), alquiler.getAmount(), alquiler.getUserId());
+            // SEMANA 4: Extraer Función.
+            Object[] params = extraerParametrosAlquiler(alquiler);
+            int rowsAffected = jdbcTemplate.update(query, params);
             return rowsAffected > 0 ? 1 : -1;
         } catch (Exception e) { return -1; }
+    }
+
+    // SEMANA 4: Extraer Función para evitar listas de parámetros excesivamente largas.
+    private Object[] extraerParametrosAlquiler(Alquiler alquiler) {
+        return new Object[]{
+            alquiler.getStartDate(), alquiler.getEndDate(), alquiler.getRegistrationNumber(), 
+            alquiler.getNumberOfSeats(), alquiler.getAmount(), alquiler.getUserId()
+        };
     }
 
     public List<Alquiler> findCurrentAndFutureAlquileres() {
         try {
             String sql = sqlQueries.getProperty("alquiler.findVigentes", "SELECT * FROM Alquiler WHERE endDate >= ? OR endDate IS NULL");
-            return jdbcTemplate.query(sql, (rs, rowNum) -> new Alquiler(
-                rs.getDate("startDate").toLocalDate(),
-                rs.getDate("endDate") != null ? rs.getDate("endDate").toLocalDate() : null,
-                rs.getString("registrationNumber"),
-                rs.getInt("numSeats"),
-                rs.getDouble("totalAmount"),
-                rs.getInt("id"),
-                rs.getString("userid")
-            ), java.sql.Date.valueOf(LocalDate.now()));
+            return jdbcTemplate.query(sql, alquilerRowMapper(), java.sql.Date.valueOf(LocalDate.now()));
         } catch (Exception e) { return null; }
     }
 }

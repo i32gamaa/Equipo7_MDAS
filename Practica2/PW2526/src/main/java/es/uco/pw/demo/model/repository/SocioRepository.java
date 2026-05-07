@@ -71,9 +71,16 @@ public class SocioRepository extends AbstractRepository {
     // Regla 20
     private void executeUpdateSocio(Socio socio) {
         String query = sqlQueries.getProperty("socio.updateSocio", "UPDATE Socio SET name=?, surname=?, address=?, birthdate=? WHERE id=?");
-        int rowsAffected = jdbcTemplate.update(query, socio.getName(), socio.getSurname(), socio.getAddress(), socio.getBirthdate(), socio.getSocioId());
+        // SEMANA 4: Extraer Función
+        Object[] params = extraerParametrosUpdateSocio(socio);
+        int rowsAffected = jdbcTemplate.update(query, params);
         
         if (rowsAffected == 0) throw new IllegalArgumentException("No se encontró el socio"); // Regla 19
+    }
+
+    // SEMANA 4: Extraer Función
+    private Object[] extraerParametrosUpdateSocio(Socio socio) {
+        return new Object[]{socio.getName(), socio.getSurname(), socio.getAddress(), socio.getBirthdate(), socio.getSocioId()};
     }
 
     private RowMapper<Socio> socioRowMapper() {
@@ -83,7 +90,7 @@ public class SocioRepository extends AbstractRepository {
                     rs.getString("address"), rs.getDate("birthdate").toLocalDate(),
                     rs.getBoolean("isBoatDriver"));
             socio.setHolderInscription(rs.getBoolean("isHolderInscription"));
-            socio.setAdult(rs.getBoolean("isAdult"));
+            // SEMANA 4: Eliminar código muerto. Se elimina 'socio.setAdult' porque el Dominio ahora lo calcula dinámicamente.
             socio.setInscriptionId(rs.getInt("inscriptionId"));
             return socio;
         };

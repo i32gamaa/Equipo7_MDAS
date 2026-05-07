@@ -11,21 +11,22 @@ import es.uco.pw.demo.model.domain.Embarcacion;
 public class ListEmbarcacionesController {
 
     private final EmbarcacionRepository embarcacionRepository;
-    private ModelAndView modelAndView = new ModelAndView();
 
     public ListEmbarcacionesController(EmbarcacionRepository embarcacionRepository) {
         this.embarcacionRepository = embarcacionRepository;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.embarcacionRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
+    // [CLEAN CODE - SEMANA 3: Función pura y simple. Delega la carga de datos a privados]
     @GetMapping("/listEmbarcacion")
     public ModelAndView mostrarTodasLasEmbarcaciones() {
-        this.modelAndView.setViewName("embarcacion/listEmbarcacionesView");
-        
-        List<Embarcacion> catalogoEmbarcaciones = embarcacionRepository.findAllEmbarcaciones();
-        
-        this.modelAndView.addObject("listOfEmbarcaciones", catalogoEmbarcaciones);
-        return modelAndView;
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaCatalogo(embarcacionRepository.findAllEmbarcaciones());
+    }
+
+    // [CLEAN CODE - SEMANA 3: Extracción de carga de ModelAndView para seguir DRY]
+    private ModelAndView construirVistaCatalogo(List<Embarcacion> embarcaciones) {
+        ModelAndView mav = new ModelAndView("embarcacion/listEmbarcacionesView");
+        mav.addObject("listOfEmbarcaciones", embarcaciones);
+        return mav;
     }
 }

@@ -1,14 +1,7 @@
 /**
  * Clase {@code Alquiler}:
  * Representa el alquiler de una embarcación realizado por un socio del club náutico.
- * 
- * <p>Esta clase almacena la información de cada operación de alquiler, incluyendo
- * las fechas de inicio y fin, la embarcación alquilada, el número de plazas ocupadas,
- * el importe total, el identificador del alquiler y el socio que lo realiza.</p>
- * 
- * <p>Los objetos de esta clase se utilizan para registrar y gestionar las operaciones
- * de alquiler dentro del sistema del club.</p>
- * 
+ * ...
  * @author  
  * @version 1.0
  * @since 2025-10-03
@@ -19,8 +12,6 @@ import java.time.LocalDate;
 
 public class Alquiler {
 
-    private LocalDate startDate;
-    private LocalDate endDate;
     private String registrationNumber;
     // REFACTORIZACIÓN (Regla 1 y 5): Se cambia 'numSeats' por 'numberOfSeats' para evitar abreviaturas y mejorar la legibilidad.
     private int numberOfSeats;
@@ -28,24 +19,28 @@ public class Alquiler {
     private int rentalId;
     private String userId;
 
+    // SEMANA 4: Extraer Clase. Agrupamos startDate y endDate en un objeto Periodo. [cite: 13, 581]
+    private Periodo periodo;
+
     public Alquiler(LocalDate startDate, LocalDate endDate, String registrationNumber,
                     int numberOfSeats, double amount, int rentalId, String userId) {
-        this.startDate = startDate;
-        this.endDate = endDate;
         this.registrationNumber = registrationNumber;
         this.numberOfSeats = numberOfSeats;
         this.amount = amount;
         this.rentalId = rentalId;
         this.userId = userId;
+        // SEMANA 4: Instanciamos el periodo encapsulado. [cite: 13, 581]
+        this.periodo = new Periodo(startDate, endDate);
     }
 
     public Alquiler() {}
 
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+    // SEMANA 4: Ocultar Delegación de las fechas al objeto periodo. [cite: 13, 631]
+    public LocalDate getStartDate() { return periodo != null ? periodo.getStartDate() : null; }
+    public void setStartDate(LocalDate startDate) { if(this.periodo != null) this.periodo.setStartDate(startDate); }
 
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+    public LocalDate getEndDate() { return periodo != null ? periodo.getEndDate() : null; }
+    public void setEndDate(LocalDate endDate) { if(this.periodo != null) this.periodo.setEndDate(endDate); }
 
     public String getRegistrationNumber() { return registrationNumber; }
     public void setRegistrationNumber(String registrationNumber) { this.registrationNumber = registrationNumber; }
@@ -68,8 +63,8 @@ public class Alquiler {
                 "id=" + rentalId +
                 ", socio='" + userId + '\'' +
                 ", matricula='" + registrationNumber + '\'' +
-                ", fechaInicio=" + startDate +
-                ", fechaFin=" + endDate +
+                ", fechaInicio=" + getStartDate() +
+                ", fechaFin=" + getEndDate() +
                 ", n_plazas=" + numberOfSeats +
                 ", importe=" + amount +
                 '}';

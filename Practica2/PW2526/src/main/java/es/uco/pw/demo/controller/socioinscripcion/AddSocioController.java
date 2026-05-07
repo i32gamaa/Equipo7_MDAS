@@ -18,73 +18,97 @@ import java.time.Period;
 @Controller
 public class AddSocioController {
 
-    private SocioRepository socioRepository;
-    private InscripcionRepository inscripcionRepository;
-    private PatronRepository patronRepository;
-    private ModelAndView modelAndView = new ModelAndView();
+    // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Replace Magic Number with Symbolic Constant]
+    private static final int EDAD_MAYORIA = 18;
+    private static final int CUOTA_EXTRA_ADULTO = 250;
+    private static final int CUOTA_EXTRA_INFANTIL = 100;
+
+    private final SocioRepository socioRepository;
+    private final InscripcionRepository inscripcionRepository;
+    private final PatronRepository patronRepository;
 
     public AddSocioController(SocioRepository socioRepository, InscripcionRepository inscripcionRepository, PatronRepository patronRepository) {
         this.socioRepository = socioRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.patronRepository = patronRepository;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.socioRepository.setSQLQueriesFileName(sqlQueriesFileName);
-        this.inscripcionRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
+    // [CLEAN CODE - SEMANA 3: Un solo nivel de abstracción. Delega la creación de la vista]
     @GetMapping("/addSocio")
     public ModelAndView mostrarFormularioRegistroSocio() {
-        this.modelAndView.setViewName("socioinscripcion/addSocioView");
-        this.modelAndView.addObject("newSocio", new Socio());
-        return modelAndView;
+        return construirVistaFormulario();
     }
 
+    // [CLEAN CODE - SEMANA 3: Función principal que se lee como una historia. 
+    // Los pasos de validación, procesamiento de datos y actualización de cuotas están encapsulados]
     @PostMapping("/addSocio")
     public String procesarNuevoSocio(@ModelAttribute("newSocio") Socio socioSolicitado, SessionStatus estadoSesion) {
-        System.out.println("[AddSocioController] Recibido socio: dni=" + socioSolicitado.getSocioId());
-
-       Socio socioExistente = socioRepository.findById(socioSolicitado.getSocioId());
-       if (socioExistente != null) {
-           return "socioinscripcion/addSocioDuplicateIdView"; 
-       }
-       
-       Patron patronExistente = patronRepository.findById(socioSolicitado.getSocioId());
-        if (patronExistente != null) {
-            return "socioinscripcion/addInscripcionDuplicateIdView"; 
+        
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Guard Clauses]
+        if (comprobarSocioOPatronExistente(socioSolicitado.getSocioId())) {
+            return "socioinscripcion/addSocioDuplicateIdView"; 
         }
 
-        boolean cumpleMayoriaEdad = Period.between(socioSolicitado.getBirthdate(), LocalDate.now()).getYears() >= 18;
-        socioSolicitado.setAdult(cumpleMayoriaEdad);
-        socioSolicitado.setInscriptionDate(LocalDate.now());
+        prepararDatosPerfilSocio(socioSolicitado);
+        actualizarEstadoInscripcionFamiliar(socioSolicitado);
 
-        if (!cumpleMayoriaEdad) {
-            socioSolicitado.setBoatDriver(false);
-        }
-
-        Inscripcion inscripcionEncontrada = inscripcionRepository.findById(socioSolicitado.getInscriptionId());
-
-        if (inscripcionEncontrada != null) {
-            int cuotaExtra = cumpleMayoriaEdad ? 250 : 100;
-            inscripcionEncontrada.setTotalAmount(inscripcionEncontrada.getTotalAmount() + cuotaExtra);
-            
-            if (cumpleMayoriaEdad) {
-                inscripcionEncontrada.setRegisteredAdults(inscripcionEncontrada.getRegisteredAdults() + 1);
-            } else {
-                inscripcionEncontrada.setRegisteredKids(inscripcionEncontrada.getRegisteredKids() + 1);
-            }
-
-            if (inscripcionEncontrada.getRegisteredAdults() > 2) {
-                return "socioinscripcion/addSocioFailView"; 
-            }
-
-            inscripcionRepository.update(inscripcionEncontrada);
-            socioSolicitado.setInscriptionId(inscripcionEncontrada.getId());
-        }
-
-        boolean registroCompletado = socioRepository.addSocio(socioSolicitado);
-        String vistaDestino = registroCompletado ? "socioinscripcion/addSocioSuccessView" : "socioinscripcion/addSocioFailView";
-
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        String vistaResultado = determinarVistaResultado(socioRepository.addSocio(socioSolicitado));
         estadoSesion.setComplete();
-        return vistaDestino;
+        
+        return vistaResultado;
+    }
+
+    // ====================================================================================================
+    // MÉTODOS PRIVADOS EXTRAÍDOS
+    // ====================================================================================================
+
+    // [CLEAN CODE - SEMANA 3: Extracción de carga de ModelAndView]
+    private ModelAndView construirVistaFormulario() {
+        ModelAndView mav = new ModelAndView("socioinscripcion/addSocioView");
+        mav.addObject("newSocio", new Socio());
+        return mav;
+    }
+
+    // [CLEAN CODE - SEMANA 3: Do One Thing. Encapsula la lógica de búsqueda de duplicados]
+    private boolean comprobarSocioOPatronExistente(String id) {
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Consolidate Conditional Expression]
+        return socioRepository.findById(id) != null || patronRepository.findById(id) != null;
+    }
+
+    // [CLEAN CODE - SEMANA 3: Extrae la lógica de bajo nivel sobre el estado del objeto Socio]
+    private void prepararDatosPerfilSocio(Socio socio) {
+        // [REFACTORIZACIÓN MANUAL - Uso de constante]
+        boolean esAdulto = Period.between(socio.getBirthdate(), LocalDate.now()).getYears() >= EDAD_MAYORIA;
+        socio.setAdult(esAdulto);
+        socio.setInscriptionDate(LocalDate.now());
+        if (!esAdulto) {
+            socio.setBoatDriver(false);
+        }
+    }
+
+    // [CLEAN CODE - SEMANA 3: Extrae la gestión compleja de cuotas y miembros de la inscripción]
+    private void actualizarEstadoInscripcionFamiliar(Socio socio) {
+        Inscripcion inscripcion = inscripcionRepository.findById(socio.getInscriptionId());
+        if (inscripcion != null) {
+            aplicarRecargosYActualizarMiembros(inscripcion, socio.isAdult());
+            inscripcionRepository.update(inscripcion);
+        }
+    }
+
+    // [CLEAN CODE - SEMANA 3: Sub-función para cumplir con un único nivel de abstracción en el proceso de inscripción]
+    private void aplicarRecargosYActualizarMiembros(Inscripcion inscripcion, boolean esAdulto) {
+        // [REFACTORIZACIÓN MANUAL - Uso de constantes]
+        int cuotaExtra = esAdulto ? CUOTA_EXTRA_ADULTO : CUOTA_EXTRA_INFANTIL;
+        inscripcion.setTotalAmount(inscripcion.getTotalAmount() + cuotaExtra);
+        if (esAdulto) {
+            inscripcion.setRegisteredAdults(inscripcion.getRegisteredAdults() + 1);
+        } else {
+            inscripcion.setRegisteredKids(inscripcion.getRegisteredKids() + 1);
+        }
+    }
+
+    private String determinarVistaResultado(boolean exito) {
+        return exito ? "socioinscripcion/addSocioSuccessView" : "socioinscripcion/addSocioFailView";
     }
 }

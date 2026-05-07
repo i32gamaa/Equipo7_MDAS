@@ -11,12 +11,10 @@ import es.uco.pw.demo.model.repository.InscripcionRepository;
 @Controller
 public class FindInscripcionByIdController {
 
-    private InscripcionRepository inscripcionRepository;
+    private final InscripcionRepository inscripcionRepository;
 
     public FindInscripcionByIdController(InscripcionRepository inscripcionRepository) {
         this.inscripcionRepository = inscripcionRepository;
-        String sqlQueriesFileName = "./src/main/resources/db/sql.properties";
-        this.inscripcionRepository.setSQLQueriesFileName(sqlQueriesFileName);
     }
 
     @GetMapping("/findInscripcionById")
@@ -24,18 +22,20 @@ public class FindInscripcionByIdController {
         return new ModelAndView("socioinscripcion/findInscripcionByIdView");
     }
 
+    // [CLEAN CODE - SEMANA 3: Estructura de historia: buscar -> responder]
     @PostMapping("/findInscripcionById")
     public ModelAndView procesarBusquedaPorId(@RequestParam("id") int idBuscado) {
-        Inscripcion inscripcionEncontrada = inscripcionRepository.findById(idBuscado);
-        ModelAndView vistaResultados;
+        // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
+        return construirVistaResultado(inscripcionRepository.findById(idBuscado));
+    }
 
-        if (inscripcionEncontrada != null) {
-            vistaResultados = new ModelAndView("socioinscripcion/findInscripcionByIdSuccessView");
-            vistaResultados.addObject("inscripcion", inscripcionEncontrada);
-        } else {
-            vistaResultados = new ModelAndView("socioinscripcion/findInscripcionByIdFailView");
+    // [CLEAN CODE - SEMANA 3: Do One Thing. Encapsula la lógica de vista]
+    private ModelAndView construirVistaResultado(Inscripcion inscripcion) {
+        if (inscripcion != null) {
+            ModelAndView mav = new ModelAndView("socioinscripcion/findInscripcionByIdSuccessView");
+            mav.addObject("inscripcion", inscripcion);
+            return mav;
         }
-
-        return vistaResultados;
+        return new ModelAndView("socioinscripcion/findInscripcionByIdFailView");
     }
 }
