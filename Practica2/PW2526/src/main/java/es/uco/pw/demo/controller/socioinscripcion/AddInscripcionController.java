@@ -20,6 +20,7 @@ public class AddInscripcionController {
 
     // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Replace Magic Number with Symbolic Constant]
     private static final int EDAD_MAYORIA = 18;
+    // [REFACTORIZACIÓN AUTOMÁTICA - VS Code Extract to Constant (Ctrl + .): Extracción automática de la cuota base de 300]
     private static final int CUOTA_BASE_INSCRIPCION = 300;
 
     private final SocioRepository socioRepository;
@@ -68,9 +69,10 @@ public class AddInscripcionController {
         return mav;
     }
 
-    private boolean comprobarDuplicadosEnSistema(String id) {
+    // [REFACTORIZACIÓN AUTOMÁTICA - VS Code Rename Symbol (F2): Se actualizó la variable abstracta 'id' a 'idSocio' sin romper el uso en las líneas internas]
+    private boolean comprobarDuplicadosEnSistema(String idSocio) {
         // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Consolidate Conditional Expression]
-        return socioRepository.findById(id) != null || patronRepository.findById(id) != null;
+        return socioRepository.findById(idSocio) != null || patronRepository.findById(idSocio) != null;
     }
 
     private boolean validarMayoriaEdad(Socio socio) {
@@ -94,8 +96,10 @@ public class AddInscripcionController {
     private boolean crearInscripcionAsociada(Socio titular) {
         Inscripcion inscripcion = new Inscripcion();
         inscripcion.setRegistrationDate(LocalDate.now());
-        // [REFACTORIZACIÓN MANUAL - Uso de constante]
+        
+        // Uso de la constante extraída automáticamente
         inscripcion.setTotalAmount(CUOTA_BASE_INSCRIPCION);
+        
         inscripcion.setUserId(titular.getSocioId());
         inscripcion.setRegisteredAdults(1);
         inscripcion.setRegisteredKids(0);

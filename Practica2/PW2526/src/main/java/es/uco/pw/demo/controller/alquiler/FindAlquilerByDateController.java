@@ -52,10 +52,14 @@ public class FindAlquilerByDateController {
     // ====================================================================================================
 
     // [CLEAN CODE - SEMANA 3: Extracción de validaciones de fechas]
-    private String validarRangoFechas(LocalDate inicio, LocalDate fin) {
+    // [REFACTORIZACIÓN AUTOMÁTICA - VS Code Rename Symbol (F2): Renombrado múltiple de parámetros 'inicio' a 'fechaInicioRango' y 'fin' a 'fechaFinRango']
+    private String validarRangoFechas(LocalDate fechaInicioRango, LocalDate fechaFinRango) {
+        // [REFACTORIZACIÓN AUTOMÁTICA - VS Code Extract Local Variable: Se ha extraído la llamada a 'LocalDate.now()' para evitar instanciarla repetidas veces internamente]
+        LocalDate hoy = LocalDate.now();
+
         // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Consolidate Conditional Expression]
-        if (inicio.isAfter(fin)) return "La fecha de inicio no puede ser posterior a la fecha de fin";
-        if (inicio.isBefore(LocalDate.now())) return "La fecha de inicio no puede ser anterior a la fecha actual";
+        if (fechaInicioRango.isAfter(fechaFinRango)) return "La fecha de inicio no puede ser posterior a la fecha de fin";
+        if (fechaInicioRango.isBefore(hoy)) return "La fecha de inicio no puede ser anterior a la fecha actual";
         return null;
     }
 

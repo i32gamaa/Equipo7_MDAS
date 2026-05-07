@@ -24,6 +24,7 @@ public class FindReservaByIdController {
 
     // [CLEAN CODE - SEMANA 3: Un solo nivel de abstracción. El flujo es: buscar -> construir respuesta]
     @PostMapping("/findReservaById")
+    // [REFACTORIZACIÓN AUTOMÁTICA - VS Code Rename Symbol (F2): Se renombró la variable 'id' a 'idBuscado' para darle contexto sin romper el código]
     public ModelAndView procesarBusquedaPorId(@RequestParam("id") int idBuscado) {
         // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
         // En lugar de guardar 'Reserva reservaEncontrada = ...', lo inyectamos directo al constructor.

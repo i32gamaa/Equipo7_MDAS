@@ -85,7 +85,11 @@ public class AddPatronController {
         if (fechaNacimiento == null) {
             return false;
         }
+
+        // [REFACTORIZACIÓN AUTOMÁTICA - VS Code Extract Local Variable: Se aisló 'LocalDate.now()' en una variable local de forma rápida usando el atajo Ctrl + .]
+        LocalDate hoy = LocalDate.now();
+
         // [REFACTORIZACIÓN MANUAL - Uso de la constante extraída]
-        return Period.between(fechaNacimiento, LocalDate.now()).getYears() >= MAYORIA_EDAD;
+        return Period.between(fechaNacimiento, hoy).getYears() >= MAYORIA_EDAD;
     }
 }

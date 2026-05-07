@@ -148,29 +148,30 @@ public class AddAlquilerController {
         }
     }
 
-    private String validarReglasAlquiler(Alquiler alquiler) {
+    // [REFACTORIZACIÓN AUTOMÁTICA - VS Code Rename Symbol (F2): Se renombró 'alquiler' a 'alquilerAValidar' para darle mayor contexto semántico]
+    private String validarReglasAlquiler(Alquiler alquilerAValidar) {
         // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Guard Clauses] 
-        if (alquiler.getStartDate() == null || alquiler.getEndDate() == null) return "Las fechas son obligatorias";
-        if (alquiler.getStartDate().isAfter(alquiler.getEndDate())) return "La fecha de inicio no puede ser posterior a la fecha de fin";
-        if (alquiler.getRegistrationNumber() == null || alquiler.getRegistrationNumber().trim().isEmpty()) return "La matrícula es obligatoria";
-        if (alquiler.getUserId() == null || alquiler.getUserId().trim().isEmpty()) return "El ID de socio es obligatorio";
-        if (alquiler.getNumberOfSeats() <= 0) return "El número de plazas debe ser mayor a 0";
-        if (alquiler.getStartDate().isBefore(LocalDate.now())) return "La fecha de inicio no puede ser en el pasado";
+        if (alquilerAValidar.getStartDate() == null || alquilerAValidar.getEndDate() == null) return "Las fechas son obligatorias";
+        if (alquilerAValidar.getStartDate().isAfter(alquilerAValidar.getEndDate())) return "La fecha de inicio no puede ser posterior a la fecha de fin";
+        if (alquilerAValidar.getRegistrationNumber() == null || alquilerAValidar.getRegistrationNumber().trim().isEmpty()) return "La matrícula es obligatoria";
+        if (alquilerAValidar.getUserId() == null || alquilerAValidar.getUserId().trim().isEmpty()) return "El ID de socio es obligatorio";
+        if (alquilerAValidar.getNumberOfSeats() <= 0) return "El número de plazas debe ser mayor a 0";
+        if (alquilerAValidar.getStartDate().isBefore(LocalDate.now())) return "La fecha de inicio no puede ser en el pasado";
 
-        String periodValidation = validateRentalPeriod(alquiler.getStartDate(), alquiler.getEndDate());
+        String periodValidation = validateRentalPeriod(alquilerAValidar.getStartDate(), alquilerAValidar.getEndDate());
         if (periodValidation != null) return periodValidation;
 
-        String socioValidation = validateSocio(alquiler.getUserId());
+        String socioValidation = validateSocio(alquilerAValidar.getUserId());
         if (socioValidation != null) return socioValidation;
 
-        String embarcacionValidation = validateEmbarcacion(alquiler.getRegistrationNumber());
+        String embarcacionValidation = validateEmbarcacion(alquilerAValidar.getRegistrationNumber());
         if (embarcacionValidation != null) return embarcacionValidation;
 
-        if (!hasSufficientCapacity(alquiler.getRegistrationNumber(), alquiler.getNumberOfSeats())) {
+        if (!hasSufficientCapacity(alquilerAValidar.getRegistrationNumber(), alquilerAValidar.getNumberOfSeats())) {
             return "La embarcación no tiene suficientes plazas disponibles";
         }
 
-        if (!isEmbarcacionAvailable(alquiler.getRegistrationNumber(), alquiler.getStartDate(), alquiler.getEndDate())) {
+        if (!isEmbarcacionAvailable(alquilerAValidar.getRegistrationNumber(), alquilerAValidar.getStartDate(), alquilerAValidar.getEndDate())) {
             return "La embarcación no está disponible para las fechas seleccionadas.";
         }
 

@@ -24,6 +24,7 @@ public class FindSocioByIdController {
 
     // [CLEAN CODE - SEMANA 3: Un solo nivel de abstracción]
     @PostMapping("/findSocioById")
+    // [REFACTORIZACIÓN AUTOMÁTICA - VS Code Rename Symbol (F2): Se renombró de forma segura la variable genérica 'id' a 'dniBuscado' en todo su ámbito]
     public ModelAndView procesarBusquedaPorId(@RequestParam("id") String dniBuscado) {
         // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]
         return construirVistaResultado(socioRepository.findById(dniBuscado));

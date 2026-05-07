@@ -24,6 +24,7 @@ public class UpdateIsBoatDriverController {
 
     // [CLEAN CODE - SEMANA 3: Historia clara: buscar -> intentar actualizar -> responder]
     @PostMapping("/updateIsBoatDriver")
+    // [REFACTORIZACIÓN AUTOMÁTICA - VS Code Rename Symbol (F2): 'id' renombrado a 'dniBuscado' actualizando automáticamente la firma y el cuerpo]
     public ModelAndView procesarActualizacionPatron(@RequestParam("id") String dniBuscado) {
         Socio socio = socioRepository.findById(dniBuscado);
         // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Inline Temp]

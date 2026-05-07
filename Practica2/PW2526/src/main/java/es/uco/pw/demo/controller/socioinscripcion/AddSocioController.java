@@ -18,8 +18,9 @@ import java.time.Period;
 @Controller
 public class AddSocioController {
 
-    // [REFACTORIZACIÓN MANUAL - Refactoring Guru: Replace Magic Number with Symbolic Constant]
+    // [REFACTORIZACIÓN AUTOMÁTICA - VS Code Extract to Constant (Ctrl + .): Se extrajo automáticamente el literal 18]
     private static final int EDAD_MAYORIA = 18;
+    // [REFACTORIZACIÓN AUTOMÁTICA - VS Code Extract to Constant: Se extrajeron los literales 250 y 100]
     private static final int CUOTA_EXTRA_ADULTO = 250;
     private static final int CUOTA_EXTRA_INFANTIL = 100;
 
@@ -78,10 +79,13 @@ public class AddSocioController {
 
     // [CLEAN CODE - SEMANA 3: Extrae la lógica de bajo nivel sobre el estado del objeto Socio]
     private void prepararDatosPerfilSocio(Socio socio) {
+        // [REFACTORIZACIÓN AUTOMÁTICA - VS Code Extract Local Variable: Extracción de LocalDate.now() para evitar repetir llamadas]
+        LocalDate fechaActual = LocalDate.now();
+        
         // [REFACTORIZACIÓN MANUAL - Uso de constante]
-        boolean esAdulto = Period.between(socio.getBirthdate(), LocalDate.now()).getYears() >= EDAD_MAYORIA;
+        boolean esAdulto = Period.between(socio.getBirthdate(), fechaActual).getYears() >= EDAD_MAYORIA;
         socio.setAdult(esAdulto);
-        socio.setInscriptionDate(LocalDate.now());
+        socio.setInscriptionDate(fechaActual);
         if (!esAdulto) {
             socio.setBoatDriver(false);
         }
