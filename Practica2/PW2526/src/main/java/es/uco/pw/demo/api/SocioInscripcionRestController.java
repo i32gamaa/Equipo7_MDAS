@@ -9,15 +9,16 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import es.uco.pw.demo.model.domain.Socio;
-import es.uco.pw.demo.model.repository.SocioRepository;
+import es.uco.pw.demo.model.repository.ISocioRepository;
 
 @RestController()
 @RequestMapping(path="/api/socioinscripcion", produces="application/json")
 public class SocioInscripcionRestController {
 
-    private final SocioRepository socioRepository;
+    private static final String EL_SOCIO_A_ACTUALIZAR_NO_EXISTE = "El socio a actualizar no existe";
+    private final ISocioRepository socioRepository;
 
-    public SocioInscripcionRestController(SocioRepository socioRepository) {
+    public SocioInscripcionRestController(ISocioRepository socioRepository) {
         this.socioRepository = socioRepository;
     }
 
@@ -26,7 +27,7 @@ public class SocioInscripcionRestController {
         try {
             return socioRepository.findById(id); 
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Socio no encontrado", e); // Regla 19
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, EL_SOCIO_A_ACTUALIZAR_NO_EXISTE, e); // Regla 19
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor", e);
         }
@@ -44,7 +45,7 @@ public class SocioInscripcionRestController {
             return existingSocio;
 
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El socio a actualizar no existe", e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, EL_SOCIO_A_ACTUALIZAR_NO_EXISTE, e);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al actualizar la base de datos", e);
         }

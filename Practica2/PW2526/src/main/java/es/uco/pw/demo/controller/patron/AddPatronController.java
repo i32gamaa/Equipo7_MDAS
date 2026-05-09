@@ -6,8 +6,9 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.ModelAndView;
 import es.uco.pw.demo.model.domain.Patron;
 import es.uco.pw.demo.model.domain.Socio;
+import es.uco.pw.demo.model.repository.ISocioRepository;
 import es.uco.pw.demo.model.repository.PatronRepository;
-import es.uco.pw.demo.model.repository.SocioRepository;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import java.time.LocalDate;
@@ -20,9 +21,9 @@ public class AddPatronController {
     private static final int MAYORIA_EDAD = 18;
 
     private PatronRepository patronRepository;
-    private SocioRepository socioRepository;
+    private ISocioRepository socioRepository;
 
-    public AddPatronController(PatronRepository patronRepository, SocioRepository socioRepository) {
+    public AddPatronController(PatronRepository patronRepository, ISocioRepository socioRepository) {
         this.patronRepository = patronRepository;
         this.socioRepository = socioRepository;
         String sqlQueriesFileName = "./src/main/resources/db/sql.properties";

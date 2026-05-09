@@ -12,6 +12,7 @@ import java.time.LocalDate;
 
 public class Reserva {
 
+    private static final int PRECIO_POR_PLAZA = 40;
     private int id;
     private String purpose;
     // REFACTORIZACIÓN (Regla 1): Se cambia 'date' por 'reservationDate' para ser explícito.
@@ -68,7 +69,7 @@ public class Reserva {
 
     // REGLA S3: Función puramente matemática (Un solo nivel de abstracción) [cite: 13, 164]
     private void actualizarImportePorPlazas(int plazas) {
-        this.totalAmount = plazas * 40;
+        this.totalAmount = plazas * PRECIO_POR_PLAZA; // SEMANA 5: Refactorizacion automática
     }
 
     public int getTotalAmount() { return totalAmount; }
