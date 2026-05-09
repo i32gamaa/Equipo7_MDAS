@@ -1,4 +1,4 @@
-package es.uco.pw.demo;
+package es.uco.pw.demo.controller;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
