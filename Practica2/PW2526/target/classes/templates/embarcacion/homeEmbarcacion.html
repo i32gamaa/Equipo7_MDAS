@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <link rel="stylesheet" href="stylehome.css">
+    <title>Gestión de Embarcaciones - Club Náutico</title>
+</head>
+
+<body>
+    <div class="overlay">
+        <h1>Gestión de Embarcaciones</h1>
+        <p>Registra, busca y gestiona embarcaciones</p>
+
+        <div class="action-grid">
+            <div class="action-card">
+                <i class="fas fa-ship"></i>
+                <h5>Embarcaciones</h5>
+                <a href="/addEmbarcacion" class="btn btn-success btn-custom">Agregar</a>
+                <a href="/findEmbarcacionMenu" class="btn btn-outline-light btn-custom">Buscar</a>
+                <a href="/listEmbarcacion" class="btn btn-outline-light btn-custom">Listar</a>
+            </div>
+        </div>
+
+        <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
+    </div>
+</body>
+
+</html>

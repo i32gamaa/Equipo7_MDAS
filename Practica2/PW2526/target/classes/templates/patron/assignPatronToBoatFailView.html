@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <title>Error en Asignación</title>
+    <link rel="stylesheet" href="stylefail.css">
+</head>
+
+<body>
+    <div class="error-container">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+
+        <h2 class="titulo-error-w">Error en Asignación</h2>
+
+        <div class="error-message">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>NO SE PUDO COMPLETAR LA ASIGNACIÓN DEL PATRÓN</span>
+        </div>
+
+        <p>El patrón ya está asignado a otra embarcación.</p>
+
+        <div class="action-buttons">
+            <a th:href="@{/assignPatronToBoat}" class="btn btn-primary">
+                <i class="fas fa-redo-alt"></i>
+                Intentar Nuevamente
+            </a>
+            <a th:href="@{/listPatrones}" class="btn btn-primary">
+                <i class="fas fa-list"></i>
+                Ver Patrones
+            </a>
+            <a th:href="@{/listEmbarcacion}" class="btn btn-primary">
+                <i class="fas fa-ship"></i>
+                Ver Embarcaciones
+            </a>
+            <a th:href="@{/}" class="btn btn-secondary">
+                <i class="fas fa-home"></i>
+                Volver al inicio
+            </a>
+        </div>
+    </div>
+</body>
+</html>

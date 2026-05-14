@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket de Alquiler</title>
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <link rel="stylesheet" href="styleticket.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <script>
+        /**
+         * DECISIÓN DE DISEÑO (Semana 4): 
+         * Se aplica la regla de "Funciones" (Everything Small). 
+         * Se extrae la lógica de la función anónima principal en funciones más pequeñas 
+         * y específicas, cada una con una única responsabilidad y un nombre descriptivo.
+         */
+        document.addEventListener('DOMContentLoaded', initializeTicket);
+
+        function initializeTicket() {
+            displayCurrentDate();
+            calculateAndDisplayRentalDetails();
+            animateTicket();
+        }
+
+        function displayCurrentDate() {
+            const now = new Date();
+            const dateString = now.toLocaleDateString('es-ES');
+            const timeString = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('currentDate').textContent = `${dateString} ${timeString}`;
+        }
+
+        function calculateAndDisplayRentalDetails() {
+            const startDateText = document.getElementById('startDateValue').textContent;
+            const endDateText = document.getElementById('endDateValue').textContent;
+
+            if (!startDateText || !endDateText) {
+                updateDurationUI('Fechas no disponibles');
+                return;
+            }
+
+            try {
+                const startDate = parseDate(startDateText);
+                const endDate = parseDate(endDateText);
+
+                if (isValidDate(startDate) && isValidDate(endDate)) {
+                    const diffDays = calculateDaysDifference(startDate, endDate);
+                    updateDurationUI(`${diffDays} días`);
+                    updateStatusUI(startDate, endDate);
+                } else {
+                    updateDurationUI('Error en fechas');
+                }
+            } catch (error) {
+                console.error('Error calculando fechas:', error);
+                updateDurationUI('Error en cálculo');
+            }
+        }
+
+        function parseDate(dateString) {
+            const parts = dateString.split('-');
+            // Cuidado: el mes en Date(y, m, d) empieza en 0.
+            return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        }
+
+        function isValidDate(dateObj) {
+            return dateObj && !isNaN(dateObj.getTime());
+        }
+
+        function calculateDaysDifference(startDate, endDate) {
+            const diffTime = Math.abs(endDate - startDate);
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        function updateDurationUI(text) {
+            document.getElementById('durationBadge').textContent = text;
+            const daysTextElement = document.getElementById('daysText');
+            if(daysTextElement) daysTextElement.textContent = text;
+        }
+
+        function updateStatusUI(startDate, endDate) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const startCopy = new Date(startDate);
+            startCopy.setHours(0, 0, 0, 0);
+            
+            const endCopy = new Date(endDate);
+            endCopy.setHours(0, 0, 0, 0);
+
+            const statusBadge = document.getElementById('statusBadge');
+            statusBadge.className = 'status-badge'; // Clase base
+
+            if (startCopy > today) {
+                statusBadge.textContent = 'Pendiente';
+            } else if (endCopy >= today) {
+                statusBadge.textContent = 'En curso';
+            } else {
+                statusBadge.textContent = 'Finalizado';
+            }
+        }
+
+        function animateTicket() {
+            setTimeout(() => {
+                const ticket = document.querySelector('.ticket');
+                if(ticket) {
+                    ticket.style.transform = 'scale(1.02)';
+                    setTimeout(() => {
+                        ticket.style.transform = 'scale(1)';
+                    }, 200);
+                }
+            }, 500);
+        }
+    </script>
+</body>
+</html>

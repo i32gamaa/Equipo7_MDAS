@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="stylehome.css">
+    <title>Lista de Patrones</title>
+    <link rel="icon" href="images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div class="overlay">
+        <h1>Lista de Patrones</h1>
+        <p>Gestiona y visualiza todos los patrones del sistema</p>
+
+        <div th:if="${patrones != null and not patrones.empty}">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>DNI</th>
+                        <th>Nombre</th>
+                        <th>Apellidos</th>
+                        <th>Fecha Nacimiento</th>
+                        <th>Fecha Título</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="patron : ${patrones}">
+                        <td th:text="${patron.id}"></td>
+                        <td th:text="${patron.name}"></td>
+                        <td th:text="${patron.surname}"></td>
+                        <td th:text="${patron.birthDate}"></td>
+                        <td th:text="${patron.titleIssueDate}"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+        <div th:if="${patrones == null or patrones.empty}" class="no-data">
+            <h3>No hay patrones registrados</h3>
+            <p>No se encontraron patrones en el sistema.</p>
+        </div>
+
+        <div class="btn-group">
+            <a th:href="@{/addPatron}" class="btn btn-primary">Añadir Patrón</a>
+            <a th:href="@{/assignPatronToBoat}" class="btn btn-outline-light">Asignar a Embarcación</a>
+            <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
+        </div>
+    </div>
+</body>
+</html>

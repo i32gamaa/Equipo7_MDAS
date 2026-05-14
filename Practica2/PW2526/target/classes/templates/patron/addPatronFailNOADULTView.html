@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="stylefail.css">
+    <title>Error - Patrón Menor de Edad</title>
+    <link rel="icon" href="images/logo.png" type="image/png">
+</head>
+
+<body>
+    <div class="error-container">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+
+        <h2 class="titulo-error-w">Error - Patrón Menor de Edad</h2>
+
+        <div class="error-message">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>No se puede registrar un patrón menor de 18 años</span>
+        </div>
+
+        <p>El patrón debe ser mayor de edad para poder ser registrado en el sistema.</p>
+
+        <div class="info-box">
+            <h3><i class="fas fa-info-circle"></i> Requisitos de Edad</h3>
+            <p>Para ser registrado como patrón, la persona debe tener:<br>
+            <strong>18 años o más</strong><br>
+            Verifique la fecha de nacimiento introducida</p>
+        </div>
+
+        <div class="action-buttons">
+            <a th:href="@{/addPatron}" class="btn btn-primary">
+                <i class="fas fa-redo-alt"></i>
+                Intentar de nuevo
+            </a>
+            <a th:href="@{/}" class="btn btn-secondary">
+                <i class="fas fa-home"></i>
+                Volver al inicio
+            </a>
+        </div>
+    </div>
+</body>
+</html>

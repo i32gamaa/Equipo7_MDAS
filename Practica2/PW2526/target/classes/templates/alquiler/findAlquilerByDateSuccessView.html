@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embarcaciones Disponibles</title>
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <link rel="stylesheet" href="stylesuccess.css">
+</head>
+
+<body>
+    <main class="overlay">
+        <h1>✅ Embarcaciones Disponibles</h1>
+        <p class="subtitle">Del <span th:text="${startDate}"></span> al <span th:text="${endDate}"></span></p>
+
+        <p class="success-message">
+            <strong>Embarcaciones disponibles:</strong> 
+            <span th:text="${embarcaciones.size()}"></span> embarcación(es) no alquilada(s) en este período
+        </p>
+
+        <section class="details" th:if="${embarcaciones != null and not embarcaciones.empty}">
+            <h3>Embarcaciones Encontradas</h3>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Matrícula</th>
+                        <th>Tipo</th>
+                        <th>Plazas</th>
+                        <th>Dimensiones</th>
+                        <th>Patrón</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="embarcacion : ${embarcaciones}">
+                        <td th:text="${embarcacion.name}"></td>
+                        <td th:text="${embarcacion.registrationNumber}"></td>
+                        <td th:text="${embarcacion.type}"></td>
+                        <td th:text="${embarcacion.numSeats}"></td>
+                        <td th:text="${embarcacion.length + 'x' + embarcacion.width + 'x' + embarcacion.height + ' m'}"></td>
+                        <td th:text="${embarcacion.patronId != null ? embarcacion.patronId : 'No asignado'}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section th:if="${embarcaciones == null || embarcaciones.empty}" class="no-data">
+            <h3>No hay embarcaciones disponibles</h3>
+            <p>Todas las embarcaciones están alquiladas en el período seleccionado.</p>
+        </section>
+
+        <nav class="btn-group">
+            <a th:href="@{/findAlquilerByDate}" class="btn btn-primary">🔍 Nueva Búsqueda</a>
+            <a th:href="@{/addAlquiler}" class="btn btn-outline-light">Nuevo Alquiler</a>
+            <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
+        </nav>
+    </main>
+</body>
+</html>
