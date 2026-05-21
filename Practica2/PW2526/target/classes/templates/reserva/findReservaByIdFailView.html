@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva No Encontrada</title>
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/error.css}">
+</head>
+
+<body>
+    <main class="error-container">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+        </div>
+
+        <h2 class="error-title">Reserva No Encontrada</h2>
+
+        <div class="error-message">
+            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+            <span>No se encontró la reserva solicitada</span>
+        </div>
+
+        <p class="error-instruction">No se ha encontrado ninguna reserva con el ID introducido en el sistema.</p>
+
+        <nav class="action-buttons">
+            <a th:href="@{/findReservaById}" class="btn btn-primary">
+                <i class="fas fa-redo-alt" aria-hidden="true"></i> Intentar de Nuevo
+            </a>
+            <a th:href="@{/listReservas}" class="btn btn-outline-light">
+                <i class="fas fa-list" aria-hidden="true"></i> Ver Todas las Reservas
+            </a>
+            <a th:href="@{/}" class="btn btn-secondary">
+                <i class="fas fa-home" aria-hidden="true"></i> Volver al Inicio
+            </a>
+        </nav>
+    </main>
+</body>
+</html>

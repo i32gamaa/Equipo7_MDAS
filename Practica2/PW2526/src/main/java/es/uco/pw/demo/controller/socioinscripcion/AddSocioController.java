@@ -9,7 +9,7 @@ import org.springframework.web.servlet.ModelAndView;
 import es.uco.pw.demo.model.domain.Socio;
 import es.uco.pw.demo.model.domain.Inscripcion;
 import es.uco.pw.demo.model.domain.Patron;
-import es.uco.pw.demo.model.repository.SocioRepository;
+import es.uco.pw.demo.model.repository.ISocioRepository;
 import es.uco.pw.demo.model.repository.InscripcionRepository;
 import es.uco.pw.demo.model.repository.PatronRepository;
 import java.time.LocalDate;
@@ -24,11 +24,11 @@ public class AddSocioController {
     private static final int CUOTA_EXTRA_ADULTO = 250;
     private static final int CUOTA_EXTRA_INFANTIL = 100;
 
-    private final SocioRepository socioRepository;
+    private final ISocioRepository socioRepository;
     private final InscripcionRepository inscripcionRepository;
     private final PatronRepository patronRepository;
 
-    public AddSocioController(SocioRepository socioRepository, InscripcionRepository inscripcionRepository, PatronRepository patronRepository) {
+    public AddSocioController(ISocioRepository socioRepository, InscripcionRepository inscripcionRepository, PatronRepository patronRepository) {
         this.socioRepository = socioRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.patronRepository = patronRepository;

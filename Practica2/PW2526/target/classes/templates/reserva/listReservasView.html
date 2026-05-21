@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Reservas</title>
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+
+<body>
+    <div class="overlay">
+        <h1>Listado de Reservas</h1>
+
+        <div th:if="${error}" class="message error" th:text="${error}"></div>
+        <div th:if="${message}" class="message info" th:text="${message}"></div>
+
+        <main th:if="${bookingList != null and not bookingList.empty}">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha de Reserva</th>
+                        <th>Importe €</th>
+                        <th>ID Socio</th>
+                        <th>Plazas</th>
+                        <th>Propósito</th>
+                    </tr>
+                </thead>
+                <tbody class="text-contraste">
+                    <tr th:each="reservaItem : ${bookingList}">
+                        <td th:text="${reservaItem.id}" data-label="ID"></td>
+                        <td th:text="${reservaItem.date}" data-label="Fecha de Reserva"></td>
+                        <td th:text="${reservaItem.totalAmount} + ' €'" data-label="Importe"></td>
+                        <td th:text="${reservaItem.userId}" data-label="ID Socio"></td>
+                        <td th:text="${reservaItem.numSeats}" data-label="Plazas"></td>
+                        <td th:text="${reservaItem.purpose}" data-label="Propósito"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+
+        <section th:if="${bookingList == null or bookingList.empty}" class="no-data">
+            <h3>No hay reservas registradas</h3>
+            <p>No se encontraron reservas registradas en el sistema.</p>
+        </section>
+
+        <nav class="btn-group">
+            <a th:href="@{/addReserva}" class="btn btn-primary">Añadir Nueva Reserva</a>
+            <a th:href="@{/}" class="btn btn-secondary">Volver al Inicio</a>
+        </nav>
+    </div>
+</body>
+</html>

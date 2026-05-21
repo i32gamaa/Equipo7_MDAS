@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Repository
-public class SocioRepository extends AbstractRepository {
+public class SocioRepository extends AbstractRepository implements ISocioRepository {
 
     public SocioRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -18,6 +18,7 @@ public class SocioRepository extends AbstractRepository {
     }
 
     // Aplico Regla 20: Método público que solo maneja el error.
+    @Override
     public Socio findById(String socioId) {
         try { return executeFindById(socioId); } 
         catch (Exception e) { return null; }
@@ -36,6 +37,7 @@ public class SocioRepository extends AbstractRepository {
     }
 
     // Regla 20: Extracción de Try/Catch
+    @Override
     public boolean addSocio(Socio socio) {
         try { executeAddSocio(socio); return true; } 
         catch (Exception e) { return false; }
@@ -63,6 +65,7 @@ public class SocioRepository extends AbstractRepository {
     }
 
     // Regla 20
+    @Override
     public void updateSocio(Socio socio) {
         try { executeUpdateSocio(socio); } 
         catch (DataAccessException e) { throw new RuntimeException("Error al actualizar el socio", e); } // Regla 19
@@ -96,11 +99,13 @@ public class SocioRepository extends AbstractRepository {
         };
     }
     
+    @Override
     public boolean addSocioAdult(Socio socio) {
         try { executeAddSocio(socio); return true; } 
         catch (Exception e) { return false; }
     }
 
+    @Override
     public boolean updateInscriptionId(Socio socio) {
         try {
             String sql = sqlQueries.getProperty("socio.updateInscriptionId", "UPDATE Socio SET inscriptionId = ? WHERE id = ?");
@@ -108,6 +113,7 @@ public class SocioRepository extends AbstractRepository {
         } catch (Exception e) { return false; }
     }
 
+    @Override
     public List<Socio> findAllSocios() {
         try {
             String sql = sqlQueries.getProperty("socio.findAll", "SELECT * FROM Socio");
@@ -115,6 +121,7 @@ public class SocioRepository extends AbstractRepository {
         } catch (Exception e) { return null; }
     }
 
+    @Override
     public void updateIsBoatDriver(String socioId, boolean isBoatDriver) {
         try {
             String sql = sqlQueries.getProperty("socio.updateBoatDriver", "UPDATE Socio SET isBoatDriver = ? WHERE id = ?");

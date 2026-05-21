@@ -74,7 +74,8 @@ public class Socio {
     // comparando la fecha de nacimiento con la fecha actual.
     public boolean isAdult() { 
         if (this.birthdate == null) return false;
-        return Period.between(this.birthdate, LocalDate.now()).getYears() >= 18;
+        int age = Period.between(this.birthdate, LocalDate.now()).getYears(); // Semana 5: Refactorización automática para calcular la edad.
+        return age >= 18;
     }
 
     // ==============================================================================

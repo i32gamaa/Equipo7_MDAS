@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embarcaciones Encontradas</title>
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/success.css}">
+</head>
+
+<body>
+    <main class="overlay">
+        <h1>Embarcaciones Encontradas</h1>
+        <p class="subtitle">Tipo: <span th:text="${boatType}">VELERO</span></p>
+
+        <section th:if="${fleetList != null and not fleetList.empty}">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Matrícula</th>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Plazas</th>
+                        <th>Longitud (m)</th>
+                        <th>Ancho (m)</th>
+                        <th>Altura (m)</th>
+                        <th>Patrón</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="boatItem : ${fleetList}">
+                        <td th:text="${boatItem.registrationNumber}"></td>
+                        <td th:text="${boatItem.name}"></td>
+                        <td th:text="${boatItem.type}"></td>
+                        <td th:text="${boatItem.numSeats}"></td>
+                        <td th:text="${boatItem.length}"></td>
+                        <td th:text="${boatItem.width}"></td>
+                        <td th:text="${boatItem.height}"></td>
+                        <td>
+                            <span th:if="${boatItem.patronId != null}" class="badge-success">SÍ</span>
+                            <span th:unless="${boatItem.patronId != null}" class="badge-secondary">NO</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <p class="total-count">
+                Total de embarcaciones encontradas: <span th:text="${fleetList.size()}"></span>
+            </p>
+        </section>
+
+        <nav class="btn-group">
+            <a th:href="@{/findEmbarcacionByType}" class="btn btn-primary">Nueva Búsqueda por Tipo</a>
+            <a th:href="@{/findEmbarcacionMenu}" class="btn btn-outline-light">Volver al Menú de Búsqueda</a>
+            <a th:href="@{/}" class="btn btn-outline-light">Volver al Inicio</a>
+        </nav>
+    </main>
+</body>
+</html>

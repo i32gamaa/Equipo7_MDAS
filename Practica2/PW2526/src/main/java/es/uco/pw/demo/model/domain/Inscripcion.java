@@ -19,7 +19,7 @@ import java.time.LocalDate;
 
 public class Inscripcion {
 
-    private int id;
+    private int inscripcionId;
     // REFACTORIZACIÓN (Regla 1): Se cambia 'date' por 'registrationDate' para especificar el tipo de fecha.
     private LocalDate registrationDate;
     private int totalAmount;
@@ -28,7 +28,7 @@ public class Inscripcion {
     private int registeredKids;
 
     public Inscripcion(int id, LocalDate registrationDate, int totalAmount, String userId, int registeredAdults, int registeredKids) {
-        this.id = id;
+        this.inscripcionId = id;
         this.userId = userId;
         this.registrationDate = registrationDate;
         this.totalAmount = totalAmount;
@@ -38,8 +38,8 @@ public class Inscripcion {
 
     public Inscripcion() {}
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getInscripcionId() { return inscripcionId; }
+    public void setInscripcionId(int id) { this.inscripcionId = id; }
 
     public LocalDate getRegistrationDate() { return registrationDate; }
     public void setRegistrationDate(LocalDate registrationDate) { this.registrationDate = registrationDate; }
@@ -59,7 +59,7 @@ public class Inscripcion {
     @Override
     public String toString() {
         return "Inscripcion{" +
-                "Identificador='" + id + '\'' +
+                "Identificador='" + inscripcionId + '\'' +
                 ", Fecha='" + registrationDate + '\'' +
                 ", Importe total=" + totalAmount +
                 ", Socio titular='" + userId + '\'' +

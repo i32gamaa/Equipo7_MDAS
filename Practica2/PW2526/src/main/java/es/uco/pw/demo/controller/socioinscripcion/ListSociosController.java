@@ -1,7 +1,8 @@
 package es.uco.pw.demo.controller.socioinscripcion;
 
 import es.uco.pw.demo.model.domain.Socio;
-import es.uco.pw.demo.model.repository.SocioRepository;
+import es.uco.pw.demo.model.repository.ISocioRepository;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -10,9 +11,9 @@ import java.util.List;
 @Controller
 public class ListSociosController {
 
-    private final SocioRepository socioRepository;
+    private final ISocioRepository socioRepository;
 
-    public ListSociosController(SocioRepository socioRepository) {
+    public ListSociosController(ISocioRepository socioRepository) {
         this.socioRepository = socioRepository;
     }
 

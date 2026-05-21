@@ -16,18 +16,18 @@ public class Alquiler {
     // REFACTORIZACIÓN (Regla 1 y 5): Se cambia 'numSeats' por 'numberOfSeats' para evitar abreviaturas y mejorar la legibilidad.
     private int numberOfSeats;
     private double amount;
-    private int rentalId;
+    private int id;
     private String userId;
 
     // SEMANA 4: Extraer Clase. Agrupamos startDate y endDate en un objeto Periodo. [cite: 13, 581]
     private Periodo periodo;
 
     public Alquiler(LocalDate startDate, LocalDate endDate, String registrationNumber,
-                    int numberOfSeats, double amount, int rentalId, String userId) {
+                    int numberOfSeats, double amount, int id, String userId) {
         this.registrationNumber = registrationNumber;
         this.numberOfSeats = numberOfSeats;
         this.amount = amount;
-        this.rentalId = rentalId;
+        this.id = id;
         this.userId = userId;
         // SEMANA 4: Instanciamos el periodo encapsulado. [cite: 13, 581]
         this.periodo = new Periodo(startDate, endDate);
@@ -51,8 +51,8 @@ public class Alquiler {
     public double getAmount() { return amount; }
     public void setAmount(double amount) { this.amount = amount; }
 
-    public int getRentalId() { return rentalId; }
-    public void setRentalId(int rentalId) { this.rentalId = rentalId; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
@@ -60,7 +60,7 @@ public class Alquiler {
     @Override
     public String toString() {
         return "Alquiler{" +
-                "id=" + rentalId +
+                "id=" + id +
                 ", socio='" + userId + '\'' +
                 ", matricula='" + registrationNumber + '\'' +
                 ", fechaInicio=" + getStartDate() +

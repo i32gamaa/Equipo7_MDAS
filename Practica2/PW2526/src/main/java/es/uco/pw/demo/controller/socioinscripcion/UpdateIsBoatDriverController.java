@@ -6,14 +6,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import es.uco.pw.demo.model.domain.Socio;
-import es.uco.pw.demo.model.repository.SocioRepository;
+import es.uco.pw.demo.model.repository.ISocioRepository;
 
 @Controller
 public class UpdateIsBoatDriverController {
 
-    private final SocioRepository socioRepository;
+    private final ISocioRepository socioRepository;
 
-    public UpdateIsBoatDriverController(SocioRepository socioRepository) {
+    public UpdateIsBoatDriverController(ISocioRepository socioRepository) {
         this.socioRepository = socioRepository;
     }
 

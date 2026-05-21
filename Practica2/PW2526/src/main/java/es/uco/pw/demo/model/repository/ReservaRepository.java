@@ -106,10 +106,7 @@ public class ReservaRepository extends AbstractRepository {
 
     private Reserva extractReserva(ResultSet row) throws SQLException {
         if (row.next()) {
-            return new Reserva(
-                row.getInt("id"), row.getString("purpose"), row.getDate("date").toLocalDate(),
-                row.getInt("numSeats"), row.getString("userId"), row.getString("registrationNumber")
-            );
+            return mapearFilaReserva(row);
         }
         return null;
     }
@@ -151,10 +148,14 @@ public class ReservaRepository extends AbstractRepository {
     public List<Reserva> findAllReservas() {
         try {
             String sql = sqlQueries.getProperty("reserva.findAll", "SELECT * FROM Reserva");
-            return jdbcTemplate.query(sql, (rs, rowNum) -> new Reserva(
-                rs.getInt("id"), rs.getString("purpose"), rs.getDate("date").toLocalDate(),
-                rs.getInt("numSeats"), rs.getString("userId"), rs.getString("registrationNumber")
-            ));
+            return jdbcTemplate.query(sql, (rs, rowNum) -> mapearFilaReserva(rs));
         } catch (Exception e) { return null; }
+    }
+
+    private Reserva mapearFilaReserva(ResultSet rs) throws SQLException {
+        return new Reserva(
+            rs.getInt("id"), rs.getString("purpose"), rs.getDate("date").toLocalDate(),
+            rs.getInt("numSeats"), rs.getString("userId"), rs.getString("registrationNumber")
+        );
     }
 }

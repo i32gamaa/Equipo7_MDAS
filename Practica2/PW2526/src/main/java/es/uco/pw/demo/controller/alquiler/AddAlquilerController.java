@@ -12,8 +12,8 @@ import es.uco.pw.demo.model.domain.Alquiler;
 import es.uco.pw.demo.model.domain.Socio;
 import es.uco.pw.demo.model.domain.Embarcacion;
 import es.uco.pw.demo.model.repository.AlquilerRepository;
-import es.uco.pw.demo.model.repository.SocioRepository;
 import es.uco.pw.demo.model.repository.EmbarcacionRepository;
+import es.uco.pw.demo.model.repository.ISocioRepository;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -31,10 +31,10 @@ public class AddAlquilerController {
     private static final int MES_FIN_VERANO = 9;   
 
     private final AlquilerRepository alquilerRepository;
-    private final SocioRepository socioRepository;
+    private final ISocioRepository socioRepository;
     private final EmbarcacionRepository embarcacionRepository;
 
-    public AddAlquilerController(AlquilerRepository alquilerRepository, SocioRepository socioRepository, EmbarcacionRepository embarcacionRepository) {
+    public AddAlquilerController(AlquilerRepository alquilerRepository, ISocioRepository socioRepository, EmbarcacionRepository embarcacionRepository) {
         this.alquilerRepository = alquilerRepository;
         this.socioRepository = socioRepository;
         this.embarcacionRepository = embarcacionRepository;

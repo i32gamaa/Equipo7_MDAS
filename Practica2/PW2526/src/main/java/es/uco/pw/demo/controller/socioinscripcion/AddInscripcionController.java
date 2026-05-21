@@ -9,7 +9,7 @@ import org.springframework.web.servlet.ModelAndView;
 import es.uco.pw.demo.model.domain.Socio;
 import es.uco.pw.demo.model.domain.Inscripcion;
 import es.uco.pw.demo.model.domain.Patron;
-import es.uco.pw.demo.model.repository.SocioRepository;
+import es.uco.pw.demo.model.repository.ISocioRepository;
 import es.uco.pw.demo.model.repository.InscripcionRepository;
 import es.uco.pw.demo.model.repository.PatronRepository;
 import java.time.LocalDate;
@@ -23,11 +23,11 @@ public class AddInscripcionController {
     // [REFACTORIZACIÓN AUTOMÁTICA - VS Code Extract to Constant (Ctrl + .): Extracción automática de la cuota base de 300]
     private static final int CUOTA_BASE_INSCRIPCION = 300;
 
-    private final SocioRepository socioRepository;
+    private final ISocioRepository socioRepository;
     private final InscripcionRepository inscripcionRepository;
     private final PatronRepository patronRepository;
 
-    public AddInscripcionController(SocioRepository socioRepository, InscripcionRepository inscripcionRepository, PatronRepository patronRepository) {
+    public AddInscripcionController(ISocioRepository socioRepository, InscripcionRepository inscripcionRepository, PatronRepository patronRepository) {
         this.socioRepository = socioRepository;
         this.inscripcionRepository = inscripcionRepository;
         this.patronRepository = patronRepository;
@@ -110,7 +110,7 @@ public class AddInscripcionController {
         Inscripcion creada = inscripcionRepository.findByUserId(socio.getSocioId());
         if (creada == null) return false;
         
-        socio.setInscriptionId(creada.getId());
+        socio.setInscriptionId(creada.getInscripcionId());
         return socioRepository.updateInscriptionId(socio);
     }
 

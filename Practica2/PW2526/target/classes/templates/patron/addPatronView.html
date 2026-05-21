@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Añadir Nuevo Patrón</title>
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+
+<body>
+    <div class="overlay">
+        <h1>Añadir Nuevo Patrón</h1>
+
+        <form th:action="@{/addPatron}" th:object="${patronForm}" method="post" id="addPatronForm">
+            <div class="form-group">
+                <label for="id">DNI:</label>
+                <input type="text" id="id" th:field="*{id}" required maxlength="9" placeholder="12345678A">
+            </div>
+
+            <div class="form-group">
+                <label for="name">Nombre:</label>
+                <input type="text" id="name" th:field="*{name}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="surname">Apellidos:</label>
+                <input type="text" id="surname" th:field="*{surname}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="birthDate">Fecha de Nacimiento:</label>
+                <input type="date" id="birthDate" th:field="*{birthDate}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="titleIssueDate">Fecha de Expedición del Título:</label>
+                <input type="date" id="titleIssueDate" th:field="*{titleIssueDate}" required>
+            </div>
+
+            <nav class="form-buttons" style="grid-column: span 2;">
+                <button type="submit" class="btn btn-primary">Añadir Patrón</button>
+                <a th:href="@{/}" class="btn btn-secondary">Cancelar</a>
+            </nav>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', initializePatronForm);
+
+        function initializePatronForm() {
+            const birthDateInput = document.getElementById('birthDate');
+            const currentIsoDate = new Date().toISOString().split('T')[0];
+            
+            // Establecer el límite máximo para la fecha de nacimiento (hoy)
+            birthDateInput.max = currentIsoDate;
+        }
+    </script>
+</body>
+</html>

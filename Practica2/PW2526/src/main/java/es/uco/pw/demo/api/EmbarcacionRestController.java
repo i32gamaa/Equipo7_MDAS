@@ -17,9 +17,9 @@ public class EmbarcacionRestController {
     }
 
     @GetMapping("/{matricula}")
-    public Embarcacion getEmbarcacionByMatricula(@PathVariable String matricula){
+    public Embarcacion getEmbarcacionByMatricula(@PathVariable String registrationNumber){
         try {
-            return embarcacionRepository.findByRegistration(matricula);
+            return embarcacionRepository.findByRegistration(registrationNumber);
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Embarcación no encontrada", e); // REGLA 19
         }

@@ -105,6 +105,6 @@ public class InscripcionRepository extends AbstractRepository {
 
     // SEMANA 4: Extraer Función
     private Object[] extraerParametrosUpdate(Inscripcion inscripcion) {
-        return new Object[]{inscripcion.getTotalAmount(), inscripcion.getRegisteredAdults(), inscripcion.getRegisteredKids(), inscripcion.getId()};
+        return new Object[]{inscripcion.getTotalAmount(), inscripcion.getRegisteredAdults(), inscripcion.getRegisteredKids(), inscripcion.getInscripcionId()};
     }
 }
