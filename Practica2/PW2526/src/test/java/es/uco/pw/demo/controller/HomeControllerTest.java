@@ -1,11 +1,11 @@
-package es.uco.pw.demo;
+package es.uco.pw.demo.controller;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DemoApplicationTests {
+class HomeControllerTest {
 
     /**
      * DECISIÓN DE DISEÑO: Se renombra el método a 'contextLoads' para seguir el estándar 
