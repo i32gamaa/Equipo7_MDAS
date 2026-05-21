@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="images/logo.png" type="image/png">
-    <link rel="stylesheet" href="stylehome.css">
     <title>Gestión de Embarcaciones - Club Náutico</title>
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
 </head>
 
 <body>
@@ -14,18 +13,19 @@
         <h1>Gestión de Embarcaciones</h1>
         <p>Registra, busca y gestiona embarcaciones</p>
 
-        <div class="action-grid">
-            <div class="action-card">
-                <i class="fas fa-ship"></i>
+        <main class="action-grid">
+            <section class="action-card">
+                <i class="fas fa-ship" aria-hidden="true"></i>
                 <h5>Embarcaciones</h5>
-                <a href="/addEmbarcacion" class="btn btn-success btn-custom">Agregar</a>
-                <a href="/findEmbarcacionMenu" class="btn btn-outline-light btn-custom">Buscar</a>
-                <a href="/listEmbarcacion" class="btn btn-outline-light btn-custom">Listar</a>
-            </div>
-        </div>
+                <a th:href="@{/addEmbarcacion}" class="btn btn-success btn-custom">Agregar</a>
+                <a th:href="@{/findEmbarcacionMenu}" class="btn btn-outline-light btn-custom">Buscar</a>
+                <a th:href="@{/listEmbarcacion}" class="btn btn-outline-light btn-custom">Listar</a>
+            </section>
+        </main>
 
-        <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
+        <nav>
+            <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
+        </nav>
     </div>
 </body>
-
 </html>

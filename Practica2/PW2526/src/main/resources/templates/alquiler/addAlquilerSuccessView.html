@@ -4,110 +4,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ticket de Alquiler</title>
-    <link rel="icon" href="images/logo.png" type="image/png">
-    <link rel="stylesheet" href="styleticket.css">
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/ticket.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
     <script>
-        /**
-         * DECISIÓN DE DISEÑO (Semana 4): 
-         * Se aplica la regla de "Funciones" (Everything Small). 
-         * Se extrae la lógica de la función anónima principal en funciones más pequeñas 
-         * y específicas, cada una con una única responsabilidad y un nombre descriptivo.
-         */
-        document.addEventListener('DOMContentLoaded', initializeTicket);
+        document.addEventListener('DOMContentLoaded', initializeTicketPage);
 
-        function initializeTicket() {
-            displayCurrentDate();
-            calculateAndDisplayRentalDetails();
-            animateTicket();
+        function initializeTicketPage() {
+            renderCurrentTimestamp();
+            processRentalDuration();
+            triggerTicketPulseAnimation();
         }
 
-        function displayCurrentDate() {
-            const now = new Date();
-            const dateString = now.toLocaleDateString('es-ES');
-            const timeString = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('currentDate').textContent = `${dateString} ${timeString}`;
+        function renderCurrentTimestamp() {
+            const currentDateTime = new Date();
+            const formattedDate = currentDateTime.toLocaleDateString('es-ES');
+            const formattedTime = currentDateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            
+            document.getElementById('currentDate').textContent = `${formattedDate} ${formattedTime}`;
         }
 
-        function calculateAndDisplayRentalDetails() {
-            const startDateText = document.getElementById('startDateValue').textContent;
-            const endDateText = document.getElementById('endDateValue').textContent;
+        function processRentalDuration() {
+            const startDateRawText = document.getElementById('startDateValue').textContent;
+            const endDateRawText = document.getElementById('endDateValue').textContent;
 
-            if (!startDateText || !endDateText) {
-                updateDurationUI('Fechas no disponibles');
+            if (!startDateRawText || !endDateRawText) {
+                updateDurationDisplay('Fechas no disponibles');
                 return;
             }
 
             try {
-                const startDate = parseDate(startDateText);
-                const endDate = parseDate(endDateText);
+                const rentalStartDate = parseIsoDateString(startDateRawText);
+                const rentalEndDate = parseIsoDateString(endDateRawText);
 
-                if (isValidDate(startDate) && isValidDate(endDate)) {
-                    const diffDays = calculateDaysDifference(startDate, endDate);
-                    updateDurationUI(`${diffDays} días`);
-                    updateStatusUI(startDate, endDate);
+                if (isValidDateObject(rentalStartDate) && isValidDateObject(rentalEndDate)) {
+                    const totalRentalDays = calculateDaysBetweenDates(rentalStartDate, rentalEndDate);
+                    updateDurationDisplay(`${totalRentalDays} días`);
+                    updateRentalStatusDisplay(rentalStartDate, rentalEndDate);
                 } else {
-                    updateDurationUI('Error en fechas');
+                    updateDurationDisplay('Error en fechas');
                 }
-            } catch (error) {
-                console.error('Error calculando fechas:', error);
-                updateDurationUI('Error en cálculo');
+            } catch (processingError) {
+                console.error('Error calculando fechas:', processingError);
+                updateDurationDisplay('Error en cálculo');
             }
         }
 
-        function parseDate(dateString) {
-            const parts = dateString.split('-');
-            // Cuidado: el mes en Date(y, m, d) empieza en 0.
-            return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        function parseIsoDateString(dateString) {
+            const dateComponents = dateString.split('-');
+            const year = parseInt(dateComponents[0]);
+            const monthIndex = parseInt(dateComponents[1]) - 1;
+            const day = parseInt(dateComponents[2]);
+            
+            return new Date(year, monthIndex, day);
         }
 
-        function isValidDate(dateObj) {
-            return dateObj && !isNaN(dateObj.getTime());
+        function isValidDateObject(dateObject) {
+            return dateObject && !isNaN(dateObject.getTime());
         }
 
-        function calculateDaysDifference(startDate, endDate) {
-            const diffTime = Math.abs(endDate - startDate);
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        function calculateDaysBetweenDates(startDate, endDate) {
+            const durationMilliseconds = Math.abs(endDate - startDate);
+            const millisecondsInDay = 1000 * 60 * 60 * 24;
+            
+            return Math.ceil(durationMilliseconds / millisecondsInDay);
         }
 
-        function updateDurationUI(text) {
-            document.getElementById('durationBadge').textContent = text;
+        function updateDurationDisplay(statusMessage) {
+            document.getElementById('durationBadge').textContent = statusMessage;
             const daysTextElement = document.getElementById('daysText');
-            if(daysTextElement) daysTextElement.textContent = text;
-        }
-
-        function updateStatusUI(startDate, endDate) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            const startCopy = new Date(startDate);
-            startCopy.setHours(0, 0, 0, 0);
-            
-            const endCopy = new Date(endDate);
-            endCopy.setHours(0, 0, 0, 0);
-
-            const statusBadge = document.getElementById('statusBadge');
-            statusBadge.className = 'status-badge'; // Clase base
-
-            if (startCopy > today) {
-                statusBadge.textContent = 'Pendiente';
-            } else if (endCopy >= today) {
-                statusBadge.textContent = 'En curso';
-            } else {
-                statusBadge.textContent = 'Finalizado';
+            if (daysTextElement) {
+                daysTextElement.textContent = statusMessage;
             }
         }
 
-        function animateTicket() {
+        function updateRentalStatusDisplay(startDate, endDate) {
+            const currentSystemDate = new Date();
+            currentSystemDate.setHours(0, 0, 0, 0);
+            
+            const normalizedStartDate = new Date(startDate);
+            normalizedStartDate.setHours(0, 0, 0, 0);
+            
+            const normalizedEndDate = new Date(endDate);
+            normalizedEndDate.setHours(0, 0, 0, 0);
+
+            const statusBadgeElement = document.getElementById('statusBadge');
+            statusBadgeElement.className = 'status-badge';
+
+            if (normalizedStartDate > currentSystemDate) {
+                statusBadgeElement.textContent = 'Pendiente';
+            } else if (normalizedEndDate >= currentSystemDate) {
+                statusBadgeElement.textContent = 'En curso';
+            } else {
+                statusBadgeElement.textContent = 'Finalizado';
+            }
+        }
+
+        function triggerTicketPulseAnimation() {
             setTimeout(() => {
-                const ticket = document.querySelector('.ticket');
-                if(ticket) {
-                    ticket.style.transform = 'scale(1.02)';
+                const ticketContainer = document.querySelector('.ticket');
+                if (ticketContainer) {
+                    ticketContainer.style.transform = 'scale(1.02)';
                     setTimeout(() => {
-                        ticket.style.transform = 'scale(1)';
+                        ticketContainer.style.transform = 'scale(1)';
                     }, 200);
                 }
             }, 500);

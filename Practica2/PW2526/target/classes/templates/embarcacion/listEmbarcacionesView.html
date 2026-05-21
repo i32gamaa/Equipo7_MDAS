@@ -1,22 +1,21 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="images/logo.png" type="image/png">
     <title>Listado de Embarcaciones</title>
-    <link rel="stylesheet" href="stylehome.css">
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
 </head>
 
 <body>
     <main class="overlay">
         <h1>Listado de Embarcaciones</h1>
 
-        <div th:if="${error}" class="message error" th:text="${error}"></div>
-        <div th:if="${message}" class="message info" th:text="${message}"></div>
+        <div th:if="${errorMessage}" class="message error" th:text="${errorMessage}"></div>
+        <div th:if="${infoMessage}" class="message info" th:text="${infoMessage}"></div>
 
-        <section th:if="${listOfEmbarcaciones} and ${not listOfEmbarcaciones.empty}">
+        <section th:if="${fleetList != null and not fleetList.empty}">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -31,37 +30,36 @@
                     </tr>
                 </thead>
                 <tbody class="text-contraste">
-                    <tr th:each="emb : ${listOfEmbarcaciones}">
-                        <td th:text="${emb.registrationNumber}" data-label="Matrícula"></td>
-                        <td th:text="${emb.type}" data-label="Tipo"></td>
-                        <td th:text="${emb.name}" data-label="Nombre"></td>
-                        <td th:text="${emb.numSeats}" data-label="Plazas"></td>
-                        <td th:text="${emb.length}" data-label="Longitud"></td>
-                        <td th:text="${emb.width}" data-label="Ancho"></td>
-                        <td th:text="${emb.height}" data-label="Altura"></td>
+                    <tr th:each="boatItem : ${fleetList}">
+                        <td th:text="${boatItem.registrationNumber}" data-label="Matrícula"></td>
+                        <td th:text="${boatItem.type}" data-label="Tipo"></td>
+                        <td th:text="${boatItem.name}" data-label="Nombre"></td>
+                        <td th:text="${boatItem.numSeats}" data-label="Plazas"></td>
+                        <td th:text="${boatItem.length}" data-label="Longitud"></td>
+                        <td th:text="${boatItem.width}" data-label="Ancho"></td>
+                        <td th:text="${boatItem.height}" data-label="Altura"></td>
                         <td data-label="Patrón">
-                            <span th:if="${emb.patronId != null}" th:text="${emb.patronId}" class="badge-success">Asignado</span>
-                            <span th:unless="${emb.patronId != null}" class="badge-secondary">Sin asignar</span>
+                            <span th:if="${boatItem.patronId != null}" th:text="${boatItem.patronId}" class="badge-success">Asignado</span>
+                            <span th:unless="${boatItem.patronId != null}" class="badge-secondary">Sin asignar</span>
                         </td>
                     </tr>
                 </tbody>
             </table>
             
             <p class="total-count">
-                Total de embarcaciones: <span th:text="${listOfEmbarcaciones.size()}"></span>
+                Total de embarcaciones: <span th:text="${fleetList.size()}"></span>
             </p>
         </section>
 
-        <div th:if="${listOfEmbarcaciones == null or listOfEmbarcaciones.empty}" class="no-data">
-            No hay embarcaciones registradas en el sistema.
-        </div>
+        <section th:if="${fleetList == null || fleetList.empty}" class="no-data">
+            <p>No hay embarcaciones registradas en el sistema.</p>
+        </section>
 
-        <div class="btn-group">
+        <nav class="btn-group">
             <a th:href="@{/addEmbarcacion}" class="btn btn-primary">Añadir Nueva Embarcación</a>
             <a th:href="@{/findEmbarcacionMenu}" class="btn btn-outline-light">Buscar Embarcaciones</a>
-            <a th:href="@{/}" class="btn btn-secondary">Volver al Inicio</a>
-        </div>
+            <a th:href="@{//}" class="btn btn-secondary">Volver al Inicio</a>
+        </nav>
     </main>
 </body>
-
 </html>

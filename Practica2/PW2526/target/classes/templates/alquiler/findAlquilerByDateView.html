@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="stylehome.css">
     <title>Buscar Embarcaciones Disponibles</title>
-    <link rel="icon" href="images/logo.png" type="image/png">
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
 </head>
 
 <body>
@@ -13,60 +13,78 @@
         <h1>📅 Buscar Embarcaciones Disponibles</h1>
         <p>Encuentra embarcaciones disponibles para tus fechas</p>
 
-        <form th:action="@{/findAlquilerByDate}" method="post" class="form-container">
+        <form th:action="@{/findAlquilerByDate}" method="post" class="form-container" id="searchFleetForm">
             <div class="form-group">
                 <label for="startDate">Fecha de Inicio:</label>
-                <input type="date" id="startDate" name="startDate" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" min="" required>
+                <input type="date" id="startDate" name="startDate" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" required>
             </div>
+            
             <div class="form-group">
                 <label for="endDate">Fecha de Fin:</label>
-                <input type="date" id="endDate" name="endDate" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" min="" required>
+                <input type="date" id="endDate" name="endDate" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" required>
             </div>
+            
             <button type="submit" class="btn btn-primary">🔍 Buscar Disponibles</button>
         </form>
 
         <p class="note">Se mostrarán las embarcaciones que NO están alquiladas entre las fechas seleccionadas.</p>
 
-        <div class="btn-group">
+        <nav class="btn-group">
             <a th:href="@{/addAlquiler}" class="btn btn-outline-light">Nuevo Alquiler</a>
             <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
-        </div>
+        </nav>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('startDate').min = today;
-            document.getElementById('endDate').min = today;
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const searchFleetForm = document.getElementById('searchFleetForm');
 
-            document.getElementById('startDate').addEventListener('change', function() {
-                const startDate = this.value;
-                document.getElementById('endDate').min = startDate;
-                
-                if (document.getElementById('endDate').value < startDate) {
-                    document.getElementById('endDate').value = startDate;
-                }
-            });
+        document.addEventListener('DOMContentLoaded', initializeSearchPage);
 
-            document.querySelector('form').addEventListener('submit', function(e) {
-                const startDate = new Date(document.getElementById('startDate').value);
-                const endDate = new Date(document.getElementById('endDate').value);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
+        function initializeSearchPage() {
+            setupInitialDateBounds();
+            setupEventListeners();
+        }
 
-                if (startDate < today) {
-                    alert('❌ La fecha de inicio no puede ser anterior a hoy');
-                    e.preventDefault();
-                    return;
-                }
+        function setupInitialDateBounds() {
+            const currentIsoDate = new Date().toISOString().split('T')[0];
+            startDateInput.min = currentIsoDate;
+            endDateInput.min = currentIsoDate;
+        }
 
-                if (endDate < startDate) {
-                    alert('❌ La fecha de fin no puede ser anterior a la fecha de inicio');
-                    e.preventDefault();
-                    return;
-                }
-            });
-        });
+        function setupEventListeners() {
+            startDateInput.addEventListener('change', handleStartDateChange);
+            searchFleetForm.addEventListener('submit', handleFormSubmission);
+        }
+
+        function handleStartDateChange() {
+            const selectedStartDate = startDateInput.value;
+            endDateInput.min = selectedStartDate;
+            
+            if (endDateInput.value < selectedStartDate) {
+                endDateInput.value = selectedStartDate;
+            }
+        }
+
+        function handleFormSubmission(event) {
+            const selectedStartDate = new Date(startDateInput.value);
+            const selectedEndDate = new Date(endDateInput.value);
+            const currentSystemDate = new Date();
+            currentSystemDate.setHours(0, 0, 0, 0);
+
+            if (selectedStartDate < currentSystemDate) {
+                alert('❌ La fecha de inicio no puede ser anterior a hoy');
+                event.preventDefault();
+                return;
+            }
+
+            if (selectedEndDate < selectedStartDate) {
+                alert('❌ La fecha de fin no puede ser anterior a la fecha de inicio');
+                event.preventDefault();
+                return;
+            }
+        }
     </script>
 </body>
 </html>

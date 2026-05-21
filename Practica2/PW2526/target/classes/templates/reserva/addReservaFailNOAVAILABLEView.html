@@ -1,49 +1,44 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
-
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="images/logo.png" type="image/png">
     <title>Error al crear reserva</title>
-    <link rel="stylesheet" href="stylefail.css">
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/error.css}">
 </head>
 
 <body>
-    <div class="error-container">
+    <main class="error-container">
         <div class="error-icon">
-            <i class="fas fa-exclamation-circle"></i>
+            <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
         </div>
 
-        <h2 class="titulo-error-w">Error al crear reserva</h2>
+        <h2 class="error-title">Error al crear reserva</h2>
 
         <div class="error-message">
-            <i class="fas fa-exclamation-triangle"></i>
-            <span>EMBARCACION NO DISPONIBLE EN ESTA FECHA</span>
+            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+            <span>Embarcación no disponible en esta fecha</span>
         </div>
 
-        <div class="detail-section">
-            <div class="detail-label">FECHA INTRODUCIDA:</div>
-            <div class="detail-value" th:text="${reserva.date}">2023-10-15</div>
-        </div>
+        <section class="detail-section">
+            <div class="detail-label">Fecha introducida:</div>
+            <div class="detail-value" th:text="${bookingItem != null ? bookingItem.date : 'N/D'}">2026-10-15</div>
+        </section>
 
-        <p>Verifique que la embarcación solicitada esté disponible en esa fecha.</p>
+        <p class="error-instruction">Verifique que la embarcación solicitada esté disponible en esa fecha.</p>
 
-        <div class="action-buttons">
-            <a href="/findAlquilerByDate" class="btn btn-primary">
-                <i class="fas fa-redo-alt"></i>
-                Buscar Alquiler por Fecha
+        <nav class="action-buttons">
+            <a th:href="@{/findAlquilerByDate}" class="btn btn-primary">
+                <i class="fas fa-search" aria-hidden="true"></i> Buscar Alquiler por Fecha
             </a>
-            <a href="/addReserva" class="btn btn-primary">
-                <i class="fas fa-redo-alt"></i>
-                Realizar otra reserva
+            <a th:href="@{/addReserva}" class="btn btn-primary">
+                <i class="fas fa-redo-alt" aria-hidden="true"></i> Realizar otra reserva
             </a>
-            <a href="/" class="btn btn-secondary">
-                <i class="fas fa-home"></i>
-                Volver al inicio
+            <a th:href="@{/}" class="btn btn-secondary">
+                <i class="fas fa-home" aria-hidden="true"></i> Volver al inicio
             </a>
-        </div>
-    </div>
+        </nav>
+    </main>
 </body>
-
 </html>

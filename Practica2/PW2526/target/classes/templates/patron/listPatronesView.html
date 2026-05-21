@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="stylehome.css">
     <title>Lista de Patrones</title>
-    <link rel="icon" href="images/logo.png" type="image/png">
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
 </head>
 
 <body>
@@ -13,7 +13,7 @@
         <h1>Lista de Patrones</h1>
         <p>Gestiona y visualiza todos los patrones del sistema</p>
 
-        <div th:if="${patrones != null and not patrones.empty}">
+        <section th:if="${patronList != null and not patronList.empty}">
             <table class="data-table">
                 <thead>
                     <tr>
@@ -25,27 +25,27 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="patron : ${patrones}">
-                        <td th:text="${patron.id}"></td>
-                        <td th:text="${patron.name}"></td>
-                        <td th:text="${patron.surname}"></td>
-                        <td th:text="${patron.birthDate}"></td>
-                        <td th:text="${patron.titleIssueDate}"></td>
+                    <tr th:each="patronItem : ${patronList}">
+                        <td th:text="${patronItem.id}"></td>
+                        <td th:text="${patronItem.name}"></td>
+                        <td th:text="${patronItem.surname}"></td>
+                        <td th:text="${patronItem.birthDate}"></td>
+                        <td th:text="${patronItem.titleIssueDate}"></td>
                     </tr>
                 </tbody>
             </table>
+        </section>
 
-
-        <div th:if="${patrones == null or patrones.empty}" class="no-data">
+        <section th:if="${patronList == null or patronList.empty}" class="no-data">
             <h3>No hay patrones registrados</h3>
             <p>No se encontraron patrones en el sistema.</p>
-        </div>
+        </section>
 
-        <div class="btn-group">
+        <nav class="btn-group">
             <a th:href="@{/addPatron}" class="btn btn-primary">Añadir Patrón</a>
             <a th:href="@{/assignPatronToBoat}" class="btn btn-outline-light">Asignar a Embarcación</a>
             <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
-        </div>
+        </nav>
     </div>
 </body>
 </html>

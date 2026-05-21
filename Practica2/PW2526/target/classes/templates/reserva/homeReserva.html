@@ -1,34 +1,31 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="stylehome.css">
-  <title>Gestión de Reservas - Bahía Azul</title>
-  <link rel="icon" href="images/logo.png" type="image/png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Reservas - Bahía Azul</title>
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
 </head>
 
 <body>
-  <div class="overlay">
-    <h1>Gestión de Reservas</h1>
-    <p>Registra, busca y gestiona reservas</p>
+    <div class="overlay">
+        <h1>Gestión de Reservas</h1>
+        <p>Registra, busca y gestiona reservas</p>
 
-    <div class="action-grid">
-      <div class="action-card">
-        <i class="fa-solid fa-id-card"></i>
-        <h5>Reservas</h5>
-        <a href="/addReserva" class="btn btn-success btn-custom">Agregar</a>
-        <a href="/findReservaById" class="btn btn-outline-light btn-custom">Buscar</a>
-        <a href="/listReservas" class="btn btn-outline-light btn-custom">Listar</a>
-      </div>
-    </div>
+        <main class="action-grid">
+            <section class="action-card">
+                <i class="fa-solid fa-id-card" aria-hidden="true"></i>
+                <h5>Reservas</h5>
+                <a th:href="@{/addReserva}" class="btn btn-success btn-custom">Agregar</a>
+                <a th:href="@{/findReservaById}" class="btn btn-outline-light btn-custom">Buscar</a>
+                <a th:href="@{/listReservas}" class="btn btn-outline-light btn-custom">Listar</a>
+            </section>
+        </main>
 
-    <!-- Botón Inicio centrado abajo -->
-    <div class="home-button">
-      <a href="/" class="btn btn-outline-primary">Inicio</a>
+        <nav class="home-button">
+            <a th:href="@{/}" class="btn btn-outline-primary">Inicio</a>
+        </nav>
     </div>
-  </div>
 </body>
-
 </html>

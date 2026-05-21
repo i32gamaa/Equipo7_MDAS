@@ -1,80 +1,88 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
-
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Añadir Nueva Reserva</title>
-    <link rel="icon" href="images/logo.png" type="image/png">
-    <link rel="stylesheet" href="stylehome.css">
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
 </head>
 
 <body>
     <div class="overlay">
-        <h5 class="white">Añadir Nueva Reserva</h5>
+        <h1>Añadir Nueva Reserva</h1>
 
-        <form th:action="@{/addReserva}" method="post" th:object="${newReserva}">
-            <!-- ID del Socio -->
+        <form th:action="@{/addReserva}" th:object="${bookingForm}" method="post" id="addReservationForm">
             <div class="form-group">
                 <label for="userId">ID del Socio</label>
                 <input type="text" id="userId" th:field="*{userId}" required>
             </div>
 
-            <!-- Matrícula -->
             <div class="form-group">
                 <label for="registrationNumber">Matrícula</label>
                 <input type="text" id="registrationNumber" th:field="*{registrationNumber}" required>
             </div>
 
-            <!-- Fecha -->
             <div class="form-group">
                 <label for="date">Fecha</label>
                 <input type="date" id="date" th:field="*{date}" required>
             </div>
 
-            <!-- Número de Plazas con tooltip -->
             <div class="form-group position-relative">
                 <label for="numSeats">
                     Número de Plazas
-                    <span class="info-icon" id="infoIcon">?</span>
+                    <button type="button" class="info-icon" id="infoIcon" aria-expanded="false" aria-controls="tooltipText">?</button>
                 </label>
                 <input type="number" id="numSeats" th:field="*{numSeats}" min="1" max="30" required>
-                <div class="tooltip-text" id="tooltipText">Precio por plaza = 40€</div>
+                <div class="tooltip-text" id="tooltipText" role="tooltip" style="display: none;">Precio por plaza = 40€</div>
             </div>
 
-            <!-- Propósito -->
             <div class="form-group" style="grid-column: span 2;">
                 <label for="purpose">Propósito</label>
                 <input type="text" id="purpose" th:field="*{purpose}" required>
             </div>
 
-            <!-- Botones -->
-            <div class="d-flex justify-content-center gap-3 mt-3" style="grid-column: span 2;">
-                <a th:href="@{/}" class="btn btn-outline-light">Cancelar</a>
+            <nav class="form-buttons" style="grid-column: span 2;">
                 <button type="submit" class="btn btn-primary">Crear Reserva</button>
-            </div>
+                <a th:href="@{/}" class="btn btn-secondary">Cancelar</a>
+            </nav>
         </form>
     </div>
 
     <script>
-        // Fecha mínima = hoy
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('date').setAttribute('min', today);
+        document.addEventListener('DOMContentLoaded', initializeReservationForm);
 
-        // Tooltip dinámico
-        document.addEventListener('DOMContentLoaded', function () {
+        function initializeReservationForm() {
+            const dateInput = document.getElementById('date');
             const infoIcon = document.getElementById('infoIcon');
             const tooltipText = document.getElementById('tooltipText');
+            
+            // Establecer fecha mínima = hoy
+            const currentIsoDate = new Date().toISOString().split('T')[0];
+            if (dateInput) {
+                dateInput.min = currentIsoDate;
+            }
 
-            infoIcon.addEventListener('click', function (e) {
-                e.stopPropagation();
-                tooltipText.style.display = tooltipText.style.display === 'block' ? 'none' : 'block';
-            });
+            // Lógica interactiva del Tooltip (Accesible)
+            if (infoIcon && tooltipText) {
+                infoIcon.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                    const isVisible = tooltipText.style.display === 'block';
+                    tooltipText.style.display = isVisible ? 'none' : 'block';
+                    infoIcon.setAttribute('aria-expanded', !isVisible);
+                });
 
-            document.addEventListener('click', () => tooltipText.style.display = 'none');
-            tooltipText.addEventListener('click', e => e.stopPropagation());
-        });
+                document.addEventListener('click', function () {
+                    tooltipText.style.display = 'none';
+                    infoIcon.setAttribute('aria-expanded', 'false');
+                });
+
+                tooltipText.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                });
+            }
+        }
     </script>
 </body>
-
 </html>

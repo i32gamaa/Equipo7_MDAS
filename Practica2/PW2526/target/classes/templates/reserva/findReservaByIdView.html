@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
-
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="images/logo.png" type="image/png">
-    <link rel="stylesheet" href="stylehome.css">
     <title>Buscar Alquiler por ID</title>
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
 </head>
 
 <body>
@@ -15,17 +14,16 @@
 
         <form th:action="@{/findReservaById}" method="post">
             <div class="form-group">
-                <label class="form-label" for="id">ID de la reserva:</label>
+                <label for="id">ID de la reserva:</label>
                 <input type="number" id="id" name="id" th:value="${param.id}" placeholder="Introduce el ID" required>
             </div>
             <button type="submit" class="btn btn-primary">Buscar</button>
         </form>
 
-        <div class="btn-group">
-            <a th:href="@{/listReservas}" class="btn btn-secondary">Ver Todas las Reservas</a>
+        <nav class="btn-group">
+            <a th:href="@{/listReservas}" class="btn btn-outline-light">Ver Todas las Reservas</a>
             <a th:href="@{/}" class="btn btn-secondary">Inicio</a>
-        </div>
+        </nav>
     </main>
 </body>
-
 </html>

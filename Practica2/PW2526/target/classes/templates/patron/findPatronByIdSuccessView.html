@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="images/logo.png" type="image/png">
     <title>Patrón Encontrado</title>
-    <link rel="stylesheet" href="stylesuccess.css">
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/success.css}">
 </head>
 
 <body>
@@ -13,22 +13,39 @@
         <h1>Patrón Encontrado</h1>
         <p class="subtitle">Patrón localizado correctamente</p>
 
-        <section class="details">
+        <section th:if="${patronItem != null}" class="details">
             <h3>Información del Patrón</h3>
             <table class="styled-table">
-                <tr><th>ID</th><td th:text="${patron.id}"></td></tr>
-                <tr><th>Nombre</th><td th:text="${patron.name}"></td></tr>
-                <tr><th>Apellidos</th><td th:text="${patron.surname}"></td></tr>
-                <tr><th>Fecha de Nacimiento</th><td th:text="${patron.birthDate}"></td></tr>
-                <tr><th>Expedición del Título</th><td th:text="${patron.titleIssueDate}"></td></tr>
+                <tbody>
+                    <tr>
+                        <th>ID</th>
+                        <td th:text="${patronItem.id}"></td>
+                    </tr>
+                    <tr>
+                        <th>Nombre</th>
+                        <td th:text="${patronItem.name}"></td>
+                    </tr>
+                    <tr>
+                        <th>Apellidos</th>
+                        <td th:text="${patronItem.surname}"></td>
+                    </tr>
+                    <tr>
+                        <th>Fecha de Nacimiento</th>
+                        <td th:text="${patronItem.birthDate}"></td>
+                    </tr>
+                    <tr>
+                        <th>Expedición del Título</th>
+                        <td th:text="${patronItem.titleIssueDate}"></td>
+                    </tr>
+                </tbody>
             </table>
         </section>
 
-        <div class="btn-group">
+        <nav class="btn-group">
             <a th:href="@{/findPatronById}" class="btn btn-primary">Nueva Búsqueda</a>
             <a th:href="@{/listPatrones}" class="btn btn-outline-light">Ver Todos los Patrones</a>
             <a th:href="@{/}" class="btn btn-outline-light">Volver al Inicio</a>
-        </div>
+        </nav>
     </main>
 </body>
 </html>

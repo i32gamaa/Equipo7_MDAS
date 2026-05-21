@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
-
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="images/logo.png" type="image/png">
     <title>Buscar embarcación por matrícula</title>
-    <link rel="stylesheet" href="stylehome.css">
+    <link rel="icon" th:href="@{/images/logo.png}" type="image/png">
+    <link rel="stylesheet" th:href="@{/css/home.css}">
 </head>
 
 <body>
@@ -15,17 +14,16 @@
 
         <form th:action="@{/findEmbarcacionByRegistration}" method="post">
             <div class="form-group">
-                <label class="form-label" for="registrationNumber">Matrícula:</label>
+                <label for="registrationNumber">Matrícula:</label>
                 <input type="text" id="registrationNumber" name="registrationNumber" placeholder="Introduce la matrícula" required>
             </div>
             <button type="submit" class="btn btn-primary">Buscar</button>
         </form>
 
-        <div class="btn-group">
+        <nav class="btn-group">
             <a th:href="@{/findEmbarcacionMenu}" class="btn btn-secondary">Volver al Menú de Búsqueda</a>
             <a th:href="@{/}" class="btn btn-secondary">Volver al Inicio</a>
-        </div>
+        </nav>
     </main>
 </body>
-
 </html>
